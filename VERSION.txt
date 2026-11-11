@@ -1,0 +1,2 @@
+BlynsOS 1.0 Stabilized
+Release package combining the 2.0 desktop engine with the 1.0 Setup Assistant flow.
