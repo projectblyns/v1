@@ -26,9 +26,21 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clea
 /* BOOT */
 let started=false;
 function boot(){
-  const b=$('#boot');b.classList.remove('go');show('boot');void b.offsetWidth;
-  b.classList.add('go');chime();
-  setTimeout(()=>{securityReady.finally(()=>{S.name&&S.pwHash?(lockInit(),show('lock')):setupStart()});},3000);
+  const b=$('#boot');
+  const hint=$('#hint');
+  if(hint)hint.classList.add('is-hidden');
+  $('#off').classList.remove('on');
+  S.off=false;
+  b.classList.remove('go');
+  show('boot');
+  void b.offsetWidth;
+  b.classList.add('go');
+  chime();
+  setTimeout(()=>{
+    securityReady.finally(()=>{
+      S.name&&S.pwHash?(lockInit(),show('lock')):setupStart();
+    });
+  },3000);
 }
 function start(){if(started||S.off)return;started=true;boot()}
 addEventListener('pointerdown',start);
@@ -851,10 +863,17 @@ $('#an').textContent='Files';
 $('#ap').setAttribute('aria-label','BlynsOS menu');
 $('#ap').innerHTML='<img class="blyns-menu-logo" src="https://i.postimg.cc/FHNw8SMW/Blyns-OS-Logo.jpg" alt="B">';
 
-$('#off').innerHTML='';
-$('#off').onclick=null;
-// The power screen is keyboard-only. During startup/shutdown, 0 is the only accepted key.
-removeEventListener('pointerdown',start);
+$('#off').innerHTML='<div class="power-hint">Press 0 to power on</div>';
+$('#off').onclick=()=>{
+  if(S.off){
+    S.off=false;
+    $('#off').classList.remove('on');
+    started=true;
+    boot();
+  }
+};
+// During startup/shutdown, 0 is the keyboard power key.
+// Keep pointer activation available as an accessible alternative to the 0 key.
 const showBlynsBase=show;
 show=function(id){showBlynsBase(id);document.body.classList.toggle('black-screen',id==='boot'||S.off);};
 const bootBlynsBase=boot;
@@ -1651,6 +1670,3 @@ if(blynsMenuItems){
 })();
 /* ================= end BlynsOS 1.0 Stabilized ================= */
 
-
-// Start automatically after the entry page is ready.
-window.setTimeout(()=>{if(typeof start==='function'&&!started)start();},120);
