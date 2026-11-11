@@ -553,3 +553,25 @@ body.custom-wallpaper #desk.wall,body.custom-wallpaper #lock.wall{background-ima
 #hint.is-hidden{display:none}
 #off .power-hint{bottom:28px}
 @keyframes power-hint-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+
+/* Stabilized power and startup refinement. */
+#power{z-index:12;display:flex;align-items:flex-end;justify-content:center;background:#000;cursor:pointer}
+#power .power-hint,#off .power-hint{
+  position:absolute;left:50%;bottom:30px;transform:translateX(-50%);
+  color:rgba(255,255,255,.26);font-size:11px;font-weight:500;letter-spacing:.045em;
+  white-space:nowrap;text-align:center;pointer-events:none;
+  animation:blyns-power-pulse 3.6s ease-in-out infinite;
+}
+#off .power-hint{bottom:30px;color:rgba(255,255,255,.28)}
+@keyframes blyns-power-pulse{0%,100%{opacity:.42}50%{opacity:.82}}
+#boot{z-index:15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+#boot .boot-logo{display:block;width:82px;height:82px;max-width:82px;max-height:82px;margin:0;object-fit:contain;opacity:0;transition:opacity 1s ease}
+#boot.go .boot-logo{opacity:1}
+#bar{width:190px;height:4px;margin-top:clamp(112px,15vh,155px);border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden;opacity:0;transition:opacity .55s ease}
+#boot.go #bar{opacity:1}
+#bar i{display:block;width:0;height:100%;border-radius:inherit;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.35);transition:width 3s linear}
+#boot.go #bar i{width:100%}
+#unlock-error{min-height:16px;color:#ffe0e0;font-size:12px;text-shadow:0 1px 5px #0008}
+#pw:disabled{opacity:.75;cursor:wait}
+@media(prefers-reduced-motion:reduce){#power .power-hint,#off .power-hint{animation:none;opacity:.6}}

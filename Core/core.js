@@ -1,6 +1,6 @@
 
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
-const S={name:'',pwHash:'',vol:8,z:10,off:false,ph:'boot'};
+const S={name:'',pwHash:'',vol:8,z:10,off:false,ph:'power'};
 let securityReady=Promise.resolve();
 try{
   S.name=localStorage.getItem('mac_n')||'';
@@ -10,7 +10,7 @@ try{
     securityReady=window.BlynsSecurity.hashPassword(legacyPassword).then(hash=>{
       S.pwHash=hash;localStorage.setItem('blyns_password_hash',hash);localStorage.removeItem('mac_p');
     }).catch(error=>{console.warn('Password migration requires a secure browser context.',error);});
-  }else if(legacyPassword){localStorage.removeItem('mac_p');}
+  }
 }catch(e){console.warn('BlynsOS profile could not be loaded.',e)}
 async function saveBlynsPassword(password){
   const hash=await window.BlynsSecurity.hashPassword(password);
@@ -19,7 +19,26 @@ async function saveBlynsPassword(password){
   localStorage.removeItem('mac_p');
   return hash;
 }
-async function verifyBlynsPassword(password){return window.BlynsSecurity.verifyPassword(password,S.pwHash);}
+async function verifyBlynsPassword(password){
+  await securityReady.catch(()=>{});
+  let storedHash='';
+  let legacy='';
+  try{
+    storedHash=localStorage.getItem('blyns_password_hash')||S.pwHash||'';
+    legacy=localStorage.getItem('mac_p')||'';
+  }catch(error){console.warn('BlynsOS could not read account credentials.',error);}
+  if(storedHash&&window.BlynsSecurity&&await window.BlynsSecurity.verifyPassword(password,storedHash)){
+    S.pwHash=storedHash;
+    return true;
+  }
+  // Compatibility for installations upgraded from the older local-password format.
+  // The legacy value is immediately replaced with a salted hash after a successful sign-in.
+  if(!storedHash&&legacy&&password===legacy){
+    await saveBlynsPassword(password);
+    return true;
+  }
+  return false;
+}
 let AC;function chime(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[174.6,261.6,349.2,440,523.3,698.5].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=i%2?'triangle':'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12*S.vol/8,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+2.6);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+2.7)})}catch(e){}}
 function show(id){S.ph=id;$$('.ph').forEach(p=>p.classList.toggle('on',p.id==id))}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e.t);e.t=setTimeout(()=>e.classList.remove('on'),2500)}
@@ -38,43 +57,52 @@ function boot(){
   chime();
   setTimeout(()=>{
     securityReady.finally(()=>{
-      S.name&&S.pwHash?(lockInit(),show('lock')):setupStart();
+      if(S.name&&S.pwHash){lockInit();show('lock');}
+      else if(typeof window.BlynsSetupStart==='function'){window.BlynsSetupStart();}
+      else{console.error('BlynsOS Setup Assistant did not initialise.');show('setup');}
     });
   },3000);
 }
 function start(){if(started||S.off)return;started=true;boot()}
-addEventListener('pointerdown',start);
-/* SETUP */
-const langs=['Hello','Bonjour','Hola','你好','こんにちは','안녕하세요','Ciao','Olá','Hallo','مرحبا','नमस्ते','Selamat'];
-let hi=0,ht;
-function card(h){$('#sc').innerHTML=h}
-function setupStart(){show('setup');card('<div id="hello"></div><p>Welcome to BlynsOS</p><button class="pb" id="go">Continue</button>');
-const h=$('#hello');h.textContent=langs[0];ht=setInterval(()=>{h.style.opacity=0;setTimeout(()=>{hi=(hi+1)%langs.length;h.textContent=langs[hi];h.style.opacity=1},500)},2200);$('#go').onclick=()=>{clearInterval(ht);region()}}
-function region(){card('<h2>Select Your Country or Region</h2><select id="rg"><option>Malaysia</option><option>United States</option><option>United Kingdom</option><option>Japan</option><option>Germany</option><option>France</option><option>Brazil</option><option>India</option></select><button class="pb" id="n">Continue</button>');$('#n').onclick=net}
-function net(){card('<h2>Select Your Wi-Fi Network</h2><p>Choose a demo network to continue setup.</p><div style="width:100%;display:flex;flex-direction:column;gap:8px">'+['Golden Gate Home','Cafe Guest','Office 5G'].map(n=>`<div class="net"><span>${n}</span><button>Connect</button></div>`).join('')+'</div>');
-$$('.net button').forEach(b=>b.onclick=()=>{b.textContent='Connecting…';setTimeout(()=>{b.textContent='Connected ✓';setTimeout(activate,700)},900)})}
-function activate(){card('<div class="sp"></div><h2>Activating BlynsOS…</h2><p>This may take a few moments.</p>');setTimeout(acct,3000)}
-function acct(){card('<h2>Create a Computer Account</h2><input id="un" placeholder="Full Name" maxlength="20"><input id="up" type="password" placeholder="Password"><button class="pb" id="n">Continue</button><p id="er"></p>');
-$('#n').onclick=()=>{const n=$('#un').value.trim(),p=$('#up').value;if(!n||!p){$('#er').textContent='Enter a name and a password.';return}S.name=n;try{localStorage.mac_n=n}catch(e){}
-card('<div class="sp"></div><h2>Setting up BlynsOS…</h2>');setTimeout(()=>{lockInit();show('lock')},2200)}}
+$('#power').addEventListener('click',start);
+/* First-run setup is provided by the Stabilized Setup Assistant module below. */
 /* LOCK */
 function tick(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',hour12:false});$('#date').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});$('#mt').textContent=d.toLocaleTimeString([],{weekday:'short',hour:'numeric',minute:'2-digit'})}
 setInterval(tick,1000);tick();
 function lockInit(){$('#lock').classList.remove('up');$('#lav').textContent=S.name[0].toUpperCase();$('#lnm').textContent=S.name;$('#pw').value='';setTimeout(()=>$('#pw').focus(),900)}
-$('#pw').addEventListener('keydown',async e=>{
-  if(e.key!=='Enter')return;
-  const field=e.target, error=$('#unlock-error');
-  field.disabled=true;if(error)error.textContent='';
-  const valid=await verifyBlynsPassword(field.value);
-  field.disabled=false;
-  if(valid){
-    $('#desk').classList.add('on');$('#lock').classList.add('up');S.ph='desk';
-    if(error)error.textContent='';setTimeout(()=>$('#lock').classList.remove('on'),900);field.blur();
-  }else{
-    field.classList.remove('shake');void field.offsetWidth;field.classList.add('shake');field.value='';
-    if(error)error.textContent='The password is not correct.';
-    field.focus();
+let unlockBusy=false;
+async function attemptUnlock(){
+  if(unlockBusy)return;
+  const field=$('#pw'),error=$('#unlock-error');
+  const password=field.value;
+  if(!password){if(error)error.textContent='Enter your password to continue.';field.focus();return;}
+  unlockBusy=true;field.disabled=true;if(error)error.textContent='';
+  try{
+    const valid=await verifyBlynsPassword(password);
+    if(valid){
+      S.ph='desk';
+      $('#desk').classList.add('on');
+      $('#lock').classList.add('up');
+      if(error)error.textContent='';
+      field.value='';
+      field.blur();
+      setTimeout(()=>$('#lock').classList.remove('on'),850);
+      setTimeout(()=>{if(typeof restoreSavedWindows==='function')restoreSavedWindows();},900);
+    }else{
+      field.classList.remove('shake');void field.offsetWidth;field.classList.add('shake');field.value='';
+      if(error)error.textContent='The password is not correct. Please try again.';
+      field.focus();
+    }
+  }catch(err){
+    if(error)error.textContent=err?.message||'Sign-in could not be completed. Reload and try again.';
+    console.error('BlynsOS sign-in failed.',err);
+  }finally{
+    field.disabled=false;unlockBusy=false;
+    if(S.ph==='lock'&&!field.value)field.focus();
   }
+}
+$('#pw').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();attemptUnlock();}
 });
 function logout(){$$('.win').forEach(w=>w.remove());for(const k in W)delete W[k];$$('.di').forEach(d=>d.classList.remove('on'));$('#lock').classList.add('on');lockInit();$('#desk').classList.remove('on');S.ph='lock'}
 /* GLOBAL KEYS */
@@ -129,7 +157,7 @@ let on=0;$('#nm',b).onclick=e=>{on=!on;e.target.textContent=on?'🔔 Tracking �
 app('siri','Siri','🌈','#bf5af2,#0a84ff',(b,w,arg)=>{
 H(b,'<div class="chat" style="flex:1;display:flex;flex-direction:column;min-height:0"><div id="lg" style="flex:1;overflow:auto;padding:14px"></div><input id="si" placeholder="Ask Blyns Assistant…"><canvas id="cv" height="70" style="width:100%;background:#0b0b14"></canvas></div>');
 const lg=$('#lg',b),add=(t,c)=>{lg.insertAdjacentHTML('beforeend',`<div class="msg ${c}">${t}</div>`);lg.scrollTop=1e9};
-const ans=q=>{q=q.toLowerCase();if(/time/.test(q))return'It’s '+new Date().toLocaleTimeString();if(/date|day/.test(q))return'Today is '+new Date().toDateString();if(/hello|hi\b/.test(q))return'Hi '+S.name+'! How can I help?';if(/joke/.test(q))return'Why did the Mac go to therapy? Too many unresolved windows.';if(/weather/.test(q))return'It’s 31° and partly cloudy.';if(/volume/.test(q))return'Volume is at '+S.vol*12.5+'%.';if(/open (\w+)/.test(q)){const m=q.match(/open (\w+)/)[1];if(APPS[m]){openApp(m);return'Opening '+APPS[m].n+'.'}}const c=q.replace(/x/g,'*').match(/^[\d+\-*\/.() ]+$/);if(c)try{return'That’s '+Function('return '+c[0])()}catch(e){}return'Here’s what I found on the web for “'+q+'”.'};
+const ans=q=>{q=q.toLowerCase();if(/time/.test(q))return'It’s '+new Date().toLocaleTimeString();if(/date|day/.test(q))return'Today is '+new Date().toDateString();if(/hello|hi\b/.test(q))return'Hi '+S.name+'! How can I help?';if(/joke/.test(q))return'Why did the Blyns desktop feel calmer? It finally closed its extra windows.';if(/weather/.test(q))return'Live weather data is not connected. Open Navigator to check a current forecast.';if(/volume/.test(q))return'Volume is at '+S.vol*12.5+'%.';if(/open (\w+)/.test(q)){const m=q.match(/open (\w+)/)[1];if(APPS[m]){openApp(m);return'Opening '+APPS[m].n+'.'}}const c=q.replace(/x/g,'*').match(/^[\d+\-*\/.() ]+$/);if(c)try{return'That’s '+Function('return '+c[0])()}catch(e){}return'I can help with local time, date, volume, simple calculations and opening installed apps. Use Navigator for current information from the web.'};
 const say=q=>{add(q,'me');setTimeout(()=>add(ans(q),'bot'),600)};w.q=say;add('Hi '+S.name+', I’m Blyns Assistant. Ask me anything.','bot');
 $('#si',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){say(e.target.value);e.target.value=''}};if(arg)say(arg);
 const cv=$('#cv',b),x=cv.getContext('2d');cv.width=cv.clientWidth;let t=0;(function f(){if(!b.isConnected)return;t+=.05;x.clearRect(0,0,cv.width,70);[['#ff2d95',1],['#0a84ff',1.4],['#30d158',.8]].forEach(([c,k],j)=>{x.beginPath();x.strokeStyle=c;x.globalAlpha=.8;x.lineWidth=2.5;for(let i=0;i<=cv.width;i+=3){const y=35+Math.sin(i/(40*k)+t*(j+1))*Math.sin(i/cv.width*Math.PI)*22*Math.sin(t*k+j);i?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()});requestAnimationFrame(f)})()},[420,520]);
@@ -144,7 +172,29 @@ app('music','Music','🎵','#ff6b81,#fa233b',b=>{sideApp(b,['Listen Now','Browse
 app('weather','Weather','⛅','#4facfe,#1a5fd0',b=>{H(b,`<div style="flex:1;background:linear-gradient(#3a7bd5,#00d2ff);color:#fff;padding:24px;text-align:center"><div>Labuan</div><div style="font-size:72px;font-weight:200">31°</div><div>Partly Cloudy</div><div style="display:flex;gap:10px;justify-content:center;margin-top:24px">${['Wed ⛅ 31','Thu 🌧️ 28','Fri ☀️ 32','Sat ⛅ 30'].map(x=>`<div style="background:rgba(255,255,255,.2);padding:10px;border-radius:12px">${x}°</div>`).join('')}</div></div>`)},[400,420]);
 app('clock','Clock','🕒','#333,#000',b=>{H(b,'<div class="main" style="background:#111;color:#fff"><h3>World Clock</h3><div id="wc"></div></div>');const z=[['Labuan','Asia/Kuala_Lumpur'],['Cupertino','America/Los_Angeles'],['London','Europe/London'],['Tokyo','Asia/Tokyo']];const u=()=>{if(!b.isConnected)return;$('#wc',b).innerHTML=z.map(([n,t])=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #333"><span>${n}</span><span style="font-size:24px;font-weight:300">${new Date().toLocaleTimeString([],{timeZone:t,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}</span></div>`).join('');setTimeout(u,1000)};u()},[380,380]);
 app('calc','Calculator','🧮','#ff9f0a,#c46f00',b=>{b.classList.add('calc');H(b,'<div class="dsp" id="d">0</div><div class="cg">'+['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(k=>`<button class="${'÷×−+='.includes(k)?'o':'0'==k||/\d|\./.test(k)?'':'f'}">${k}</button>`).join('')+'</div>');let e='';const d=$('#d',b);$$('button',b).forEach(k=>k.onclick=()=>{const v=k.textContent;if(v=='C')e='';else if(v=='⌫')e=e.slice(0,-1);else if(v=='=')try{e=String(+Function('return '+e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-'))().toFixed(8))}catch(x){e=''}else if(v=='±')e=e.startsWith('-')?e.slice(1):'-'+e;else e+=v;d.textContent=e||'0'})},[300,460]);
-app('terminal','Terminal','⌨️','#444,#000',b=>{H(b,'<div class="dark"><div id="o">Last login: '+new Date().toDateString()+' on ttys000</div><div>'+S.name.toLowerCase().replace(/\W/g,'')+'@mac ~ % <input id="t"></div></div>');const o=$('#o',b),C={help:'commands: help date whoami ls uname clear echo',date:new Date().toString(),whoami:S.name,ls:'Desktop  Documents  Downloads',uname:'Darwin 27.3 Golden Gate'};$('#t',b).onkeydown=e=>{if(e.key!='Enter')return;const v=e.target.value.trim();let r=v=='clear'?null:v.startsWith('echo ')?v.slice(5):C[v]||(v?'zsh: command not found: '+v:'');if(r===null)o.innerHTML='';else o.insertAdjacentText('beforeend','\n% '+v+'\n'+r),o.style.whiteSpace='pre-wrap';e.target.value=''}},[560,360]);
+app('terminal','Console','⌨️','#303641,#080b12',b=>{
+H(b,'<div class="dark"><div id="o">BlynsOS local console · browser profile only\nType &quot;help&quot; to view available commands.</div><div>blyns&gt; <input id="t" autocomplete="off" spellcheck="false"></div></div>');
+const o=$('#o',b),commands={
+ help:'Available commands: help, date, whoami, ls, apps, version, clear, echo <text>',
+ date:()=>new Date().toString(),
+ whoami:()=>S.name||'User',
+ ls:()=>['Desktop','Documents','Downloads'].map(n=>n+': '+((FS&&FS[n]||[]).length)+' item(s)').join('\n'),
+ apps:()=>Object.values(APPS).map(a=>a.n).sort().join('\n'),
+ version:'BlynsOS 1.0 Stabilized'
+};
+const input=$('#t',b);
+input.onkeydown=e=>{
+ if(e.key!=='Enter')return;
+ const raw=input.value.trim();input.value='';
+ if(!raw)return;
+ if(raw==='clear'){o.textContent='BlynsOS local console · browser profile only\nType "help" to view available commands.';return;}
+ let result;
+ if(raw.startsWith('echo '))result=raw.slice(5);
+ else {result=commands[raw];if(typeof result==='function')result=result();}
+ if(result===undefined)result='Command not available in this local console.';
+ o.insertAdjacentText('beforeend','\n\nblyns> '+raw+'\n'+String(result));o.style.whiteSpace='pre-wrap';
+};
+},[560,360]);
 app('store','App Store','🅰️','#4fc3ff,#0a6cff',b=>{H(b,'<div class="main"><h2 style="margin-bottom:10px">Discover</h2>'+['Pages','Keynote','Xcode','Final Cut Pro'].map(a=>`<div class="ml" style="display:flex;justify-content:space-between;align-items:center">${a}<button class="pb st" style="padding:4px 16px;font-size:13px">Get</button></div>`).join('')+'</div>');$$('.st',b).forEach(x=>x.onclick=()=>{x.textContent='…';setTimeout(()=>x.textContent='Open',1200)})},[540,420]);
 app('settings','Blyns Settings','⚙️','#9a9aa0,#55555a',b=>{
 const sec=['Wi-Fi','Appearance','Sound','Users & Groups','About'];
@@ -156,10 +206,10 @@ return'<h3>About BlynsOS</h3><p style="margin-top:10px">BlynsOS 1.0<br>Chip: Bly
 /* ===== 27.2 ===== */
 document.body.insertAdjacentHTML('beforeend','<div id="am"></div><div id="lp"></div><div id="mc"></div><div id="dlg"></div>');
 $('#desk').insertAdjacentHTML('afterbegin','<div id="ds"></div>');
-$('#off').innerHTML='<div style="position:absolute;bottom:20px;width:100%;text-align:center;font-size:11px;color:#222">Press 0 or click to power on</div>';
+$('#off').innerHTML='<div class="power-hint">0 to turn on</div>';
 $('#off').onclick=()=>{if(S.off){S.off=false;$('#off').classList.remove('on');boot()}};
 const PIN=['finder','launchpad','safari','siri','messages','mail','maps','photos','calendar','notes','reminders','music','store','terminal','settings'];
-const CHG='Welcome to Notes on BlynsOS.\n\nYour notes are saved locally on this Mac.';
+const CHG='Welcome to Notes on BlynsOS.\n\nYour notes are saved locally in this browser profile.';
 const GL={
 finder:'<rect width="50" height="100" fill="#fff" opacity=".28"/><path d="M33 34v16M67 34v16M27 66q23 16 46 0" stroke="#0b2447" stroke-width="5" stroke-linecap="round" fill="none"/>',
 safari:'<circle cx="50" cy="50" r="38" fill="none" stroke="#fff" stroke-width="4"/><path d="M68 32L54 54 32 68 46 46Z" fill="#ff3b30"/><path d="M68 32L54 54 46 46Z" fill="#fff"/>',
@@ -193,6 +243,19 @@ function dI(id){let e=$(`.di[data-id="${id}"]`);if(!e){dk.insertAdjacentHTML('be
 const ld=(k,d)=>window.BlynsStorage.get(k,d),sv=(k,v)=>window.BlynsStorage.set(k,v);
 const defFS=()=>({Desktop:[{n:'Welcome.txt',t:'txt',c:'Welcome to BlynsOS 1.0!\n\nDouble-click files to open them. Edit and press Save.'},{n:'Sunset.png',t:'img',c:'linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)'}],Documents:[{n:'Todo.txt',t:'txt',c:'1. Mission Control (M)\n2. Stage Manager (S)\n3. Window snap (W)\n4. Launchpad (L)'},{n:'Aurora.png',t:'img',c:'linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)'}],Downloads:[{n:'Ocean.jpg',t:'img',c:'linear-gradient(180deg,#89f7fe,#0a5fb4)'}]});
 let FS=ld('mac_fs',null)||defFS();
+// Remove only the original gradient-image placeholders; keep files created by the user.
+const seededPreviewImages=new Set([
+  'Sunset.png|linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)',
+  'Aurora.png|linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)',
+  'Ocean.jpg|linear-gradient(180deg,#89f7fe,#0a5fb4)'
+]);
+let removedSeedPreview=false;
+Object.keys(FS||{}).forEach(folder=>{
+  const before=Array.isArray(FS[folder])?FS[folder]:[];
+  const after=before.filter(file=>!seededPreviewImages.has(`${file.n}|${file.c}`));
+  if(after.length!==before.length){FS[folder]=after;removedSeedPreview=true;}
+});
+if(removedSeedPreview){try{sv('mac_fs',FS);}catch(error){console.warn('Could not clean old placeholder images.',error);}}
 const fi=f=>f.t=='img'?`<div style="width:62px;height:46px;border-radius:5px;background:${f.c};border:2px solid #fff;box-shadow:0 1px 5px #0007"></div>`:'<svg width="46" height="58" viewBox="0 0 46 58"><path d="M2 2h30l12 12v42H2z" fill="#fff" stroke="#bbb"/><path d="M32 2v12h12" fill="#e5e5e5" stroke="#bbb"/><path d="M10 26h26M10 34h26M10 42h18" stroke="#bbb" stroke-width="3"/></svg>';
 const esc=s=>s.replace(/</g,'&lt;');
 function rd(){$('#ds').innerHTML=FS.Desktop.map((f,i)=>`<div class="tile" data-i="${i}" style="color:#fff;text-shadow:0 1px 3px #000">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')}
@@ -863,7 +926,7 @@ $('#an').textContent='Files';
 $('#ap').setAttribute('aria-label','BlynsOS menu');
 $('#ap').innerHTML='<img class="blyns-menu-logo" src="https://i.postimg.cc/FHNw8SMW/Blyns-OS-Logo.jpg" alt="B">';
 
-$('#off').innerHTML='<div class="power-hint">Press 0 to power on</div>';
+$('#off').innerHTML='<div class="power-hint">0 to turn on</div>';
 $('#off').onclick=()=>{
   if(S.off){
     S.off=false;
@@ -881,6 +944,7 @@ boot=function(){document.body.classList.add('black-screen');bootBlynsBase();};
 const shutdownBlynsBase=shutdown;
 shutdown=function(){shutdownBlynsBase();document.body.classList.add('black-screen');$('#off').classList.add('on');};
 addEventListener('keydown',e=>{
+  if(S.ph==='power'&&!started){e.preventDefault();e.stopImmediatePropagation();if(e.key==='0')start();return;}
   const black=S.ph==='boot'||S.off||$('#off').classList.contains('on');
   if(black){
     e.preventDefault();e.stopImmediatePropagation();
@@ -1134,94 +1198,103 @@ if(blynsMenuItems){
   // Remove fake connectivity settings from saved preferences and from the status bar.
   delete prefs273.wifiPreference;delete prefs273.bluetoothPreference;savePrefs273();
 
-  // First-run Setup Assistant — 10 clear stages, with no connectivity mockups.
-  let setupDraft={region:'Malaysia',language:'English',name:'',password:'',confirm:'',dark:false,wallpaper:'golden',accent:'#70a7ff',avatarColor:'#648fc5',avatarGlyph:'initial'};
-  let setupStep=1,setupGreetings=['Hello','Bonjour','Hola','你好','こんにちは','안녕하세요','Selamat Datang'],setupGreetingTimer=null,setupPrepareTimer=null;
+  // First-run Setup Assistant — uses the uploaded Setup screen structure and real local preferences.
+  let setupDraft={region:'Malaysia',language:'ms',name:'',password:'',confirm:'',dark:false,wallpaper:'golden',accent:'#70a7ff',avatarColor:'#648fc5',avatarGlyph:'initial'};
+  let setupStep=1,setupGreetings=['Hello','你好','Bonjour','Hola','こんにちは','안녕하세요','Selamat Datang'],setupGreetingTimer=null,setupPrepareTimer=null;
   const setupRegions=['Malaysia','Singapore','United States','United Kingdom','Japan','Germany','France','India','Australia','Indonesia','Brunei'];
-  const setupLanguages=['English','Bahasa Melayu','日本語','中文','Deutsch','Français'];
   const setupPalette=[['#70a7ff','Blue'],['#b49aff','Purple'],['#65c9bb','Teal'],['#f0a45e','Orange'],['#f18bb4','Pink'],['#5dc3a5','Mint'],['#e0a2e8','Lilac']];
   const customWallpaperIds=new Set((window.BLYNS_WALLPAPERS||[]).map(w=>w.id));
   let installedWallpaperIds=ld('blyns_installed_wallpapers',[]);
   if(!Array.isArray(installedWallpaperIds))installedWallpaperIds=[];
   const saveInstalledWallpapers=()=>sv('blyns_installed_wallpapers',installedWallpaperIds);
   const setupSafe=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const setupCopy={
+    ms:{step:'Langkah',continue:'Teruskan',back:'Kembali',start:'Mula',caption:'Satu permulaan baharu.',languageTitle:'Pilih bahasa anda',languageDesc:'Bahasa boleh diubah kemudian dalam tetapan.',nameTitle:'Siapa nama anda?',nameDesc:'Nama ini akan dipaparkan pada skrin kunci dan profil.',nameLabel:'Nama akaun',namePlaceholder:'Masukkan nama anda',passwordTitle:'Cipta kata laluan',passwordDesc:'Gunakan sekurang-kurangnya 8 aksara.',passwordLabel:'Kata laluan',passwordPlaceholder:'Cipta kata laluan',confirmTitle:'Sahkan kata laluan',confirmDesc:'Masukkan semula kata laluan yang sama.',confirmLabel:'Ulang kata laluan',confirmPlaceholder:'Masukkan semula kata laluan',themeTitle:'Pilih tema anda',themeDesc:'Pilih penampilan untuk ruang kerja anda.',wallTitle:'Pilih wallpaper',wallDesc:'Wallpaper ini digunakan pada desktop dan skrin kunci.',accentTitle:'Pilih warna aksen',accentDesc:'Warna ini digunakan pada kawalan dan pilihan sistem.',profileTitle:'Peribadikan profil',profileDesc:'Pilih warna dan simbol avatar anda.',prepareTitle:'Menyediakan ruang kerja',prepareDesc:'Profil dan pilihan anda sedang disimpan.',prepareStatus:'Menyimpan profil dan tetapan',errorName:'Sila masukkan nama akaun.',errorPassword:'Sila masukkan kata laluan.',errorShort:'Kata laluan mesti sekurang-kurangnya 8 aksara.',errorConfirm:'Sila sahkan kata laluan anda.',errorMismatch:'Kata laluan tidak sepadan.',languageMs:'Bahasa Melayu',languageEn:'English',themeLight:'Cerah',themeDark:'Gelap',avatarColor:'Warna avatar',avatarSymbol:'Simbol avatar',initial:'Huruf pertama nama',getStarted:'Selamat datang. Mari sediakan ruang kerja anda.'},
+    en:{step:'Step',continue:'Continue',back:'Back',start:'Get Started',caption:'A beautiful new beginning.',languageTitle:'Choose your language',languageDesc:'You can change this later in Settings.',nameTitle:'What should we call you?',nameDesc:'This name appears on your lock screen and account profile.',nameLabel:'Account name',namePlaceholder:'Enter your name',passwordTitle:'Create a password',passwordDesc:'Use at least 8 characters.',passwordLabel:'Password',passwordPlaceholder:'Create a password',confirmTitle:'Confirm your password',confirmDesc:'Enter the same password again.',confirmLabel:'Confirm password',confirmPlaceholder:'Re-enter your password',themeTitle:'Choose your theme',themeDesc:'Choose the appearance for your workspace.',wallTitle:'Choose a wallpaper',wallDesc:'This wallpaper is used on your desktop and lock screen.',accentTitle:'Choose an accent colour',accentDesc:'This colour is used for system controls and selections.',profileTitle:'Personalize your profile',profileDesc:'Choose an avatar colour and symbol.',prepareTitle:'Preparing your workspace',prepareDesc:'Your profile and preferences are being saved.',prepareStatus:'Saving your profile and preferences',errorName:'Enter an account name to continue.',errorPassword:'Enter a password to continue.',errorShort:'Your password must contain at least 8 characters.',errorConfirm:'Confirm your password to continue.',errorMismatch:'The passwords do not match.',languageMs:'Bahasa Melayu',languageEn:'English',themeLight:'Light',themeDark:'Dark',avatarColor:'Avatar colour',avatarSymbol:'Avatar symbol',initial:'Account initial',getStarted:'Welcome. Let’s prepare your personal workspace.'}
+  };
+  const st=(key)=>setupCopy[setupDraft.language][key];
+  const setupEl=(id)=>document.getElementById(id);
   function setupStart(){
     clearInterval(setupGreetingTimer);clearTimeout(setupPrepareTimer);
-    setupDraft={region:'Malaysia',language:'English',name:'',password:'',confirm:'',dark:false,wallpaper:'golden',accent:'#70a7ff',avatarColor:'#648fc5',avatarGlyph:'initial'};
+    setupDraft={region:'Malaysia',language:'ms',name:'',password:'',confirm:'',dark:false,wallpaper:'golden',accent:'#70a7ff',avatarColor:'#648fc5',avatarGlyph:'initial'};
     setupStep=1;show('setup');renderSetupStep();
   }
   function renderSetupStep(){
-    const progress=Math.round(setupStep*10);
-    const controls=(content,back=true,next='Continue')=>{
-      card(`<div class="setup-top"><span>BLYNS OS</span><span>${setupStep} / 10</span></div><div class="setup-track"><i style="width:${progress}%"></i></div><div class="setup-content">${content}</div><div class="setup-footer"><button class="pb" id="setup-back" style="background:#e9edf4;color:#414958" ${back?'':'hidden'}>Back</button><button class="pb" id="setup-next">${next} →</button></div><p class="setup-error" id="setup-error" role="alert"></p>`);
-      $('#setup-back')?.addEventListener('click',()=>{if(setupStep>1){setupStep--;renderSetupStep();}});
-      $('#setup-next')?.addEventListener('click',nextSetupStep);
-    };
+    clearInterval(setupGreetingTimer);clearTimeout(setupPrepareTimer);
+    const content=setupEl('step-content'),counter=setupEl('step-counter'),track=setupEl('step-track-fill');
+    const back=setupEl('back-button'),next=setupEl('continue-button'),error=setupEl('setup-error');
+    if(!content||!counter||!track||!back||!next||!error){console.error('BlynsOS Setup markup is incomplete.');return;}
+    counter.textContent=`${st('step')} ${setupStep} / 10`;
+    track.style.width=`${setupStep*10}%`;
+    error.textContent='';
+    back.hidden=setupStep===1||setupStep===10;
+    next.hidden=setupStep===10;
+    back.textContent=st('back');
+    next.innerHTML=`${setupStep===1?st('start'):st('continue')} <span aria-hidden="true">→</span>`;
+    back.onclick=()=>{if(setupStep>1&&setupStep<10){setupStep--;renderSetupStep();}};
+    next.onclick=nextSetupStep;
+    const render=(html)=>{content.classList.remove('step-changing');content.innerHTML=html;void content.offsetWidth;content.classList.add('step-changing');};
     if(setupStep===1){
-      const word=setupGreetings[0];
-      controls(`<div class="setup-orb"></div><p class="setup-eyebrow">A NEW BEGINNING</p><h2 class="setup-hello" id="setup-greeting">${word}</h2><p class="setup-desc">Welcome. Let’s prepare your personal workspace.</p>`,false,'Get Started');
-      let i=0;setupGreetingTimer=setInterval(()=>{const el=$('#setup-greeting');if(!el)return;i=(i+1)%setupGreetings.length;el.textContent=setupGreetings[i];},1500);
+      render(`<div class="hello-stage"><div class="hello-orb" aria-hidden="true"></div><div><p class="hello-word" id="hello-word">${setupGreetings[0]}</p><p class="hello-caption">${st('caption')}</p></div></div><p class="step-description">${st('getStarted')}</p>`);
+      let index=0;setupGreetingTimer=setInterval(()=>{const word=setupEl('hello-word');if(!word)return;index=(index+1)%setupGreetings.length;word.textContent=setupGreetings[index];word.style.animation='none';void word.offsetWidth;word.style.animation='hello-word-in 700ms cubic-bezier(.2,.8,.2,1) both';},1500);
       return;
     }
-    clearInterval(setupGreetingTimer);
     if(setupStep===2){
-      controls(`<p class="setup-eyebrow">REGIONAL PREFERENCES</p><h2>Choose your region and language</h2><p class="setup-desc">These choices help set your date, time and language preferences.</p><label>Country or region<select id="setup-region">${setupRegions.map(x=>`<option ${setupDraft.region===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Language<select id="setup-language">${setupLanguages.map(x=>`<option ${setupDraft.language===x?'selected':''}>${x}</option>`).join('')}</select></label>`);
-      return;
+      render(`<p class="step-eyebrow">${st('step')} 02</p><h1 class="step-title">${st('languageTitle')}</h1><p class="step-description">${st('languageDesc')}</p><div class="language-options" role="group" aria-label="Language"><button class="language-option ${setupDraft.language==='ms'?'selected':''}" type="button" data-language="ms"><span><span class="language-name">${st('languageMs')}</span><span class="language-native">Malaysia</span></span><span class="language-check" aria-hidden="true">✓</span></button><button class="language-option ${setupDraft.language==='en'?'selected':''}" type="button" data-language="en"><span><span class="language-name">${st('languageEn')}</span><span class="language-native">United Kingdom</span></span><span class="language-check" aria-hidden="true">✓</span></button></div>`);
+      $$('[data-language]',content).forEach(button=>button.onclick=()=>{setupDraft.language=button.dataset.language;renderSetupStep();});return;
     }
     if(setupStep===3){
-      controls(`<p class="setup-eyebrow">YOUR ACCOUNT</p><h2>What should we call you?</h2><p class="setup-desc">This name appears on your lock screen and account profile.</p><label>Account name<input id="setup-name" maxlength="28" autocomplete="name" placeholder="Enter your name" value="${setupSafe(setupDraft.name)}"></label>`);
-      $('#setup-name').focus();return;
+      render(`<p class="step-eyebrow">${st('step')} 03</p><h1 class="step-title">${st('nameTitle')}</h1><p class="step-description">${st('nameDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-name">${st('nameLabel')}</label><input class="setup-input" id="setup-name" type="text" maxlength="28" autocomplete="name" placeholder="${st('namePlaceholder')}" value="${setupSafe(setupDraft.name)}"></div>`);
+      setupEl('setup-name').addEventListener('input',e=>setupDraft.name=e.target.value);setupEl('setup-name').focus();return;
     }
     if(setupStep===4){
-      controls(`<p class="setup-eyebrow">ACCOUNT SECURITY</p><h2>Create a password</h2><p class="setup-desc">Use at least 8 characters. Your password will be stored as a salted hash.</p><label>Password<input id="setup-password" type="password" autocomplete="new-password" placeholder="Create a password"></label>`);
-      $('#setup-password').focus();return;
+      render(`<p class="step-eyebrow">${st('step')} 04</p><h1 class="step-title">${st('passwordTitle')}</h1><p class="step-description">${st('passwordDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-password">${st('passwordLabel')}</label><input class="setup-input" id="setup-password" type="password" autocomplete="new-password" placeholder="${st('passwordPlaceholder')}"></div>`);
+      setupEl('setup-password').addEventListener('input',e=>setupDraft.password=e.target.value);setupEl('setup-password').focus();return;
     }
     if(setupStep===5){
-      controls(`<p class="setup-eyebrow">ACCOUNT SECURITY</p><h2>Confirm your password</h2><p class="setup-desc">Enter the same password again to confirm.</p><label>Confirm password<input id="setup-confirm" type="password" autocomplete="new-password" placeholder="Re-enter your password"></label>`);
-      $('#setup-confirm').focus();return;
+      render(`<p class="step-eyebrow">${st('step')} 05</p><h1 class="step-title">${st('confirmTitle')}</h1><p class="step-description">${st('confirmDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-confirm">${st('confirmLabel')}</label><input class="setup-input" id="setup-confirm" type="password" autocomplete="new-password" placeholder="${st('confirmPlaceholder')}"></div>`);
+      setupEl('setup-confirm').addEventListener('input',e=>setupDraft.confirm=e.target.value);setupEl('setup-confirm').focus();return;
     }
     if(setupStep===6){
-      controls(`<p class="setup-eyebrow">APPEARANCE</p><h2>Choose your theme</h2><p class="setup-desc">You can change this any time in Settings.</p><div class="setup-choice-grid"><button class="setup-choice ${setupDraft.dark?'':'active'}" data-setup-theme="light">☀️ &nbsp; Light</button><button class="setup-choice ${setupDraft.dark?'active':''}" data-setup-theme="dark">◐ &nbsp; Dark</button></div>`);
-      $$('[data-setup-theme]').forEach(btn=>btn.onclick=()=>{setupDraft.dark=btn.dataset.setupTheme==='dark';$$('[data-setup-theme]').forEach(x=>x.classList.toggle('active',x===btn));});return;
+      render(`<p class="step-eyebrow">${st('step')} 06</p><h1 class="step-title">${st('themeTitle')}</h1><p class="step-description">${st('themeDesc')}</p><div class="setup-choice-grid"><button class="setup-choice ${!setupDraft.dark?'active':''}" type="button" data-theme="light">☀ &nbsp; ${st('themeLight')}</button><button class="setup-choice ${setupDraft.dark?'active':''}" type="button" data-theme="dark">◐ &nbsp; ${st('themeDark')}</button></div>`);
+      $$('[data-theme]',content).forEach(button=>button.onclick=()=>{setupDraft.dark=button.dataset.theme==='dark';$$('[data-theme]',content).forEach(item=>item.classList.toggle('active',item===button));});return;
     }
     if(setupStep===7){
-      const choices=[...wallpaperOptions.map(([id,name,preview])=>({id,name,preview,src:null})),...(window.BLYNS_WALLPAPERS||[]).map(w=>({id:w.id,name:w.name,preview:`url('${w.preview||w.src}') center/cover`,src:w.src}))];
-      const unique=choices.filter((x,i)=>choices.findIndex(y=>y.id===x.id)===i);
-      controls(`<p class="setup-eyebrow">WALLPAPER</p><h2>Choose your background</h2><p class="setup-desc">Select a wallpaper for your desktop and lock screen.</p><div class="setup-wall-grid">${unique.map(w=>`<button class="setup-wall-choice ${setupDraft.wallpaper===w.id?'active':''}" data-setup-wall="${setupSafe(w.id)}"><img src="${w.src||''}" style="${w.src?'':'display:none'}" alt=""><span style="display:block;height:${w.src?'0':'72px'};border-radius:8px;background:${w.src?'transparent':w.preview};margin-bottom:5px"></span>${setupSafe(w.name)}</button>`).join('')}</div>`);
-      $$('[data-setup-wall]').forEach(btn=>btn.onclick=()=>{setupDraft.wallpaper=btn.dataset.setupWall;$$('[data-setup-wall]').forEach(x=>x.classList.toggle('active',x===btn));});return;
+      const choices=wallpaperOptions.map(([id,name,preview])=>({id,name,preview}));
+      render(`<p class="step-eyebrow">${st('step')} 07</p><h1 class="step-title">${st('wallTitle')}</h1><p class="step-description">${st('wallDesc')}</p><div class="setup-wall-grid">${choices.map(w=>`<button class="setup-wall-choice ${setupDraft.wallpaper===w.id?'active':''}" type="button" data-wallpaper="${setupSafe(w.id)}"><span class="setup-wall-preview" style="background:${w.preview}"></span><span>${setupSafe(w.name)}</span></button>`).join('')}</div>`);
+      $$('[data-wallpaper]',content).forEach(button=>button.onclick=()=>{setupDraft.wallpaper=button.dataset.wallpaper;$$('[data-wallpaper]',content).forEach(item=>item.classList.toggle('active',item===button));});return;
     }
     if(setupStep===8){
-      controls(`<p class="setup-eyebrow">ACCENT COLOUR</p><h2>Choose your highlight colour</h2><p class="setup-desc">This colour is used for selected items and system controls.</p><div class="setup-color-row">${setupPalette.map(([c,n])=>`<button class="setup-color-choice ${setupDraft.accent===c?'active':''}" data-setup-accent="${c}" title="${n}" style="background:${c}"></button>`).join('')}</div><label>Custom colour<input id="setup-accent-custom" type="color" value="${setupDraft.accent}" style="height:44px"></label>`);
-      $$('[data-setup-accent]').forEach(btn=>btn.onclick=()=>{setupDraft.accent=btn.dataset.setupAccent;$('#setup-accent-custom').value=setupDraft.accent;$$('[data-setup-accent]').forEach(x=>x.classList.toggle('active',x===btn));});
-      $('#setup-accent-custom').oninput=e=>{setupDraft.accent=e.target.value;$$('[data-setup-accent]').forEach(x=>x.classList.toggle('active',x.dataset.setupAccent===setupDraft.accent));};return;
+      render(`<p class="step-eyebrow">${st('step')} 08</p><h1 class="step-title">${st('accentTitle')}</h1><p class="step-description">${st('accentDesc')}</p><div class="setup-color-row">${setupPalette.map(([color,label])=>`<button class="setup-color-choice ${setupDraft.accent===color?'active':''}" type="button" data-accent="${color}" title="${label}" style="background:${color}"></button>`).join('')}</div><label class="setup-label" for="setup-accent-custom">Custom colour</label><input id="setup-accent-custom" type="color" value="${setupDraft.accent}" style="width:70px;height:42px;border:0;background:transparent;cursor:pointer">`);
+      $$('[data-accent]',content).forEach(button=>button.onclick=()=>{setupDraft.accent=button.dataset.accent;setupEl('setup-accent-custom').value=setupDraft.accent;$$('[data-accent]',content).forEach(item=>item.classList.toggle('active',item===button));});
+      setupEl('setup-accent-custom').oninput=e=>{setupDraft.accent=e.target.value;$$('[data-accent]',content).forEach(item=>item.classList.toggle('active',item.dataset.accent===setupDraft.accent));};return;
     }
     if(setupStep===9){
-      controls(`<p class="setup-eyebrow">PROFILE</p><h2>Personalize your account</h2><p class="setup-desc">Choose an avatar colour and symbol.</p><div class="setup-avatar-preview" id="setup-avatar-preview" style="background:${setupDraft.avatarColor}">${setupDraft.avatarGlyph==='initial'?setupSafe((setupDraft.name||'B').slice(0,1).toUpperCase()):setupSafe(setupDraft.avatarGlyph)}</div><label>Avatar colour<input id="setup-avatar-color" type="color" value="${setupDraft.avatarColor}" style="height:44px"></label><label>Avatar symbol<select id="setup-avatar-glyph"><option value="initial">Account initial</option><option value="🙂">Smile</option><option value="🌟">Star</option><option value="🌙">Moon</option><option value="💎">Gem</option><option value="🌿">Leaf</option><option value="🚀">Rocket</option></select></label>`);
-      $('#setup-avatar-glyph').value=setupDraft.avatarGlyph;
-      $('#setup-avatar-color').oninput=e=>{$('#setup-avatar-preview').style.background=e.target.value;};
-      $('#setup-avatar-glyph').onchange=e=>{$('#setup-avatar-preview').textContent=e.target.value==='initial'?setupDraft.name.slice(0,1).toUpperCase():e.target.value;};return;
+      const glyphs=[['initial',st('initial')],['🙂','Smile'],['🌟','Star'],['🌙','Moon'],['💎','Gem'],['🌿','Leaf'],['🚀','Rocket']];
+      const display=setupDraft.avatarGlyph==='initial'?(setupDraft.name||'B').slice(0,1).toUpperCase():setupDraft.avatarGlyph;
+      render(`<p class="step-eyebrow">${st('step')} 09</p><h1 class="step-title">${st('profileTitle')}</h1><p class="step-description">${st('profileDesc')}</p><div class="setup-avatar-preview" id="setup-avatar-preview" style="background:${setupDraft.avatarColor}">${setupSafe(display)}</div><label class="setup-label" for="setup-avatar-color">${st('avatarColor')}</label><input id="setup-avatar-color" type="color" value="${setupDraft.avatarColor}" style="width:70px;height:42px;border:0;background:transparent;cursor:pointer"><label class="setup-label" for="setup-avatar-glyph">${st('avatarSymbol')}</label><select id="setup-avatar-glyph" class="setup-input">${glyphs.map(([value,label])=>`<option value="${setupSafe(value)}" ${setupDraft.avatarGlyph===value?'selected':''}>${setupSafe(label)}</option>`).join('')}</select>`);
+      setupEl('setup-avatar-color').oninput=e=>{setupDraft.avatarColor=e.target.value;setupEl('setup-avatar-preview').style.background=e.target.value;};
+      setupEl('setup-avatar-glyph').onchange=e=>{setupDraft.avatarGlyph=e.target.value;setupEl('setup-avatar-preview').textContent=e.target.value==='initial'?(setupDraft.name||'B').slice(0,1).toUpperCase():e.target.value;};return;
     }
     if(setupStep===10){
-      controls(`<div class="sp"></div><h2>Preparing your workspace</h2><p class="setup-desc">Your account and personal settings are being saved.</p><div class="setup-track" style="height:6px;margin-top:10px"><i style="width:0;animation:prepare-account 2.2s linear forwards"></i></div>`,false,'');
-      $('#setup-next').hidden=true;
-      $('#setup-back').hidden=true;
-      finishStabilizedSetup();return;
+      render(`<div class="preparing-icon" aria-hidden="true"></div><h1 class="step-title">${st('prepareTitle')}</h1><p class="step-description">${st('prepareDesc')}</p><div class="preparing-track" aria-hidden="true"><div class="preparing-fill"></div></div><p class="step-description setup-prepare-status">${st('prepareStatus')}</p>`);
+      back.hidden=true;next.hidden=true;setupPrepareTimer=setTimeout(finishStabilizedSetup,2300);return;
     }
   }
   async function nextSetupStep(){
-    const error=$('#setup-error');if(error)error.textContent='';
-    if(setupStep===2){setupDraft.region=$('#setup-region').value;setupDraft.language=$('#setup-language').value;}
-    if(setupStep===3){setupDraft.name=$('#setup-name').value.trim();if(!setupDraft.name){error.textContent='Enter your account name to continue.';return;}}
-    if(setupStep===4){setupDraft.password=$('#setup-password').value;if(setupDraft.password.length<8){error.textContent='Use at least 8 characters.';return;}}
-    if(setupStep===5){setupDraft.confirm=$('#setup-confirm').value;if(setupDraft.confirm!==setupDraft.password){error.textContent='The passwords do not match.';return;}}
-    if(setupStep===8)setupDraft.accent=$('#setup-accent-custom').value;
-    if(setupStep===9){setupDraft.avatarColor=$('#setup-avatar-color').value;setupDraft.avatarGlyph=$('#setup-avatar-glyph').value;}
+    const error=setupEl('setup-error');if(error)error.textContent='';
+    if(setupStep===2){/* The selected language is already stored by its option button. */}
+    if(setupStep===3){setupDraft.name=setupEl('setup-name').value.trim();if(!setupDraft.name){error.textContent=st('errorName');setupEl('setup-name').focus();return;}}
+    if(setupStep===4){setupDraft.password=setupEl('setup-password').value;if(!setupDraft.password){error.textContent=st('errorPassword');setupEl('setup-password').focus();return;}if(setupDraft.password.length<8){error.textContent=st('errorShort');setupEl('setup-password').focus();return;}}
+    if(setupStep===5){setupDraft.confirm=setupEl('setup-confirm').value;if(!setupDraft.confirm){error.textContent=st('errorConfirm');setupEl('setup-confirm').focus();return;}if(setupDraft.confirm!==setupDraft.password){error.textContent=st('errorMismatch');setupEl('setup-confirm').focus();return;}}
+    if(setupStep===8)setupDraft.accent=setupEl('setup-accent-custom').value;
+    if(setupStep===9){setupDraft.avatarColor=setupEl('setup-avatar-color').value;setupDraft.avatarGlyph=setupEl('setup-avatar-glyph').value;}
     if(setupStep<10){setupStep++;renderSetupStep();}
   }
   async function finishStabilizedSetup(){
     try{
       await saveBlynsPassword(setupDraft.password);
-      S.name=setupDraft.name;
+      S.name=setupDraft.name.trim();
       avatarColor=setupDraft.avatarColor;avatarGlyph=setupDraft.avatarGlyph;
       prefs273.dark=setupDraft.dark;prefs273.wallpaper=setupDraft.wallpaper;prefs273.accent=setupDraft.accent;
       if(customWallpaperIds.has(setupDraft.wallpaper)&&!installedWallpaperIds.includes(setupDraft.wallpaper)){installedWallpaperIds.push(setupDraft.wallpaper);saveInstalledWallpapers();}
@@ -1229,12 +1302,15 @@ if(blynsMenuItems){
       localStorage.setItem('blyns_avatar_color',avatarColor);localStorage.setItem('blyns_avatar_glyph',avatarGlyph);
       localStorage.setItem('blyns_region',setupDraft.region);localStorage.setItem('blyns_language',setupDraft.language);
       savePrefs273();applyPrefs273();
-      card(`<div class="sp"></div><h2>Welcome, ${setupSafe(S.name)}</h2><p>Your BlynsOS workspace is ready.</p>`);
-      setTimeout(()=>{lockInit();show('lock');},1400);
+      setupEl('welcome-hello').textContent=`${setupDraft.language==='ms'?'Selamat datang':'Welcome'}, ${S.name}`;
+      setupEl('welcome-subtitle').textContent=setupDraft.language==='ms'?'Ruang kerja anda sedia digunakan':'Your workspace is ready';
+      show('welcome');
+      setTimeout(()=>{lockInit();show('lock');},2200);
     }catch(error){
-      setupStep=4;renderSetupStep();const target=$('#setup-error');if(target)target.textContent=error.message||'Secure account setup could not be completed.';
+      setupStep=4;renderSetupStep();const target=setupEl('setup-error');if(target)target.textContent=error.message||'Secure account setup could not be completed.';
     }
   }
+  window.BlynsSetupStart=setupStart;
   function applyProfile(){
     const el=$('#lav');if(!el)return;
     const display=avatarGlyph==='initial'?(S.name||'B').trim().slice(0,1).toUpperCase():avatarGlyph;
@@ -1528,16 +1604,16 @@ if(blynsMenuItems){
   };
   APPS.messages.r=function(b){
     let history=[];try{history=JSON.parse(localStorage.getItem('blyns_chat_history')||'[]')}catch(e){}
-    H(b,`<div class="chat" style="flex:1;display:flex;flex-direction:column;min-height:0"><div style="padding:9px;text-align:center;background:#f0f2f6;color:#7b8491;font-size:11px">Local conversation · Demo contact</div><div id="chatline-log" style="flex:1;min-height:0;overflow:auto;padding:12px"></div><form id="chatline-form" style="display:flex;gap:7px;padding:8px;border-top:1px solid #e4e7ed"><input id="chatline-input" placeholder="Write a message…" style="flex:1;min-width:0;border:1px solid #d7dce4;border-radius:18px;padding:9px 13px;background:#fff;color:#222"><button class="settings-link">Send</button></form></div>`);
+    H(b,`<div class="chat" style="flex:1;display:flex;flex-direction:column;min-height:0"><div style="padding:9px;text-align:center;background:#f0f2f6;color:#7b8491;font-size:11px">Local message log · saved in this browser; not delivered externally</div><div id="chatline-log" style="flex:1;min-height:0;overflow:auto;padding:12px"></div><form id="chatline-form" style="display:flex;gap:7px;padding:8px;border-top:1px solid #e4e7ed"><input id="chatline-input" placeholder="Write a message…" style="flex:1;min-width:0;border:1px solid #d7dce4;border-radius:18px;padding:9px 13px;background:#fff;color:#222"><button class="settings-link">Save</button></form></div>`);
     const log=$('#chatline-log',b),save=()=>{try{localStorage.setItem('blyns_chat_history',JSON.stringify(history))}catch(e){}};
     const draw=()=>{log.innerHTML=history.map(m=>`<div class="msg ${m.from==='me'?'me':'bot'}">${txt(m.text)}</div>`).join('')||'<p style="font-size:11px;color:#9299a4;text-align:center">Start a conversation.</p>';log.scrollTop=log.scrollHeight};
-    $('#chatline-form',b).onsubmit=e=>{e.preventDefault();const q=$('#chatline-input',b).value.trim();if(!q)return;history.push({from:'me',text:q});$('#chatline-input',b).value='';save();draw();setTimeout(()=>{if(!b.isConnected)return;history.push({from:'bot',text:'This is a local demo conversation. Your message is saved in this browser.'});save();draw()},500)};draw();
+    $('#chatline-form',b).onsubmit=e=>{e.preventDefault();const q=$('#chatline-input',b).value.trim();if(!q)return;history.push({from:'me',text:q});$('#chatline-input',b).value='';save();draw()};draw();
   };
   APPS.mail.r=function(b){
     let drafts=[];try{drafts=JSON.parse(localStorage.getItem('blyns_mail_drafts')||'[]')}catch(e){}
-    const samples=[['BlynsOS','Welcome to BlynsOS','Your desktop setup is complete.'],['Family','Dinner this weekend?','Let’s plan a time to meet.'],['System','Your saved files','Your local files stay in this browser.']];
+    const samples=[];
     H(b,`<div class="bar"><button id="inbox-new">＋ Compose</button><input id="inbox-search" placeholder="Search messages" style="margin-left:auto;max-width:190px"></div><div class="row"><div class="side" id="inbox-list" style="width:175px"></div><div class="main" id="inbox-read"><h3>Inbox</h3><p style="color:#8b929e;margin-top:6px;font-size:12px">Select a message or create a local draft.</p></div></div>`);
-    const list=$('#inbox-list',b),read=$('#inbox-read',b);function draw(){list.innerHTML=samples.map((m,i)=>`<div class="ml" data-inbox="${i}"><b>${m[0]}</b><div style="margin-top:3px">${m[1]}</div><small style="color:#8a929e">Sample message</small></div>`).join('')+drafts.map((d,i)=>`<div class="ml" data-draft="${i}"><b>Draft</b><div>${txt(d.subject||'(No subject)')}</div></div>`).join('');$$('[data-inbox]',list).forEach(x=>x.onclick=()=>{const m=samples[+x.dataset.inbox];read.innerHTML=`<h3>${m[1]}</h3><p style="color:#858d97;font-size:11px;margin:8px 0 16px">From ${m[0]}</p><p>${m[2]}</p>`});$$('[data-draft]',list).forEach(x=>x.onclick=()=>showDraft(+x.dataset.draft));}
+    const list=$('#inbox-list',b),read=$('#inbox-read',b);function draw(){list.innerHTML=(samples.length?samples.map((m,i)=>`<div class="ml" data-inbox="${i}"><b>${m[0]}</b><div style="margin-top:3px">${m[1]}</div></div>`).join(''):'<p style="padding:12px;color:#8b929e;font-size:11px">No mail account is connected. You can create and save local drafts here.</p>')+drafts.map((d,i)=>`<div class="ml" data-draft="${i}"><b>Draft</b><div>${txt(d.subject||'(No subject)')}</div></div>`).join('');$$('[data-inbox]',list).forEach(x=>x.onclick=()=>{const m=samples[+x.dataset.inbox];read.innerHTML=`<h3>${m[1]}</h3><p style="color:#858d97;font-size:11px;margin:8px 0 16px">From ${m[0]}</p><p>${m[2]}</p>`});$$('[data-draft]',list).forEach(x=>x.onclick=()=>showDraft(+x.dataset.draft));}
     function compose(){read.innerHTML=`<h3>New Draft</h3><label style="display:block;margin-top:12px;font-size:11px">To<input id="draft-to" style="display:block;width:100%;padding:8px;margin-top:4px;border:1px solid #d7dce4;border-radius:7px;color:#222;background:#fff"></label><label style="display:block;margin-top:9px;font-size:11px">Subject<input id="draft-subject" style="display:block;width:100%;padding:8px;margin-top:4px;border:1px solid #d7dce4;border-radius:7px;color:#222;background:#fff"></label><textarea id="draft-body" placeholder="Write your message…" style="width:100%;height:150px;margin-top:10px;padding:10px;border:1px solid #d7dce4;border-radius:8px;color:#222;background:#fff"></textarea><button id="draft-save" class="settings-link" style="margin-top:9px">Save draft</button><p style="font-size:10px;color:#8b929e;margin-top:8px">Drafts are stored locally. Sending email requires a connected mail service.</p>`;$('#draft-save',read).onclick=()=>{drafts.push({to:$('#draft-to',read).value,subject:$('#draft-subject',read).value,body:$('#draft-body',read).value});try{localStorage.setItem('blyns_mail_drafts',JSON.stringify(drafts))}catch(e){}draw();toast('Draft saved')};}
     function showDraft(i){const d=drafts[i];compose();$('#draft-to',read).value=d.to||'';$('#draft-subject',read).value=d.subject||'';$('#draft-body',read).value=d.body||'';}
     $('#inbox-new',b).onclick=compose;$('#inbox-search',b).oninput=e=>$$('.ml',list).forEach(x=>x.style.display=x.textContent.toLowerCase().includes(e.target.value.toLowerCase())?'':'none');draw();
@@ -1563,9 +1639,9 @@ if(blynsMenuItems){
       </ul>
       <h3>Desktop and system features</h3>
       <ul style="padding-left:19px;margin:8px 0 18px">
-        <li>Retains Files, Navigator, Blyns Assistant, Chatline, Inbox, Atlas, Gallery, Daybook, Jotter, Tasks, Soundwave, Forecast, Console and Blyns Settings.</li>
+        <li>Retains Files, Navigator, Blyns Assistant, Atlas, Gallery, Daybook, Jotter, Tasks, Soundwave, World Clock, Math Desk, Console and Blyns Settings.</li>
         <li>Retains window management, Dock, App Library, Spotlight, Control Center, Stage Manager and desktop shortcuts.</li>
-        <li>Settings include Appearance, wallpaper, accent colour, Dock preferences, accounts, storage and reset options.</li>
+        <li>Chatline keeps a local message log and Inbox keeps local drafts; neither claims to send or receive external messages without a connected service. Settings include Appearance, wallpaper, accent colour, Dock preferences, accounts, storage and reset options.</li>
       </ul>
       <p style="font-size:11px;color:#777;margin-top:14px">BlynsOS 1.0 Stabilized · Your account, apps and personal settings are stored in this browser profile.</p>`;
     const draw=()=>{
@@ -1660,6 +1736,15 @@ if(blynsMenuItems){
 
   // Blur the lock-screen password field after a successful unlock so desktop shortcuts respond immediately.
   $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')setTimeout(()=>{if(S.ph==='desk')e.target.blur();},0)});
+
+  // Hide unfinished sample/prototype apps until real implementations or service integrations are supplied.
+  const deferredSampleApps273=['weather','weatherplus','home','monitor','podcasts','books','contacts','keynote','pages'];
+  deferredSampleApps273.forEach(id=>{delete APPS[id];delete installedApps[id];});
+  for(const id of deferredSampleApps273){const pinIndex=PIN.indexOf(id);if(pinIndex!==-1)PIN.splice(pinIndex,1);}
+  installed=installed.filter(id=>!deferredSampleApps273.includes(id));
+  persistInstalled();
+  desktopApps=desktopApps.filter(id=>!deferredSampleApps273.includes(id));
+  sv(desktopAppKey,desktopApps);
 
   // Final version strings and refreshed desktop/system surfaces.
   const ccVersion=$('#ccpanel .cc-v2-head small');if(ccVersion)ccVersion.textContent=V2;

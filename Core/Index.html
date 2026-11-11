@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="core.css">
+  <link rel="stylesheet" href="setup.css">
   <script src="../Systems/storage.js"></script>
   <script src="../Systems/security.js"></script>
   <script src="../Systems/wallpapers.js"></script>
@@ -19,16 +20,39 @@
   <script defer src="core.js"></script>
 </head>
 <body>
-  <section class="ph on" id="boot" aria-label="Power on BlynsOS">
-    <img alt="BlynsOS" class="boot-logo" src="https://i.postimg.cc/Pxv27fKS/Blyns-OS-Logo.png">
-    <div id="bar" aria-label="Startup progress"><i></i></div>
-    <p id="hint" role="status">Press 0 to power on</p>
+  <section class="ph on" id="power" aria-label="BlynsOS power">
+    <p class="power-hint" role="status">0 to turn on</p>
   </section>
 
-  <section class="ph bg" id="setup" aria-label="Setup Assistant">
-    <div aria-hidden="true" class="setup-wallpaper"></div>
-    <div aria-hidden="true" class="setup-shade"></div>
-    <div class="card" id="sc"></div>
+  <section class="ph" id="boot" aria-label="BlynsOS is starting">
+    <img alt="BlynsOS" class="boot-logo" src="https://i.postimg.cc/Pxv27fKS/Blyns-OS-Logo.png">
+    <div id="bar" aria-label="Startup progress"><i></i></div>
+  </section>
+
+  <section class="ph setup-screen" id="setup" aria-label="BlynsOS setup">
+    <div class="setup-wallpaper" aria-hidden="true"></div>
+    <div class="setup-shade" aria-hidden="true"></div>
+    <section class="setup-card" aria-live="polite">
+      <div class="setup-topline">
+        <span class="setup-brand">BLYNS OS <span>1.0</span></span>
+        <span class="step-counter" id="step-counter">1 / 10</span>
+      </div>
+      <div class="step-track" aria-hidden="true"><div class="step-track-fill" id="step-track-fill"></div></div>
+      <div id="step-content" class="step-content"></div>
+      <div class="setup-footer" id="setup-footer">
+        <button id="back-button" class="back-button" type="button" hidden>Back</button>
+        <button id="continue-button" class="continue-button" type="button">Continue <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="setup-error" id="setup-error" role="alert"></p>
+    </section>
+  </section>
+
+  <section class="ph welcome-screen" id="welcome" aria-label="Welcome to BlynsOS">
+    <div class="welcome-content">
+      <p id="welcome-hello" class="welcome-hello">Hello...</p>
+      <p id="welcome-subtitle" class="welcome-subtitle">Welcome to</p>
+      <img class="welcome-logo" src="https://i.postimg.cc/Dy8SsWjX/Blyns-OS-Logo.png" alt="BlynsOS">
+    </div>
   </section>
 
   <section class="ph wall" id="lock" aria-label="Lock screen">
@@ -67,6 +91,6 @@
   <div id="hud"><span id="hi">🔊</span><div id="hb"></div></div>
   <div id="siri"><input id="sq" placeholder="Search or Ask"></div>
   <div id="toast" role="status"></div>
-  <div id="off" aria-label="Computer is powered off"></div>
+  <div id="off" aria-label="Computer is powered off"><div class="power-hint">0 to turn on</div></div>
 </body>
 </html>
