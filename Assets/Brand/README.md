@@ -1,0 +1,1 @@
+Logo BlynsOS dalam Core/Index.html menggunakan pautan logo B-only yang disediakan pemilik projek. Folder ini disediakan untuk menempatkan aset jenama tempatan jika mahu menggantikan pautan luaran itu nanti.
