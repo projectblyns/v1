@@ -1,0 +1,22 @@
+/* App-specific styles; all surfaces remain within BlynsOS window chrome. */
+.focus-package{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px;text-align:center;background:radial-gradient(circle at 50% 25%,#dbeaff 0,transparent 46%),linear-gradient(145deg,#f7f9ff,#edf2fb);color:#26334d}
+.focus-package-mark{font-size:10px;font-weight:850;letter-spacing:2px;color:#8195ba}
+.focus-package h2{font-size:23px;letter-spacing:-.7px;margin-top:9px}
+.focus-package-subtitle{font-size:12px;color:#7d8ba4;margin-top:5px}
+.focus-package-ring{width:190px;height:190px;margin:21px 0 17px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#fafdff 57%,transparent 59%),conic-gradient(from -90deg,#668fce 0%,#b8cef0 75%,#e2ebfa 75%);box-shadow:0 16px 38px #6686b52b,inset 0 1px #fff}
+.focus-package-ring span{font-size:43px;font-weight:650;letter-spacing:-2px;font-variant-numeric:tabular-nums;color:#344a70}
+.focus-package-controls{display:flex;gap:9px}
+.focus-package-controls button,.focus-package-presets button{border:1px solid #d8e0ee;border-radius:10px;padding:9px 17px;background:#fff;color:#43536f;font-weight:700;cursor:pointer}
+.focus-package-controls button.primary{background:#5c83c5;border-color:#5c83c5;color:white}
+.focus-package-controls button:disabled{opacity:.5;cursor:default}
+.focus-package-presets{display:flex;gap:7px;margin-top:14px}
+.focus-package-presets button{padding:7px 11px;font-size:11px}
+.focus-package-presets button.selected{background:#e5efff;border-color:#8aabe3;color:#315d9b}
+.focus-package-status{min-height:18px;font-size:11px;color:#8592a8;margin-top:15px}
+body.dark-mode .focus-package{background:radial-gradient(circle at 50% 25%,#30445f 0,transparent 46%),linear-gradient(145deg,#202b3a,#1a2330);color:#eef4ff}
+body.dark-mode .focus-package-subtitle,body.dark-mode .focus-package-status{color:#a4b4cc}
+body.dark-mode .focus-package-ring{background:radial-gradient(circle,#263447 57%,transparent 59%),conic-gradient(from -90deg,#719ad6 0%,#536c93 75%,#3a485e 75%)}
+body.dark-mode .focus-package-ring span{color:#f0f5ff}
+body.dark-mode .focus-package-controls button,body.dark-mode .focus-package-presets button{background:#334257;border-color:#4b5b73;color:#eef4ff}
+body.dark-mode .focus-package-controls button.primary{background:#638bc9;border-color:#638bc9}
+body.dark-mode .focus-package-presets button.selected{background:#3d5b86;border-color:#7098d4}

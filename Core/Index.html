@@ -4,57 +4,50 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050505">
-  <meta name="description" content="BlynsOS 1.0 Stabilized">
+  <meta name="description" content="BlynsOS — personal workspace">
   <title>BlynsOS</title>
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+  <link rel="manifest" href="../site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="core.css">
-  <link rel="stylesheet" href="setup.css">
-  <script src="../Systems/storage.js"></script>
-  <script src="../Systems/security.js"></script>
-  <script src="../Systems/wallpapers.js"></script>
-  <script src="../Systems/registry.js"></script>
-  <script src="../Systems/packages.js"></script>
-  <script src="../Apps/focus-timer.js"></script>
+  <link rel="stylesheet" href="../Setup/setup.css">
+
+  <!-- Load order matters: shared systems, independent screens, then Core. -->
+  <script defer src="../Systems/storage.js"></script>
+  <script defer src="../Systems/security.js"></script>
+  <script defer src="../Systems/wallpapers.js"></script>
+  <script defer src="../Systems/registry.js"></script>
+  <script defer src="../Systems/file-vault.js"></script>
+  <script defer src="../Systems/packages.js"></script>
+  <script defer src="../Setup/setup.js"></script>
+  <script defer src="boot.js"></script>
+  <script defer src="off.js"></script>
   <script defer src="core.js"></script>
 </head>
 <body>
   <section class="ph on" id="power" aria-label="BlynsOS power">
-    <p class="power-hint" role="status">Press 0 to power to boot</p>
+    <p class="power-hint" role="status">Press 0 to power on</p>
   </section>
 
-  <section class="ph" id="boot" aria-label="BlynsOS is starting">
+  <section class="ph" id="boot" aria-label="BlynsOS starting">
     <img alt="BlynsOS" class="boot-logo" src="https://i.postimg.cc/Pxv27fKS/Blyns-OS-Logo.png">
     <div id="bar" aria-label="Startup progress"><i></i></div>
   </section>
 
-  <section class="ph setup-screen" id="setup" aria-label="BlynsOS setup">
+  <section class="ph setup-screen" id="setup" aria-label="Initial setup">
     <div class="setup-wallpaper" aria-hidden="true"></div>
     <div class="setup-shade" aria-hidden="true"></div>
-    <section class="setup-card" aria-live="polite">
-      <div class="setup-topline">
-        <span class="setup-brand">BLYNS OS <span>1.0</span></span>
-        <span class="step-counter" id="step-counter">1 / 10</span>
-      </div>
-      <div class="step-track" aria-hidden="true"><div class="step-track-fill" id="step-track-fill"></div></div>
-      <div id="step-content" class="step-content"></div>
-      <div class="setup-footer" id="setup-footer">
-        <button id="back-button" class="back-button" type="button" hidden>Back</button>
-        <button id="continue-button" class="continue-button" type="button">Continue <span aria-hidden="true">→</span></button>
-      </div>
-      <p class="setup-error" id="setup-error" role="alert"></p>
-    </section>
+    <div id="setup-root"></div>
   </section>
 
-  <section class="ph welcome-screen" id="welcome" aria-label="Welcome to BlynsOS">
+  <section class="ph welcome-screen" id="welcome" aria-label="Welcome">
     <div class="welcome-content">
       <p id="welcome-hello" class="welcome-hello">Hello...</p>
-      <p id="welcome-subtitle" class="welcome-subtitle">Welcome to</p>
+      <p id="welcome-subtitle" class="welcome-subtitle">Your workspace is ready</p>
       <img class="welcome-logo" src="https://i.postimg.cc/Dy8SsWjX/Blyns-OS-Logo.png" alt="BlynsOS">
     </div>
   </section>
@@ -77,13 +70,13 @@
       <span class="mbmenu" data-menu="File">File</span>
       <span class="mbmenu" data-menu="Window">Window</span>
       <span class="mbmenu" data-menu="Work">Work</span>
-      <span class="mbmenu" data-menu="Settings">Settings</span>
+      <span class="mbmenu" data-menu="Settings">Blyns</span>
       <div class="r">
-        <button aria-label="Spotlight Search" id="spotlightBtn" title="Spotlight Search (Ctrl + S)">
+        <button aria-label="Spotlight Search" id="spotlightBtn" title="Spotlight Search">
           <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 5 5"></path></svg>
         </button>
         <span id="mt"></span>
-        <button aria-label="Control Center" id="ccbtn" title="Control Center (C)">
+        <button aria-label="Control Center" id="ccbtn" title="Control Center">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6m6 4v6"></path></svg>
         </button>
       </div>
@@ -95,6 +88,7 @@
   <div id="hud"><span id="hi">🔊</span><div id="hb"></div></div>
   <div id="siri"><input id="sq" placeholder="Search or Ask"></div>
   <div id="toast" role="status"></div>
-  <div id="off" aria-label="Computer is powered off"><div class="power-hint">0 to turn on</div></div>
+  <div id="off" aria-label="Powered off"><div class="power-hint">0 to turn on</div></div>
+  <div id="power-transition" aria-hidden="true"></div>
 </body>
 </html>
