@@ -579,21 +579,23 @@ body.custom-wallpaper #desk.wall,body.custom-wallpaper #lock.wall{background-ima
 /* BlynsOS 1.1 — power confirmation, hidden minimized windows and soft overlays. */
 #power-transition{position:fixed;inset:0;z-index:9998;background:#000;opacity:0;pointer-events:none;transition:opacity 2s ease}
 #power-transition.active{opacity:1;pointer-events:auto}
-.power-auth-backdrop{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:20px;background:rgba(7,10,18,.48);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:power-auth-in .22s ease both}
-.power-auth-card{width:min(410px,100%);padding:27px;border:1px solid rgba(255,255,255,.72);border-radius:23px;background:rgba(250,251,255,.94);box-shadow:0 24px 75px #0005;color:#242a35;text-align:center}
-.power-auth-symbol{display:grid;width:54px;height:54px;margin:0 auto 14px;place-items:center;border-radius:17px;background:linear-gradient(145deg,#e8efff,#c7d8f6);color:#527ab6;font-size:28px}
-.power-auth-card h2{font-size:21px;letter-spacing:-.5px}
-.power-auth-copy{margin:8px 0 20px;color:#7e8795;font-size:12px;line-height:1.55}
-.power-auth-label{display:block;margin:0 0 7px;text-align:left;color:#596475;font-size:11px;font-weight:700}
-.power-auth-input{width:100%;height:43px;padding:0 13px;border:1px solid #d6deeb;border-radius:11px;outline:none;background:#fff;color:#252d3a}
-.power-auth-input:focus{border-color:#6f9de2;box-shadow:0 0 0 3px #6f9de222}
-.power-auth-error{min-height:18px;margin-top:7px;color:#bd3540;font-size:11px;text-align:left}
-.power-auth-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-.power-auth-actions button{min-height:38px;padding:0 15px;border:0;border-radius:10px;cursor:pointer;font-weight:700;font-size:12px}
-.power-auth-cancel{background:#edf0f5;color:#515b6b}
-.power-auth-primary{background:#397fd2;color:#fff}
-.power-auth-primary:disabled{opacity:.5;cursor:wait}
-@keyframes power-auth-in{from{opacity:0}to{opacity:1}}
+/* Power and erase dialogs share the original BlynsOS confirmation surface:
+   dark grey glass panel, grey Cancel button and blue primary action. */
+#dlg .power-auth-box{width:min(370px,calc(100vw - 36px));color:#fff;text-align:center}
+#dlg .power-auth-box h3{font-size:17px;font-weight:650;letter-spacing:-.2px;color:#fff}
+#dlg .power-auth-copy{margin:-6px 0 3px;color:rgba(255,255,255,.76);font-size:12px;line-height:1.55}
+#dlg .power-auth-form{display:flex;width:100%;flex-direction:column;gap:7px;text-align:left}
+#dlg .power-auth-label{display:block;color:rgba(255,255,255,.86);font-size:11px;font-weight:650}
+#dlg .power-auth-input{width:100%;height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.24);border-radius:9px;outline:none;background:rgba(255,255,255,.94);color:#242832;font:inherit;font-size:13px;user-select:text;-webkit-user-select:text}
+#dlg .power-auth-input:focus{border-color:#69aaff;box-shadow:0 0 0 3px rgba(10,132,255,.22)}
+#dlg .power-auth-error{min-height:16px;margin:0;color:#ffaaa9;font-size:11px;line-height:1.4}
+#dlg .power-auth-expected{margin:0;color:rgba(255,255,255,.67);font-size:11px;overflow-wrap:anywhere}
+#dlg .power-auth-expected strong{color:#fff;font-weight:700}
+#dlg .power-auth-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:5px}
+#dlg .power-auth-actions .pb{min-width:86px;min-height:34px;padding:7px 15px;border-radius:9px;font-size:12px;font-weight:650}
+#dlg .power-auth-actions .power-auth-cancel{background:#666!important;color:#fff}
+#dlg .power-auth-actions .power-auth-primary{background:#0a84ff!important;color:#fff}
+#dlg .power-auth-actions .power-auth-primary:disabled{opacity:.55;cursor:wait}
 #wins>.win.min{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .25s ease,transform .55s cubic-bezier(.2,.8,.2,1),visibility 0s linear .55s!important}
 #wins>.win:not(.min){visibility:visible}
 #ccpanel,#spotlight,#am{will-change:opacity,transform}
@@ -606,6 +608,6 @@ body.custom-wallpaper #desk.wall,body.custom-wallpaper #lock.wall{background-ima
 body.dark-mode .settings-select{background:#2d3644;color:#f2f5fa;border-color:#4a5668}
 @media(prefers-reduced-motion:reduce){
   #power-transition{transition:none}
-  .power-auth-backdrop,#settings-page .v2-section,#settings-page .app-hero{animation:none}
+  #dlg .power-auth-box,#settings-page .v2-section,#settings-page .app-hero{animation:none}
   #ccpanel,#spotlight,#am{transition:none!important}
 }

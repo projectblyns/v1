@@ -209,7 +209,7 @@ sideApp(b,sec,(n,i,m)=>{if(n=='Wi-Fi')return'<h3>Wi-Fi</h3><p style="margin-top:
 if(n=='Appearance'){setTimeout(()=>{const r=$('#lg',m),c=$('#hc',m);r.oninput=()=>{const v=+r.value;document.documentElement.style.setProperty('--blur',v*.6+'px');document.documentElement.style.setProperty('--g',(v/100*.6).toFixed(2))};c.onchange=()=>document.body.classList.toggle('hc',c.checked);c.checked=document.body.classList.contains('hc')});return'<h3>Appearance</h3><p style="margin:16px 0 6px">Liquid Glass transparency</p><input id="lg" type="range" min="0" max="100" value="50" style="width:100%"><p style="margin:18px 0"><label><input id="hc" type="checkbox"> High-contrast window borders</label></p>'}
 if(n=='Sound'){setTimeout(()=>{$('#vs',m).oninput=e=>{S.vol=+e.target.value;hud()}});return`<h3>Sound</h3><p style="margin:16px 0 6px">Output volume</p><input id="vs" type="range" min="0" max="8" value="${S.vol}" style="width:100%">`}
 if(n=='Users & Groups'){setTimeout(()=>$('#lo',m).onclick=logout);return`<h3>Users & Groups</h3><p style="margin:12px 0">${S.name} (Admin)</p><button class="pb" id="lo">🔒 Lock Screen / Log Out</button>`}
-return'<h3>About BlynsOS</h3><p style="margin-top:10px">BlynsOS 1.1<br>Chip: Blyns Core<br>Memory: 32 GB</p><p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>'+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=()=>ask('This erases your account, files and notes, then restarts Setup Assistant.','Erase',factory))}),'')},0)},[680,460]);
+return'<h3>About BlynsOS</h3><p style="margin-top:10px">BlynsOS 1.1<br>Chip: Blyns Core<br>Memory: 32 GB</p><p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>'+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
 /* ===== 27.2 ===== */
 document.body.insertAdjacentHTML('beforeend','<div id="am"></div><div id="lp"></div><div id="mc"></div><div id="dlg"></div>');
 $('#desk').insertAdjacentHTML('afterbegin','<div id="ds"></div>');
@@ -289,8 +289,15 @@ const clearWins=()=>{$$('.win').forEach(w=>{if(typeof w.__blynsCleanup==='functi
 function shutdown(){S.off=true;$('#off').classList.add('on');$$('.ph').forEach(p=>p.classList.remove('on'));clearWins();dockBuild()}
 function restart(){shutdown();setTimeout(()=>{S.off=false;$('#off').classList.remove('on');boot()},1500)}
 function factory(){try{['mac_n','mac_p','mac_fs','mac_notes'].forEach(k=>localStorage.removeItem(k))}catch(e){}S.name='';S.pwHash='';FS=defFS();rd();restart()}
+function requestFactoryErase(){
+  if(window.BlynsOff&&typeof window.BlynsOff.requestErase==='function'){
+    return window.BlynsOff.requestErase({accountName:S.name,onConfirm:()=>factory()});
+  }
+  toast('Security confirmation is unavailable. Reload BlynsOS and try again.');
+  return false;
+}
 $('#ap').innerHTML='<img class="blyns-menu-logo" src="https://i.postimg.cc/FHNw8SMW/Blyns-OS-Logo.jpg" alt="BlynsOS">';
-$('#ap').onclick=()=>menu(8,28,[['About BlynsOS',()=>openApp('settings')],['Blyns Settings…',()=>openApp('settings')],['Blyns Store…',()=>openApp('store')],null,['Force Quit Front App',()=>{const w=topWin();w&&$('.tl i',w).click()}],null,['Lock Screen',logout],['Restart…',()=>restart()],['Shut Down…',()=>shutdown()],null,['Erase All Content and Settings…',()=>ask('This erases your account, files and notes, then restarts Setup Assistant.','Erase',factory)],['Log Out '+S.name+'…',()=>ask('Log out '+S.name+'?','Log Out',logout)]]);
+$('#ap').onclick=()=>menu(8,28,[['About BlynsOS',()=>openApp('settings')],['Blyns Settings…',()=>openApp('settings')],['Blyns Store…',()=>openApp('store')],null,['Force Quit Front App',()=>{const w=topWin();w&&$('.tl i',w).click()}],null,['Lock Screen',logout],['Restart…',()=>restart()],['Shut Down…',()=>shutdown()],null,['Erase All Content and Settings…',requestFactoryErase],['Log Out '+S.name+'…',()=>ask('Log out '+S.name+'?','Log Out',logout)]]);
 $('#desk').oncontextmenu=e=>{e.preventDefault();if(e.target.closest('.win'))return;menu(e.clientX,e.clientY,[['New Text File',()=>{FS.Desktop.push({n:'Untitled '+(FS.Desktop.length+1)+'.txt',t:'txt',c:''});saveFS()}],['App Library',launchpad],['Mission Control',mc],null,['Blyns Settings…',()=>openApp('settings')]])};
 function launchpad(){const l=$('#lp');if(l.classList.contains('on')){l.classList.remove('on');return}l.innerHTML='<input class="lps" placeholder="Search"><div class="lpg">'+Object.keys(APPS).filter(k=>k!='launchpad').map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';l.classList.add('on');
 $('.lps',l).oninput=e=>$$('.lpi',l).forEach(x=>x.style.display=x.textContent.toLowerCase().includes(e.target.value.toLowerCase())?'':'none');
@@ -1652,7 +1659,7 @@ if(blynsMenuItems){
       });
       $('#account-avatar-glyph',main) && ($('#account-avatar-glyph',main).value=avatarGlyph);
       $('#account-lock',main)?.addEventListener('click',logout);
-      $('#erase-now',main)?.addEventListener('click',()=>ask('Erase all BlynsOS data in this browser and restart the first-run setup? This cannot be undone.','Erase',factory));
+      $('#erase-now',main)?.addEventListener('click',requestFactoryErase);
     };
     draw();
   };
