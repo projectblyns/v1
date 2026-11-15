@@ -212,12 +212,44 @@ ad.onkeydown=e=>{if(e.key=='Enter')nav(ad.value)};$('#bk',b).onclick=()=>{if(ix>
     const ans=q=>{q=q.toLowerCase();if(/time/.test(q))return'It’s '+new Date().toLocaleTimeString();if(/date|day/.test(q))return'Today is '+new Date().toDateString();if(/hello|hi\b/.test(q))return'Hi '+S.name+'! How can I help?';if(/joke/.test(q))return'Why did the Blyns desktop feel calmer? It finally closed its extra windows.';if(/weather/.test(q))return'Live weather data is not connected. Open Navigator to check a current forecast.';if(/volume/.test(q))return'Volume is at '+S.vol*12.5+'%.';if(/open (\w+)/.test(q)){const m=q.match(/open (\w+)/)[1];if(APPS[m]){openApp(m);return'Opening '+APPS[m].n+'.'}}const c=q.replace(/x/g,'*').match(/^[\d+\-*\/.() ]+$/);if(c)try{return'That’s '+Function('return '+c[0])()}catch(e){}return'I can help with local time, date, volume, simple calculations and opening installed apps. Use Navigator for current information from the web.'};
     const say=q=>{add(q,'me');setTimeout(()=>add(ans(q),'bot'),600)};w.q=say;add('Hi '+S.name+', I’m Blyns Assistant. Ask me anything.','bot');
     $('#si',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){say(e.target.value);e.target.value=''}};if(arg)say(arg);
-    const cv=$('#cv',b),x=cv.getContext('2d');cv.width=cv.clientWidth;let t=0;(function f(){if(!b.isConnected)return;t+=.05;x.clearRect(0,0,cv.width,70);[['#ff2d95',1],['#0a84ff',1.4],['#30d158',.8]].forEach(([c,k],j)=>{x.beginPath();x.strokeStyle=c;x.globalAlpha=.8;x.lineWidth=2.5;for(let i=0;i<=cv.width;i+=3){const y=35+Math.sin(i/(40*k)+t*(j+1))*Math.sin(i/cv.width*Math.PI)*22*Math.sin(t*k+j);i?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()});requestAnimationFrame(f)})()},[420,520]); app('messages','Messages','💬','#5be26b,#1db23a',b=>{H(b,'<div class="chat" style="flex:1;display:flex;flex-direction:column">
-            <div style="padding:8px;text-align:center;font-size:12px;color:#888;background:#f0f0f3">To: Mom</div>
+    const cv=$('#cv',b),x=cv.getContext('2d');cv.width=cv.clientWidth;let t=0;(function f(){if(!b.isConnected)return;t+=.05;x.clearRect(0,0,cv.width,70);[['#ff2d95',1],['#0a84ff',1.4],['#30d158',.8]].forEach(([c,k],j)=>{x.beginPath();x.strokeStyle=c;x.globalAlpha=.8;x.lineWidth=2.5;for(let i=0;i<=cv.width;i+=3){const y=35+Math.sin(i/(40*k)+t*(j+1))*Math.sin(i/cv.width*Math.PI)*22*Math.sin(t*k+j);i?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()});requestAnimationFrame(f)})()},[420,520]); 
+app('messages','Messages','💬','#5be26b,#1db23a',b=>{
+    H(b,`
+        <div class="chat" style="flex:1;display:flex;flex-direction:column">
+            <div style="padding:8px;text-align:center;font-size:12px;color:#888;background:#f0f0f3">
+                To: Mom
+            </div>
+
             <div id="lg" style="flex:1;padding:12px;overflow:auto">
                 <div class="msg bot">Did you eat yet? 🍜</div>
-            </div><input id="mi" placeholder="iMessage">
-        </div>');const lg=$('#lg',b);$('#mi',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){lg.insertAdjacentHTML('beforeend',`<div class="msg me">${e.target.value.replace(/</g,'&lt;')}< /div>`);e.target.value='';setTimeout(()=>{lg.insertAdjacentHTML('beforeend','<div class="msg bot">Haha okay! ❤️</div>');lg.scrollTop=1e9},900)}}},[520,460]);
+            </div>
+
+            <input id="mi" placeholder="iMessage">
+        </div>
+    `);
+
+    const lg=$('#lg',b);
+
+    $('#mi',b).onkeydown=e=>{
+        if(e.key=='Enter'&&e.target.value){
+            lg.insertAdjacentHTML(
+                'beforeend',
+                `<div class="msg me">${e.target.value.replace(/</g,'&lt;')}</div>`
+            );
+
+            e.target.value='';
+
+            setTimeout(()=>{
+                lg.insertAdjacentHTML(
+                    'beforeend',
+                    '<div class="msg bot">Haha okay! ❤️</div>'
+                );
+                lg.scrollTop=1e9;
+            },900);
+        }
+    };
+},[520,460]);
+;
             app('mail','Mail','✉️','#5ac8fa,#007aff',b=>{const M=[['Apple','Welcome to BlynsOS 27','Your Mac is ready. Explore Liquid Glass.'],['Mom','Dinner Sunday?','Come by around 6, I’m cooking.'],['GitHub','New sign-in','We noticed a new sign-in to your account.']];const m=sideApp(b,M.map(x=>x[0]),(n,i)=>`<h3>${M[i][1]}</h3>
             <p style="color:#888;margin:6px 0 14px">From ${M[i][0]}</p>
             <p>${M[i][2]}</p>`)},[640,420]);
