@@ -132,13 +132,13 @@ const APPS={};
 function app(id,n,i,c,r,sz){APPS[id]={n,i,c,r,sz:sz||[620,440]}}
 function openApp(id,arg){
 
-  // Launchpad is a system overlay, never a normal window.
-  if(id==='launchpad'){
-    launchpad();
-    return;
-  }
+// Launchpad is a system overlay, never a normal window.
+if(id==='launchpad'){
+launchpad();
+return;
+}
 
-  if(W[id]){if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
+if(W[id]){if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
 const a=APPS[id],n=Object.keys(W).length,w=document.createElement('div');w.className='win';w.dataset.id=id;
 const [ww,wh]=a.sz,mw=Math.min(ww,innerWidth-20),mh=Math.min(wh,innerHeight-120);Object.assign(w.style,{width:mw+'px',height:mh+'px',left:Math.max(8,(innerWidth-mw)/2+(n%6)*28-70)+'px',top:(50+(n%6)*26)+'px',opacity:0,transform:'scale(.86) translateY(24px)'});
 w.innerHTML=`<div class="tb">
@@ -156,9 +156,26 @@ $('.tb',w).ondblclick=()=>g.click();
 $$('.h',w).forEach(h=>h.onpointerdown=e=>{e.stopPropagation();focus(w);const d=h.getAttribute('d'),X=e.clientX,Y=e.clientY,L=w.offsetLeft,T=w.offsetTop,WW=w.offsetWidth,HH=w.offsetHeight;w.classList.add('drag');
 const m=ev=>{const dx=ev.clientX-X,dy=ev.clientY-Y;if(d.includes('e'))w.style.width=Math.max(260,WW+dx)+'px';if(d.includes('s'))w.style.height=Math.max(160,HH+dy)+'px';if(d.includes('w')&&WW-dx>260){w.style.width=WW-dx+'px';w.style.left=L+dx+'px'}if(d.includes('n')&&HH-dy>160){w.style.height=HH-dy+'px';w.style.top=T+dy+'px'}};
 const u=()=>{w.classList.remove('drag');removeEventListener('pointermove',m);removeEventListener('pointerup',u)};addEventListener('pointermove',m);addEventListener('pointerup',u)});
-const body=$('.body',w);if(body.isConnected){body.innerHTML='';try{a.r(body,w,arg)}catch(err){body.innerHTML='<div style="padding:24px;color:#b42318"><b>App could not open</b>
-    <p style="margin-top:8px;font-size:12px">'+String(err.message||err)+'</p>
-</div>';console.error('App render failed:',id,err)}}}
+const body=$('.body',w);
+
+if(body.isConnected){
+body.innerHTML='';
+
+try{
+a.r(body,w,arg);
+}catch(err){
+body.innerHTML=`
+<div style="padding:24px;color:#b42318">
+    <b>App could not open</b>
+    <p style="margin-top:8px;font-size:12px">
+        ${String(err.message||err)}
+    </p>
+</div>
+`;
+
+console.error('App render failed:',id,err);
+}
+}
 function focus(w){w.style.zIndex=++S.z;$('#an').textContent=APPS[w.dataset.id].n}
 function minim(w){const d=$(`.di[data-id=${w.dataset.id}]`).getBoundingClientRect(),r=w.getBoundingClientRect();w.style.transform=`translate(${d.left+d.width/2-r.left-r.width/2}px,${d.top-r.top-r.height/2}px) scale(.08)`;w.classList.add('min')}
 /* DOCK */
@@ -2741,4 +2758,4 @@ ad.onkeydown=e=>{if(e.key=='Enter')nav(ad.value)};$('#bk',b).onclick=()=>{if(ix>
                                                                                             dockBuild();
 
                                                                                             })();
-                                                                                            /* ================= end BlynsOS 1.1 ================= */
+                                                                                            /* ================= end BlynsOS 1.2 ================= */
