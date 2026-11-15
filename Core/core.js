@@ -138,7 +138,7 @@ launchpad();
 return;
 }
 
-if(W[id]){if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
+if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
 const a=APPS[id],n=Object.keys(W).length,w=document.createElement('div');w.className='win';w.dataset.id=id;
 const [ww,wh]=a.sz,mw=Math.min(ww,innerWidth-20),mh=Math.min(wh,innerHeight-120);Object.assign(w.style,{width:mw+'px',height:mh+'px',left:Math.max(8,(innerWidth-mw)/2+(n%6)*28-70)+'px',top:(50+(n%6)*26)+'px',opacity:0,transform:'scale(.86) translateY(24px)'});
 w.innerHTML=`<div class="tb">
@@ -176,6 +176,7 @@ body.innerHTML=`
 console.error('App render failed:',id,err);
 }
 }
+}
 function focus(w){w.style.zIndex=++S.z;$('#an').textContent=APPS[w.dataset.id].n}
 function minim(w){const d=$(`.di[data-id=${w.dataset.id}]`).getBoundingClientRect(),r=w.getBoundingClientRect();w.style.transform=`translate(${d.left+d.width/2-r.left-r.width/2}px,${d.top-r.top-r.height/2}px) scale(.08)`;w.classList.add('min')}
 /* DOCK */
@@ -196,18 +197,18 @@ app('safari','Safari','🧭','#4fc3ff,#0a84ff',(b)=>{
 H(b,`<div class="bar"><button id="bk">‹</button><button id="fw">›</button><button id="rl">⟳</button><input id="ad" placeholder="Search or enter website name"><button id="nm">🔔 Notify Me</button><button id="ex" title="Open in new tab">↗</button></div>
 <div style="flex:1;display:flex;flex-direction:column;position:relative" id="pg"></div>`);
 const pg=$('#pg',b),ad=$('#ad',b);let hist=[],ix=-1;
-const home=()=>{H(pg,'<div style="padding:20px;overflow:auto">
-    <h3 style="color:#222">Favorites</h3>'+[['Example','example.com','🌐'],['Wikipedia','wikipedia.org','📚'],['MDN','developer.mozilla.org','🧩'],['OpenStreetMap','openstreetmap.org','🗺️'],['Anthropic','anthropic.com','✨']].map(([n,u,i])=>`<div class="tile" data-u="${u}" style="color:#333"><u style="background:#e8e8ee">${i}</u>${n}</div>`).join('')+'<p style="color:#888;font-size:12px;margin-top:12px">Some sites block embedding in frames; use ↗ to open those in a new tab.</p>
-</div>');$$('.tile',pg).forEach(t=>t.onclick=()=>nav(t.dataset.u))};
-const nav=(q,push=true)=>{q=q.trim();if(!q)return;let u=/^https?:\/\//.test(q)?q:/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(q)?'https://'+q:'https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(q);ad.value=u;if(push){hist=hist.slice(0,ix+1);hist.push(u);ix++}H(pg,'<div class="spl" style="color:#666">
+const home=()=>{H(pg,`<div style="padding:20px;overflow:auto">
+    <h3 style="color:#222">Favorites</h3>${[['Example','example.com','🌐'],['Wikipedia','wikipedia.org','📚'],['MDN','developer.mozilla.org','🧩'],['OpenStreetMap','openstreetmap.org','🗺️'],['Anthropic','anthropic.com','✨']].map(([n,u,i])=>`<div class="tile" data-u="${u}" style="color:#333"><u style="background:#e8e8ee">${i}</u>${n}</div>`).join('')}<p style="color:#888;font-size:12px;margin-top:12px">Some sites block embedding in frames; use ↗ to open those in a new tab.</p>
+</div>`);$$('.tile',pg).forEach(t=>t.onclick=()=>nav(t.dataset.u))};
+const nav=(q,push=true)=>{q=q.trim();if(!q)return;let u=/^https?:\/\//.test(q)?q:/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(q)?'https://'+q:'https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(q);ad.value=u;if(push){hist=hist.slice(0,ix+1);hist.push(u);ix++}H(pg,`<div class="spl" style="color:#666">
     <div class="sp" style="border-color:#ddd;border-top-color:#888"></div>Loading…
-</div>');setTimeout(()=>{H(pg,`<iframe src="${u}" referrerpolicy="no-referrer"></iframe>`)},400)};
+</div>`);setTimeout(()=>{H(pg,`<iframe src="${u}" referrerpolicy="no-referrer"></iframe>`)},400)};
 ad.onkeydown=e=>{if(e.key=='Enter')nav(ad.value)};$('#bk',b).onclick=()=>{if(ix>0)nav(hist[--ix],false);else{ix=-1;ad.value='';home()}};$('#fw',b).onclick=()=>{if(ix<hist.length-1)nav(hist[++ix],false)};$('#rl',b).onclick=()=>{if(hist[ix])nav(hist[ix],false)};
     let on=0;$('#nm',b).onclick=e=>{on=!on;e.target.textContent=on?'🔔 Tracking ✓':'🔔 Notify Me';toast(on?'You’ll be notified of changes to this page':'Notifications off')};$('#ex',b).onclick=()=>hist[ix]&&open(hist[ix],'_blank');home()},[760,500]);
     app('siri','Siri','🌈','#bf5af2,#0a84ff',(b,w,arg)=>{
-    H(b,'<div class="chat" style="flex:1;display:flex;flex-direction:column;min-height:0">
+    H(b,`<div class="chat" style="flex:1;display:flex;flex-direction:column;min-height:0">
         <div id="lg" style="flex:1;overflow:auto;padding:14px"></div><input id="si" placeholder="Ask Blyns Assistant…"><canvas id="cv" height="70" style="width:100%;background:#0b0b14"></canvas>
-    </div>');
+    </div>`);
     const lg=$('#lg',b),add=(t,c)=>{lg.insertAdjacentHTML('beforeend',`<div class="msg ${c}">${t}</div>`);lg.scrollTop=1e9};
     const ans=q=>{q=q.toLowerCase();if(/time/.test(q))return'It’s '+new Date().toLocaleTimeString();if(/date|day/.test(q))return'Today is '+new Date().toDateString();if(/hello|hi\b/.test(q))return'Hi '+S.name+'! How can I help?';if(/joke/.test(q))return'Why did the Blyns desktop feel calmer? It finally closed its extra windows.';if(/weather/.test(q))return'Live weather data is not connected. Open Navigator to check a current forecast.';if(/volume/.test(q))return'Volume is at '+S.vol*12.5+'%.';if(/open (\w+)/.test(q)){const m=q.match(/open (\w+)/)[1];if(APPS[m]){openApp(m);return'Opening '+APPS[m].n+'.'}}const c=q.replace(/x/g,'*').match(/^[\d+\-*\/.() ]+$/);if(c)try{return'That’s '+Function('return '+c[0])()}catch(e){}return'I can help with local time, date, volume, simple calculations and opening installed apps. Use Navigator for current information from the web.'};
     const say=q=>{add(q,'me');setTimeout(()=>add(ans(q),'bot'),600)};w.q=say;add('Hi '+S.name+', I’m Blyns Assistant. Ask me anything.','bot');
@@ -253,23 +254,22 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
             app('mail','Mail','✉️','#5ac8fa,#007aff',b=>{const M=[['Apple','Welcome to BlynsOS 27','Your Mac is ready. Explore Liquid Glass.'],['Mom','Dinner Sunday?','Come by around 6, I’m cooking.'],['GitHub','New sign-in','We noticed a new sign-in to your account.']];const m=sideApp(b,M.map(x=>x[0]),(n,i)=>`<h3>${M[i][1]}</h3>
             <p style="color:#888;margin:6px 0 14px">From ${M[i][0]}</p>
             <p>${M[i][2]}</p>`)},[640,420]);
-            app('maps','Maps','🗺️','#7be08a,#2a9d4a',b=>{H(b,'<div class="bar"><input placeholder="Search Maps"></div><svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" style="flex:1;background:#e9efdc">
+            app('maps','Maps','🗺️','#7be08a,#2a9d4a',b=>{H(b,`<div class="bar"><input placeholder="Search Maps"></div><svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" style="flex:1;background:#e9efdc">
                 <path d="M0 300 Q200 220 360 320 T600 260 V400H0Z" fill="#a8d4f5" />
                 <path d="M0 120 H600 M200 0 V400 M420 0 V400 M0 220 H600" stroke="#fff" stroke-width="9" />
                 <path d="M60 40 L540 360" stroke="#f7d86a" stroke-width="7" />
                 <circle cx="300" cy="170" r="9" fill="#ff3b30" />
-            </svg>')});
+            </svg>`)});
             app('photos','Photos','🌸','#ffd166,#ef476f',b=>{H(b,'<div class="main" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px">'+Array.from({length:18},(_,i)=>`<div class="ph2" style="height:110px;background:linear-gradient(${i*37}deg,hsl(${i*47},80%,60%),hsl(${i*47+60},80%,45%))"></div>`).join('')+'</div>')});
-            app('calendar','Calendar','📅','#fff,#ddd',b=>{const d=new Date(),f=new Date(d.getFullYear(),d.getMonth(),1).getDay(),n=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();let c='';for(let i=0;i<f;i++)c+='<div>
-        </div>';for(let i=1;i<=n;i++)c+=`<div style="padding:12px;border:1px solid #e5e5e8;${i==d.getDate()?'background:#ff3b30;color:#fff;border-radius:8px':''}">${i}</div>`;H(b,`<div class="main">
+            app('calendar','Calendar','📅','#fff,#ddd',b=>{const d=new Date(),f=new Date(d.getFullYear(),d.getMonth(),1).getDay(),n=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();let c='';for(let i=0;i<f;i++)c+='<div></div>';for(let i=1;i<=n;i++)c+=`<div style="padding:12px;border:1px solid #e5e5e8;${i==d.getDate()?'background:#ff3b30;color:#fff;border-radius:8px':''}">${i}</div>`;H(b,`<div class="main">
                 <h2 style="color:#ff3b30">${d.toLocaleString([],{month:'long',year:'numeric'})}</h2>
                 <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:12px;text-align:center">${['S','M','T','W','T','F','S'].map(x=>`<b>${x}</b>`).join('')}${c}</div>
             </div>`)},[520,460]);
             app('notes','Notes','📝','#ffe066,#f4b400',b=>{const N=['Welcome','Ideas','Groceries'];const m=sideApp(b,N,(n)=>`<textarea style="width:100%;height:100%;border:0;outline:none;font-size:15px;resize:none;background:none;color:#222" placeholder="Start typing…">${n=='Welcome'?'Welcome to Notes on BlynsOS 1.2!':''}</textarea>`)});
-            app('reminders','Reminders','☑️','#fff,#ddd',b=>{H(b,'<div class="main">
+            app('reminders','Reminders','☑️','#fff,#ddd',b=>{H(b,`<div class="main">
                 <h2 style="color:#0a84ff;margin-bottom:10px">Today</h2>
                 <div id="rl"></div><input class="in" id="ri" placeholder="New Reminder" style="width:100%;margin:10px 0">
-            </div>');const add=t=>$('#rl',b).insertAdjacentHTML('beforeend',`<label style="display:block;padding:7px 0;border-bottom:1px solid #eee"><input type="checkbox"> ${t}</label>`);['Buy milk','Call Mom'].forEach(add);$('#ri',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){add(e.target.value.replace(/</g,'&lt;'));e.target.value=''}}},[420,440]); app('music','Music','🎵','#ff6b81,#fa233b',b=>{sideApp(b,['Listen Now','Browse','Radio','Library'],n=>`<h3>${n}</h3>
+            </div>`);const add=t=>$('#rl',b).insertAdjacentHTML('beforeend',`<label style="display:block;padding:7px 0;border-bottom:1px solid #eee"><input type="checkbox"> ${t}</label>`);['Buy milk','Call Mom'].forEach(add);$('#ri',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){add(e.target.value.replace(/</g,'&lt;'));e.target.value=''}}},[420,440]); app('music','Music','🎵','#ff6b81,#fa233b',b=>{sideApp(b,['Listen Now','Browse','Radio','Library'],n=>`<h3>${n}</h3>
             <div style="margin:12px 0">`+['Golden Hour','Night Drive','Lo-fi Loop','Sunrise'].map((s,i)=>`<div class="ml" onclick="toast('Playing ${s}')">▶ ${s} <span style="float:right;color:#999">3:${10+i*7}</span></div>`).join('')+'</div>')},[620,420]);
             app('weather','Weather','⛅','#4facfe,#1a5fd0',b=>{H(b,`<div style="flex:1;background:linear-gradient(#3a7bd5,#00d2ff);color:#fff;padding:24px;text-align:center">
                 <div>Labuan</div>
@@ -277,17 +277,17 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 <div>Partly Cloudy</div>
                 <div style="display:flex;gap:10px;justify-content:center;margin-top:24px">${['Wed ⛅ 31','Thu 🌧️ 28','Fri ☀️ 32','Sat ⛅ 30'].map(x=>`<div style="background:rgba(255,255,255,.2);padding:10px;border-radius:12px">${x}°</div>`).join('')}</div>
             </div>`)},[400,420]);
-            app('clock','Clock','🕒','#333,#000',b=>{H(b,'<div class="main" style="background:#111;color:#fff">
+            app('clock','Clock','🕒','#333,#000',b=>{H(b,`<div class="main" style="background:#111;color:#fff">
                 <h3>World Clock</h3>
                 <div id="wc"></div>
-            </div>');const z=[['Labuan','Asia/Kuala_Lumpur'],['Cupertino','America/Los_Angeles'],['London','Europe/London'],['Tokyo','Asia/Tokyo']];const u=()=>{if(!b.isConnected)return;$('#wc',b).innerHTML=z.map(([n,t])=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #333"><span>${n}</span><span style="font-size:24px;font-weight:300">${new Date().toLocaleTimeString([],{timeZone:t,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}</span></div>`).join('');setTimeout(u,1000)};u()},[380,380]);
-            app('calc','Calculator','🧮','#ff9f0a,#c46f00',b=>{b.classList.add('calc');H(b,'<div class="dsp" id="d">0</div>
-            <div class="cg">'+['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(k=>`<button class="${'÷×−+='.includes(k)?'o':'0'==k||/\d|\./.test(k)?'':'f'}">${k}</button>`).join('')+'</div>');let e='';const d=$('#d',b);$$('button',b).forEach(k=>k.onclick=()=>{const v=k.textContent;if(v=='C')e='';else if(v=='⌫')e=e.slice(0,-1);else if(v=='=')try{e=String(+Function('return '+e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-'))().toFixed(8))}catch(x){e=''}else if(v=='±')e=e.startsWith('-')?e.slice(1):'-'+e;else e+=v;d.textContent=e||'0'})},[300,460]);
+            </div>`);const z=[['Labuan','Asia/Kuala_Lumpur'],['Cupertino','America/Los_Angeles'],['London','Europe/London'],['Tokyo','Asia/Tokyo']];const u=()=>{if(!b.isConnected)return;$('#wc',b).innerHTML=z.map(([n,t])=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #333"><span>${n}</span><span style="font-size:24px;font-weight:300">${new Date().toLocaleTimeString([],{timeZone:t,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}</span></div>`).join('');setTimeout(u,1000)};u()},[380,380]);
+            app('calc','Calculator','🧮','#ff9f0a,#c46f00',b=>{b.classList.add('calc');H(b,`<div class="dsp" id="d">0</div>
+            <div class="cg">`+['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(k=>`<button class="${'÷×−+='.includes(k)?'o':'0'==k||/\d|\./.test(k)?'':'f'}">${k}</button>`).join('')+'</div>');let e='';const d=$('#d',b);$$('button',b).forEach(k=>k.onclick=()=>{const v=k.textContent;if(v=='C')e='';else if(v=='⌫')e=e.slice(0,-1);else if(v=='=')try{e=String(+Function('return '+e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-'))().toFixed(8))}catch(x){e=''}else if(v=='±')e=e.startsWith('-')?e.slice(1):'-'+e;else e+=v;d.textContent=e||'0'})},[300,460]);
             app('terminal','Console','⌨️','#303641,#080b12',b=>{
-            H(b,'<div class="dark">
+            H(b,`<div class="dark">
                 <div id="o">BlynsOS local console · browser profile only\nType &quot;help&quot; to view available commands.</div>
                 <div>blyns&gt; <input id="t" autocomplete="off" spellcheck="false"></div>
-            </div>');
+            </div>`);
             const o=$('#o',b),commands={
             help:'Available commands: help, date, whoami, ls, apps, version, clear, echo <text>',
                 date:()=>new Date().toString(),
@@ -309,86 +309,86 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 o.insertAdjacentText('beforeend','\n\nblyns> '+raw+'\n'+String(result));o.style.whiteSpace='pre-wrap';
                 };
                 },[560,360]);
-                app('store','App Store','🅰️','#4fc3ff,#0a6cff',b=>{H(b,'<div class="main">
-                    <h2 style="margin-bottom:10px">Discover</h2>'+['Pages','Keynote','Xcode','Final Cut Pro'].map(a=>`<div class="ml" style="display:flex;justify-content:space-between;align-items:center">${a}<button class="pb st" style="padding:4px 16px;font-size:13px">Get</button></div>`).join('')+'
-                </div>');$$('.st',b).forEach(x=>x.onclick=()=>{x.textContent='…';setTimeout(()=>x.textContent='Open',1200)})},[540,420]);
+                app('store','App Store','🅰️','#4fc3ff,#0a6cff',b=>{H(b,`<div class="main">
+                    <h2 style="margin-bottom:10px">Discover</h2>`+['Pages','Keynote','Xcode','Final Cut Pro'].map(a=>`<div class="ml" style="display:flex;justify-content:space-between;align-items:center">${a}<button class="pb st" style="padding:4px 16px;font-size:13px">Get</button></div>`).join('')+`
+                </div>`);$$('.st',b).forEach(x=>x.onclick=()=>{x.textContent='…';setTimeout(()=>x.textContent='Open',1200)})},[540,420]);
                 app('settings','Blyns Settings','⚙️','#9a9aa0,#55555a',b=>{
                 const sec=['Wi-Fi','Appearance','Sound','Users & Groups','About'];
-                sideApp(b,sec,(n,i,m)=>{if(n=='Wi-Fi')return'<h3>Wi-Fi</h3>
-                <p style="margin-top:10px">Connected to Golden Gate Home 📶</p>';
-                if(n=='Appearance'){setTimeout(()=>{const r=$('#lg',m),c=$('#hc',m);r.oninput=()=>{const v=+r.value;document.documentElement.style.setProperty('--blur',v*.6+'px');document.documentElement.style.setProperty('--g',(v/100*.6).toFixed(2))};c.onchange=()=>document.body.classList.toggle('hc',c.checked);c.checked=document.body.classList.contains('hc')});return'<h3>Appearance</h3>
+                sideApp(b,sec,(n,i,m)=>{if(n=='Wi-Fi')return`<h3>Wi-Fi</h3>
+                <p style="margin-top:10px">Connected to Golden Gate Home 📶</p>`;
+                if(n=='Appearance'){setTimeout(()=>{const r=$('#lg',m),c=$('#hc',m);r.oninput=()=>{const v=+r.value;document.documentElement.style.setProperty('--blur',v*.6+'px');document.documentElement.style.setProperty('--g',(v/100*.6).toFixed(2))};c.onchange=()=>document.body.classList.toggle('hc',c.checked);c.checked=document.body.classList.contains('hc')});return`<h3>Appearance</h3>
                 <p style="margin:16px 0 6px">Liquid Glass transparency</p><input id="lg" type="range" min="0" max="100" value="50" style="width:100%">
-                <p style="margin:18px 0"><label><input id="hc" type="checkbox"> High-contrast window borders</label></p>'}
+                <p style="margin:18px 0"><label><input id="hc" type="checkbox"> High-contrast window borders</label></p>`}
                 if(n=='Sound'){setTimeout(()=>{$('#vs',m).oninput=e=>{S.vol=+e.target.value;hud()}});return`<h3>Sound</h3>
                 <p style="margin:16px 0 6px">Output volume</p><input id="vs" type="range" min="0" max="8" value="${S.vol}" style="width:100%">`}
                 if(n=='Users & Groups'){setTimeout(()=>$('#lo',m).onclick=logout);return`<h3>Users & Groups</h3>
                 <p style="margin:12px 0">${S.name} (Admin)</p><button class="pb" id="lo">🔒 Lock Screen / Log Out</button>`}
-                return'<h3>About BlynsOS</h3>
+                return`<h3>About BlynsOS</h3>
                 <p style="margin-top:10px">BlynsOS 1.2<br>Chip: Blyns Core<br>Memory: 32 GB</p>
-                <p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>'+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
+                <p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>`+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
                 /* ===== 27.2 ===== */
-                document.body.insertAdjacentHTML('beforeend','<div id="am"></div>
+                document.body.insertAdjacentHTML('beforeend',`<div id="am"></div>
                 <div id="lp"></div>
                 <div id="mc"></div>
-                <div id="dlg"></div>');
+                <div id="dlg"></div>`);
                 $('#desk').insertAdjacentHTML('afterbegin','<div id="ds"></div>');
                 $('#off').innerHTML='<div class="power-hint">0 to turn on</div>';
                 $('#off').onclick=()=>{if(S.off){S.off=false;$('#off').classList.remove('on');boot()}};
                 const PIN=['finder','launchpad','safari','siri','messages','mail','maps','photos','calendar','notes','reminders','music','store','terminal','settings'];
                 const CHG='Welcome to Notes on BlynsOS.\n\nYour notes are saved locally in this browser profile.';
                 const GL={
-                finder:'
+                finder:`
                 <rect width="50" height="100" fill="#fff" opacity=".28" />
-                <path d="M33 34v16M67 34v16M27 66q23 16 46 0" stroke="#0b2447" stroke-width="5" stroke-linecap="round" fill="none" />',
-                safari:'
+                <path d="M33 34v16M67 34v16M27 66q23 16 46 0" stroke="#0b2447" stroke-width="5" stroke-linecap="round" fill="none" />`,
+                safari:`
                 <circle cx="50" cy="50" r="38" fill="none" stroke="#fff" stroke-width="4" />
                 <path d="M68 32L54 54 32 68 46 46Z" fill="#ff3b30" />
-                <path d="M68 32L54 54 46 46Z" fill="#fff" />',
-                siri:'
+                <path d="M68 32L54 54 46 46Z" fill="#fff" />`,
+                siri:`
                 <circle cx="50" cy="50" r="28" fill="#bf5af2" />
                 <circle cx="44" cy="46" r="20" fill="#0a84ff" opacity=".9" />
                 <circle cx="56" cy="56" r="16" fill="#ff2d95" opacity=".8" />
-                <circle cx="50" cy="50" r="9" fill="#fff" opacity=".9" />',
-                messages:'
+                <circle cx="50" cy="50" r="9" fill="#fff" opacity=".9" />`,
+                messages:`
                 <ellipse cx="50" cy="46" rx="34" ry="27" fill="#fff" />
-                <path d="M28 66L20 84 44 72Z" fill="#fff" />',
-                mail:'
+                <path d="M28 66L20 84 44 72Z" fill="#fff" />`,
+                mail:`
                 <rect x="18" y="28" width="64" height="46" rx="7" fill="#fff" />
-                <path d="M20 33L50 56 80 33" stroke="#0a84ff" stroke-width="5" fill="none" />',
-                maps:'
+                <path d="M20 33L50 56 80 33" stroke="#0a84ff" stroke-width="5" fill="none" />`,
+                maps:`
                 <path d="M0 70Q40 50 100 78V100H0Z" fill="#fff" opacity=".35" />
                 <path d="M50 16a20 20 0 0 1 20 20c0 18-20 44-20 44S30 54 30 36a20 20 0 0 1 20-20z" fill="#ff3b30" />
-                <circle cx="50" cy="36" r="8" fill="#fff" />',
-                photos:'
+                <circle cx="50" cy="36" r="8" fill="#fff" />`,
+                photos:`
                 <rect width="100" height="100" fill="#fff" />
                 <g opacity=".8">
                     <circle cx="50" cy="33" r="17" fill="#ff9500" />
                     <circle cx="67" cy="50" r="17" fill="#34c759" />
                     <circle cx="50" cy="67" r="17" fill="#0a84ff" />
                     <circle cx="33" cy="50" r="17" fill="#ff2d55" />
-                </g>',
-                notes:'
+                </g>`,
+                notes:`
                 <rect width="100" height="100" fill="#fff" />
                 <rect width="100" height="26" fill="#ffd60a" />
-                <path d="M20 46h60M20 60h60M20 74h38" stroke="#d0d0d4" stroke-width="4" />',
-                reminders:'
+                <path d="M20 46h60M20 60h60M20 74h38" stroke="#d0d0d4" stroke-width="4" />`,
+                reminders:`
                 <rect width="100" height="100" fill="#fff" />
                 <circle cx="26" cy="28" r="7" fill="#ff3b30" />
                 <circle cx="26" cy="52" r="7" fill="#ff9500" />
                 <circle cx="26" cy="76" r="7" fill="#0a84ff" />
-                <path d="M42 28h40M42 52h40M42 76h40" stroke="#ccc" stroke-width="4" />',
-                music:'
+                <path d="M42 28h40M42 52h40M42 76h40" stroke="#ccc" stroke-width="4" />`,
+                music:`
                 <path d="M40 70V34l30-8v36" stroke="#fff" stroke-width="6" fill="none" />
                 <circle cx="33" cy="70" r="9" fill="#fff" />
-                <circle cx="63" cy="62" r="9" fill="#fff" />',
-                weather:'
+                <circle cx="63" cy="62" r="9" fill="#fff" />`,
+                weather:`
                 <circle cx="38" cy="38" r="16" fill="#ffd60a" />
-                <path d="M26 74a14 14 0 0 1 4-27 18 18 0 0 1 34 4 12 12 0 0 1-2 23z" fill="#fff" />',
-                clock:'
+                <path d="M26 74a14 14 0 0 1 4-27 18 18 0 0 1 34 4 12 12 0 0 1-2 23z" fill="#fff" />`,
+                clock:`
                 <circle cx="50" cy="50" r="38" fill="#fff" />
                 <path d="M50 50V26M50 50l16 8" stroke="#111" stroke-width="5" stroke-linecap="round" />
-                <path d="M50 50L36 72" stroke="#ff9500" stroke-width="2" />',
-                calc:'
+                <path d="M50 50L36 72" stroke="#ff9500" stroke-width="2" />`,
+                calc:`
                 <rect x="22" y="18" width="56" height="18" rx="4" fill="#fff" opacity=".9" />
                 <g fill="#fff">
                     <circle cx="32" cy="54" r="7" opacity=".4" />
@@ -397,16 +397,16 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <circle cx="32" cy="74" r="7" opacity=".4" />
                     <circle cx="50" cy="74" r="7" opacity=".4" />
                     <circle cx="68" cy="74" r="7" />
-                </g>',
-                terminal:'
-                <path d="M24 34l18 14-18 14M48 68h28" stroke="#4cd964" stroke-width="7" fill="none" stroke-linecap="round" />',
-                store:'
-                <path d="M50 22L28 70M50 22l22 48M34 56h32" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none" />',
-                settings:'
+                </g>`,
+                terminal:`
+                <path d="M24 34l18 14-18 14M48 68h28" stroke="#4cd964" stroke-width="7" fill="none" stroke-linecap="round" />`,
+                store:`
+                <path d="M50 22L28 70M50 22l22 48M34 56h32" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none" />`,
+                settings:`
                 <circle cx="50" cy="50" r="28" fill="none" stroke="#e4e4ea" stroke-width="12" stroke-dasharray="10 10.9" />
                 <circle cx="50" cy="50" r="22" fill="#e4e4ea" />
-                <circle cx="50" cy="50" r="9" fill="#6b6b72" />',
-                launchpad:'<g fill="#fff">
+                <circle cx="50" cy="50" r="9" fill="#6b6b72" />`,
+                launchpad:`<g fill="#fff">
                     <rect x="22" y="22" width="16" height="16" rx="4" fill="#ff9500" />
                     <rect x="42" y="22" width="16" height="16" rx="4" fill="#0a84ff" />
                     <rect x="62" y="22" width="16" height="16" rx="4" fill="#34c759" />
@@ -416,15 +416,15 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <rect x="22" y="62" width="16" height="16" rx="4" fill="#ffd60a" />
                     <rect x="42" y="62" width="16" height="16" rx="4" fill="#5ac8fa" />
                     <rect x="62" y="62" width="16" height="16" rx="4" fill="#ff6b81" />
-                </g>',
-                textedit:'
+                </g>`,
+                textedit:`
                 <rect x="26" y="16" width="48" height="68" rx="4" fill="#fff" stroke="#ccc" />
                 <path d="M34 34h32M34 46h32M34 58h20" stroke="#bbb" stroke-width="4" />
-                <path d="M60 78l22-30 6 5-22 30-8 2z" fill="#ffb340" />',
-                preview:'
+                <path d="M60 78l22-30 6 5-22 30-8 2z" fill="#ffb340" />`,
+                preview:`
                 <rect x="16" y="24" width="68" height="52" rx="5" fill="#fff" />
                 <circle cx="36" cy="42" r="7" fill="#ffb340" />
-                <path d="M20 72l22-22 14 14 10-10 16 18z" fill="#34c759" />'};
+                <path d="M20 72l22-22 14 14 10-10 16 18z" fill="#34c759" />`};
                 function ico(id){
                 const a=APPS[id]||{};
                 const src=a.icon||window.BlynsRegistry?.iconPath(id)||'../Assets/Icons/application.png';
@@ -451,20 +451,20 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 if(after.length!==before.length){FS[folder]=after;removedSeedPreview=true;}
                 });
                 if(removedSeedPreview){try{sv('mac_fs',FS);}catch(error){console.warn('Could not clean old placeholder images.',error);}}
-                const fi=f=>f.t=='img'?`<div style="width:62px;height:46px;border-radius:5px;background:${f.c};border:2px solid #fff;box-shadow:0 1px 5px #0007"></div>`:'<svg width="46" height="58" viewBox="0 0 46 58">
+                const fi=f=>f.t=='img'?`<div style="width:62px;height:46px;border-radius:5px;background:${f.c};border:2px solid #fff;box-shadow:0 1px 5px #0007"></div>`:`<svg width="46" height="58" viewBox="0 0 46 58">
                     <path d="M2 2h30l12 12v42H2z" fill="#fff" stroke="#bbb" />
                     <path d="M32 2v12h12" fill="#e5e5e5" stroke="#bbb" />
                     <path d="M10 26h26M10 34h26M10 42h18" stroke="#bbb" stroke-width="3" />
-                </svg>';
+                </svg>`;
                 const esc=s=>s.replace(/</g,'&lt;'); function rd(){$('#ds').innerHTML=FS.Desktop.map((f,i)=>`<div class="tile" data-i="${i}" style="color:#fff;text-shadow:0 1px 3px #000">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')}
                 $('#ds').ondblclick=e=>{const t=e.target.closest('.tile');if(t){if(t.dataset.app)openApp(t.dataset.app);else openFile(FS.Desktop[t.dataset.i])}};
                 const saveFS=()=>{sv('mac_fs',FS);rd()};
                 const openFile=f=>f.t=='img'?openApp('preview',f):openApp('textedit',f);
-                APPS.finder.r=(b,w)=>{let loc='Desktop',sel=null;H(b,'<div class="bar"><button id="nf">＋ New File</button><button id="dl">🗑 Delete</button><span id="pt" style="margin-left:auto;font-size:12px;color:#666"></span></div>
+                APPS.finder.r=(b,w)=>{let loc='Desktop',sel=null;H(b,`<div class="bar"><button id="nf">＋ New File</button><button id="dl">🗑 Delete</button><span id="pt" style="margin-left:auto;font-size:12px;color:#666"></span></div>
                 <div class="row">
                     <div class="side"></div>
                     <div class="main"></div>
-                </div>');const L=['Applications','Desktop','Documents','Downloads'];
+                </div>`);const L=['Applications','Desktop','Documents','Downloads'];
                 const rf=()=>{$('.side',b).innerHTML=L.map(x=>`<div class="${x==loc?'a':''}">${x=='Applications'?'🅰️':'📁'} ${x}</div>`).join('');$$('.side div',b).forEach((d,i)=>d.onclick=()=>{loc=L[i];sel=null;rf()});const m=$('.main',b);$('#pt',b).textContent=loc;
                 m.innerHTML=loc=='Applications'?Object.keys(APPS).filter(k=>k!='launchpad').map(k=>`<div class="tile" data-k="${k}"><u>${ico(k)}</u>${APPS[k].n}</div>`).join(''):(FS[loc].map((f,i)=>`<div class="tile" data-i="${i}">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')||'<p style="color:#999">Folder is empty</p>');
                 $$('.tile',m).forEach(t=>{t.onclick=()=>{sel=t.dataset.i;$$('.tile',m).forEach(x=>x.style.background='');t.style.background='#cfe1ff';t.style.borderRadius='8px'};t.ondblclick=()=>t.dataset.k?openApp(t.dataset.k):openFile(FS[loc][t.dataset.i])})};
@@ -472,15 +472,15 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 $('#dl',b).onclick=()=>{if(sel!=null&&loc!='Applications'){FS[loc].splice(sel,1);sel=null;saveFS();rf()}};rf()};APPS.finder.sz=[680,440];
                 app('textedit','TextEdit','','#fff,#e4e4ea',(b,w,f)=>{H(b,'<div class="bar"><b id="fn" style="font-size:13px;color:#333"></b><button id="sv" style="margin-left:auto">💾 Save</button></div><textarea style="flex:1;border:0;outline:none;padding:14px;font-size:15px;resize:none;color:#222;background:#fff"></textarea>');const ta=$('textarea',b);let cur;const set=x=>{cur=x||{n:'Untitled.txt',t:'txt',c:''};$('#fn',b).textContent=cur.n;ta.value=cur.c;$('.tb span',w).textContent='TextEdit — '+cur.n};w.q=set;set(f);
                 $('#sv',b).onclick=()=>{cur.c=ta.value;if(!Object.values(FS).some(a=>a.includes(cur)))FS.Documents.push(cur);saveFS();toast('Saved '+cur.n)}},[520,420]);
-                app('preview','Preview','','#6ac1ff,#3a6df0',(b,w,f)=>{H(b,'<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#2b2b2e;overflow:auto">
+                app('preview','Preview','','#6ac1ff,#3a6df0',(b,w,f)=>{H(b,`<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#2b2b2e;overflow:auto">
                     <div id="im" style="width:80%;height:80%;border-radius:6px;transition:transform .35s cubic-bezier(.3,1.3,.5,1)"></div>
                 </div>
-                <div class="bar"><span id="pn" style="font-size:12px"></span><input id="zm" type="range" min="40" max="200" value="100" style="margin-left:auto"></div>');const set=x=>{x=x||FS.Downloads[0]||{n:'Image',c:'#888'};$('#im',b).style.background=x.c;$('#pn',b).textContent=x.n;$('.tb span',w).textContent='Preview — '+x.n};w.q=set;set(f);$('#zm',b).oninput=e=>$('#im',b).style.transform=`scale(${e.target.value/100})`},[560,440]);
-                APPS.notes.r=b=>{let N=ld('mac_notes',null)||[{t:'Welcome',c:CHG}],i=0;if(N.length===1&&/^What.s new in 27\.1$/i.test(N[0].t||'')){N=[{t:'Welcome',c:CHG}];sv('mac_notes',N)};H(b,'<div class="bar"><button id="nn">＋ New</button><button id="nd">🗑 Delete</button></div>
+                <div class="bar"><span id="pn" style="font-size:12px"></span><input id="zm" type="range" min="40" max="200" value="100" style="margin-left:auto"></div>`);const set=x=>{x=x||FS.Downloads[0]||{n:'Image',c:'#888'};$('#im',b).style.background=x.c;$('#pn',b).textContent=x.n;$('.tb span',w).textContent='Preview — '+x.n};w.q=set;set(f);$('#zm',b).oninput=e=>$('#im',b).style.transform=`scale(${e.target.value/100})`},[560,440]);
+                APPS.notes.r=b=>{let N=ld('mac_notes',null)||[{t:'Welcome',c:CHG}],i=0;if(N.length===1&&/^What.s new in 27\.1$/i.test(N[0].t||'')){N=[{t:'Welcome',c:CHG}];sv('mac_notes',N)};H(b,`<div class="bar"><button id="nn">＋ New</button><button id="nd">🗑 Delete</button></div>
                 <div class="row">
                     <div class="side" style="width:190px"></div>
                     <div class="main" style="padding:0;display:flex"><textarea style="flex:1;border:0;outline:none;padding:16px;font-size:15px;line-height:1.5;resize:none;color:#222;background:#fff"></textarea></div>
-                </div>');
+                </div>`);
                 const ta=$('textarea',b),save=()=>sv('mac_notes',N),rl=()=>{$('.side',b).innerHTML=N.map((n,j)=>`<div class="${j==i?'a':''}"><b>${esc(n.t||'New Note')}</b></div>`).join('');$$('.side div',b).forEach((d,j)=>d.onclick=()=>{i=j;ta.value=N[i].c;rl()})};
                 ta.value=N[0].c;ta.oninput=()=>{N[i].c=ta.value;N[i].t=ta.value.split('\n')[0].slice(0,30);save();rl()};
                 $('#nn',b).onclick=()=>{N.unshift({t:'',c:''});i=0;ta.value='';save();rl();ta.focus()};$('#nd',b).onclick=()=>{N.splice(i,1);if(!N.length)N.push({t:'',c:''});i=0;ta.value=N[0].c;save();rl()};rl()};APPS.notes.sz=[720,480];
@@ -488,8 +488,8 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <h3>${t}</h3>
                     <div><button class="pb" style="background:#666" id="dn">Cancel</button> <button class="pb" id="dy">${ok}</button></div>
                 </div>`;d.classList.add('on');$('#dn').onclick=()=>d.classList.remove('on');$('#dy').onclick=()=>{d.classList.remove('on');fn()}}
-                function menu(x,y,it){const m=$('#am');m.innerHTML=it.map((a,i)=>a?`<div data-i="${i}">${a[0]}</div>`:'
-                <hr>').join('');m.style.left=Math.min(x,innerWidth-230)+'px';m.style.top=y+'px';m.classList.add('on');m.onclick=e=>{const i=e.target.dataset.i;if(i!=null){m.classList.remove('on');it[i][1]()}}}
+                function menu(x,y,it){const m=$('#am');m.innerHTML=it.map((a,i)=>a?`<div data-i="${i}">${a[0]}</div>`:`
+                <hr>`).join('');m.style.left=Math.min(x,innerWidth-230)+'px';m.style.top=y+'px';m.classList.add('on');m.onclick=e=>{const i=e.target.dataset.i;if(i!=null){m.classList.remove('on');it[i][1]()}}}
                 addEventListener('pointerdown',e=>{if(!e.target.closest('#am,#ap'))$('#am').classList.remove('on')},true);
                 const clearWins=()=>{$$('.win').forEach(w=>{if(typeof w.__blynsCleanup==='function'){try{w.__blynsCleanup()}catch(e){}w.__blynsCleanup=null;}w.remove()});for(const k in W)delete W[k]};
                 function shutdown(){S.off=true;$('#off').classList.add('on');$$('.ph').forEach(p=>p.classList.remove('on'));clearWins();dockBuild()}
@@ -505,8 +505,8 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 $('#ap').innerHTML='<img class="blyns-menu-logo" src="https://i.postimg.cc/FHNw8SMW/Blyns-OS-Logo.jpg" alt="BlynsOS">';
                 $('#ap').onclick=()=>menu(8,28,[['About BlynsOS',()=>openApp('settings')],['Blyns Settings…',()=>openApp('settings')],['Blyns Store…',()=>openApp('store')],null,['Force Quit Front App',()=>{const w=topWin();w&&$('.tl i',w).click()}],null,['Lock Screen',logout],['Restart…',()=>restart()],['Shut Down…',()=>shutdown()],null,['Erase All Content and Settings…',requestFactoryErase],['Log Out '+S.name+'…',()=>ask('Log out '+S.name+'?','Log Out',logout)]]);
                 $('#desk').oncontextmenu=e=>{e.preventDefault();if(e.target.closest('.win'))return;menu(e.clientX,e.clientY,[['New Text File',()=>{FS.Desktop.push({n:'Untitled '+(FS.Desktop.length+1)+'.txt',t:'txt',c:''});saveFS()}],['Launchpad',launchpad],['Mission Control',mc],null,['Blyns Settings…',()=>openApp('settings')]])};
-                function launchpad(){const l=$('#lp');if(l.classList.contains('on')){l.classList.remove('on');return}l.innerHTML='<input class="lps" placeholder="Search">
-                <div class="lpg">'+Object.keys(APPS).filter(k=>k!='launchpad').map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';l.classList.add('on');
+                function launchpad(){const l=$('#lp');if(l.classList.contains('on')){l.classList.remove('on');return}l.innerHTML=`<input class="lps" placeholder="Search">
+                <div class="lpg">`+Object.keys(APPS).filter(k=>k!='launchpad').map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';l.classList.add('on');
                 $('.lps',l).oninput=e=>$$('.lpi',l).forEach(x=>x.style.display=x.textContent.toLowerCase().includes(e.target.value.toLowerCase())?'':'none');
                 l.onclick=e=>{const i=e.target.closest('.lpi');if(i||e.target==l||e.target.classList.contains('lpg')){l.classList.remove('on');i&&openApp(i.dataset.k)}}}
                 function mc(){const m=$('#mc');if(m.classList.contains('on'))return mcx();const ws=Object.values(W).filter(w=>!w.classList.contains('min'));if(!ws.length)return toast('No open windows');m.style.zIndex=S.z+5;m.classList.add('on');const n=ws.length,c=Math.ceil(Math.sqrt(n)),r=Math.ceil(n/c),cw=innerWidth/c,ch=(innerHeight-120)/r;
@@ -527,28 +527,28 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 let wifiOn=true,bluetoothOn=true,stageOn=false,brightness=100;
                 let musicOn=false,musicTimer=null,musicStep=0,musicStartedAt=0,musicElapsed=0,musicCtx=null;
                 const installedApps={
-                pages:{n:'Pages',i:'📄',c:'#58a8ee,#2766bd',sz:[650,470],r:b=>{H(b,'<div class="main">
+                pages:{n:'Pages',i:'📄',c:'#58a8ee,#2766bd',sz:[650,470],r:b=>{H(b,`<div class="main">
                     <h2 style="font-size:25px;margin-bottom:12px">Pages</h2>
                     <p style="color:#777">A clean space for your next document.</p>
                     <div contenteditable="true" style="margin:22px auto;background:#fff;box-shadow:0 3px 18px #0001;width:min(420px,95%);min-height:260px;padding:30px;outline:0">Start writing here…</div>
-                </div>')}} ,
-                keynote:{n:'Keynote',i:'📊',c:'#f6bd65,#de743d',sz:[650,460],r:b=>H(b,'<div class="main">
+                </div>`)}} ,
+                keynote:{n:'Keynote',i:'📊',c:'#f6bd65,#de743d',sz:[650,460],r:b=>H(b,`<div class="main">
                     <h2 style="font-size:25px">Keynote</h2>
                     <p style="color:#777;margin:8px 0 18px">Presentation preview</p>
                     <div style="height:230px;border-radius:15px;background:linear-gradient(125deg,#244e73,#6e98ac,#e5c5a2);display:grid;place-items:center;color:white;font-size:30px;font-weight:650">Golden Gate</div>
                     <p style="margin-top:12px;color:#777">A simple local presentation canvas.</p>
-                </div>')},
-                freeform:{n:'Freeform',i:'🗂️',c:'#e7a9e6,#8d6bd4',sz:[650,460],r:b=>H(b,'<div class="main">
+                </div>`)},
+                freeform:{n:'Freeform',i:'🗂️',c:'#e7a9e6,#8d6bd4',sz:[650,460],r:b=>H(b,`<div class="main">
                     <h2>Freeform</h2>
                     <p style="color:#777;margin:7px 0 15px">Your infinite canvas</p>
                     <div contenteditable="true" style="min-height:280px;border:1px dashed #b9c1cf;border-radius:14px;padding:22px;background:linear-gradient(#fff,#fafbfe);outline:0">Click here and add your ideas…</div>
-                </div>')},
-                weatherplus:{n:'Weather Plus',i:'☀️',c:'#8ac7f2,#397bbd',sz:[420,400],r:b=>H(b,'<div class="main" style="text-align:center;padding:28px">
+                </div>`)},
+                weatherplus:{n:'Weather Plus',i:'☀️',c:'#8ac7f2,#397bbd',sz:[420,400],r:b=>H(b,`<div class="main" style="text-align:center;padding:28px">
                     <p style="color:#78808b">Local demo forecast</p>
                     <div style="font-size:68px;font-weight:250;margin:15px">29°</div>
                     <h3>Partly cloudy</h3>
                     <p style="color:#777;margin-top:8px">A lightweight sample weather app</p>
-                </div>')}
+                </div>`)}
                 };
                 Object.entries(installedApps).forEach(([id,a])=>{if(!APPS[id])app(id,a.n,a.i,a.c,(b)=>a.r(b),a.sz)});
                 function persistInstalled(){try{localStorage.setItem(installKey,JSON.stringify(installed))}catch(e){}}
@@ -576,7 +576,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 // Replace the demo store actions with a small local app catalogue.
                 APPS.store.r=(b)=>{
                 const catalogue=[['pages','Documents','Documents and writing','📄'],['keynote','Slides','Presentations','📊'],['freeform','Canvas','Ideas and collaboration','✳'],['weatherplus','Forecast Plus','Simple weather dashboard','☀']];
-                H(b,'<div class="main">
+                H(b,`<div class="main">
                     <div style="display:flex;align-items:end;justify-content:space-between;margin-bottom:8px">
                         <div>
                             <h2>Discover</h2>
@@ -584,7 +584,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                         </div><span style="font-size:11px;color:#999">LOCAL STORE</span>
                     </div>
                     <div id="store-list"></div>
-                </div>');
+                </div>`);
                 const list=$('#store-list',b);
                 const draw=()=>{list.innerHTML=catalogue.map(([id,n,desc,ic])=>`<div class="store-card">
                     <div class="store-icon" style="background:linear-gradient(145deg,${installedApps[id].c})">${ic}</div>
@@ -598,7 +598,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 function musicPause(){musicOn=false;if(musicTimer){clearInterval(musicTimer);musicTimer=null}const p=$('#music-play');if(p)p.textContent='▶';}
                 function musicPlay(){try{musicCtx=musicCtx||new(window.AudioContext||window.webkitAudioContext)();musicCtx.resume();if(musicOn){musicPause();return}musicOn=true;musicStartedAt=Date.now();const p=$('#music-play');if(p)p.textContent='Ⅱ';const step=()=>{if(!musicOn)return;if(musicStep>=melody.length){musicPause();musicStep=0;musicElapsed=0;musicProgress();return}musicNote(melody[musicStep++]);musicProgress()};step();musicTimer=setInterval(step,480)}catch(e){toast('Audio is not available in this browser')}}
                 function musicProgress(){const bar=$('#music-fill');if(bar)bar.style.width=(musicStep/melody.length*100)+'%';const time=$('#music-time');if(time)time.textContent=Math.floor(musicStep*.48)+'s / 15s'}
-                APPS.music.r=(b)=>{H(b,'<div class="music-player">
+                APPS.music.r=(b)=>{H(b,`<div class="music-player">
                     <div class="album-art">♫</div>
                     <h3>Golden Hour (Sample)</h3>
                     <p>Golden Gate Studio · Original instrumental</p>
@@ -606,15 +606,15 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <div style="width:min(300px,80%);display:flex;justify-content:flex-end;margin-top:5px;color:#92959d;font-size:10px"><span id="music-time">0s / 15s</span></div>
                     <div class="music-controls"><button class="secondary" id="music-reset">↺</button><button id="music-play">▶</button><button class="secondary" id="music-stop">■</button></div>
                     <p style="margin-top:18px">A short synthesized melody generated in your browser.</p>
-                </div>');musicPause();musicStep=0;musicProgress();$('#music-play',b).onclick=()=>musicPlay();$('#music-reset',b).onclick=()=>{musicPause();musicStep=0;musicProgress()};$('#music-stop',b).onclick=()=>{musicPause();musicStep=0;musicProgress()}};
+                </div>`);musicPause();musicStep=0;musicProgress();$('#music-play',b).onclick=()=>musicPlay();$('#music-reset',b).onclick=()=>{musicPause();musicStep=0;musicProgress()};$('#music-stop',b).onclick=()=>{musicPause();musicStep=0;musicProgress()}};
 
                 // Settings has a fixed light appearance and a clear nested update path.
                 APPS.settings.r=(b)=>{
                 let page='General';
-                H(b,'<div class="row">
+                H(b,`<div class="row">
                     <div class="side settings-nav" id="settings-nav"></div>
                     <div class="main settings-panel" id="settings-page"></div>
-                </div>');
+                </div>`);
                 const nav=$('#settings-nav',b),main=$('#settings-page',b);
                 const pages=['General','Wi-Fi','Bluetooth','Sound','Control Center','Users & Groups','About'];
                 const row=(title,desc,action,label='Details')=>`<div class="settings-row">
@@ -997,11 +997,11 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 APPS.finder.r=function(b,w){
                 let loc='Desktop',sel=null;
                 const selectedApps=new Set();
-                H(b,'<div class="bar"><button id="nf">＋ New File</button><button id="dl">Delete</button><button id="fa" class="finder-app-action">Select All</button><button id="oa" class="finder-app-action" disabled>Open Selected (0)</button><span id="pt" style="margin-left:auto;font-size:12px;color:#666"></span></div>
+                H(b,`<div class="bar"><button id="nf">＋ New File</button><button id="dl">Delete</button><button id="fa" class="finder-app-action">Select All</button><button id="oa" class="finder-app-action" disabled>Open Selected (0)</button><span id="pt" style="margin-left:auto;font-size:12px;color:#666"></span></div>
                 <div class="row">
                     <div class="side"></div>
                     <div class="main"></div>
-                </div>');
+                </div>`);
                 const L=['Applications','Desktop','Documents','Downloads'];
                 const refreshActions=()=>{
                 const apps=loc==='Applications';
@@ -1100,37 +1100,37 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
 
                 // Additional built-in lightweight apps.
                 app('freeform','Freeform','◩','#e8f1ff,#6c8fe8',(b)=>{
-                H(b,'<div class="bar"><button id="ff-add">＋ Add Note</button><button id="ff-clear">Clear Board</button><span style="margin-left:auto;font-size:11px;color:#888">Canvas</span></div>
+                H(b,`<div class="bar"><button id="ff-add">＋ Add Note</button><button id="ff-clear">Clear Board</button><span style="margin-left:auto;font-size:11px;color:#888">Canvas</span></div>
                 <div class="freeform-board" id="ff-board">
                     <div class="free-note">Plan your next idea ✨</div>
                     <div class="free-note" style="background:#c9f3df;transform:rotate(1.5deg)">Golden Gate 27.3</div>
-                </div>');
+                </div>`);
                 const board=$('#ff-board',b);$('#ff-add',b).onclick=()=>{const t=prompt('Write a note for your board:');if(t)board.insertAdjacentHTML('beforeend',`<div class="free-note">${String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>`)};$('#ff-clear',b).onclick=()=>board.innerHTML='';
                 },[680,480]);
                 app('books','Books','▤','#d9b88f,#78543b',(b)=>{
-                H(b,'<div class="main">
+                H(b,`<div class="main">
                     <div class="app-hero">
                         <div style="font-size:12px;opacity:.7">YOUR LIBRARY</div>
                         <h2 style="margin-top:8px">A little time to read.</h2>
                         <p style="font-size:12px;margin-top:6px">Your saved reading collection</p>
                     </div>
-                    <h3 style="margin:18px 0 8px">Continue Reading</h3>'+[['The Art of Design','A short guide to thoughtful interfaces.'],['Beyond the Horizon','Notes on creativity and the future.'],['Quiet Systems','A calmer approach to technology.']].map(([t,d],i)=>`<div class="ml" style="display:flex;gap:12px;align-items:center">
+                    <h3 style="margin:18px 0 8px">Continue Reading</h3>`+[['The Art of Design','A short guide to thoughtful interfaces.'],['Beyond the Horizon','Notes on creativity and the future.'],['Quiet Systems','A calmer approach to technology.']].map(([t,d],i)=>`<div class="ml" style="display:flex;gap:12px;align-items:center">
                         <div style="width:44px;height:58px;border-radius:4px;background:linear-gradient(145deg,hsl(${i*55+205} 38% 67%),hsl(${i*55+205} 34% 34%));box-shadow:2px 3px 7px #0002"></div>
                         <div><b>${t}</b>
                             <p style="font-size:11px;color:#888;margin-top:4px">${d}</p>
                         </div>
-                    </div>`).join('')+'
-                </div>');
+                    </div>`).join('')+`
+                </div>`);
                 },[540,460]);
                 app('contacts','Contacts','◉','#80b8e8,#315d9a',(b)=>{
                 const people=[['Alex Morgan','alex@example.test','AM'],['Sofia Lee','sofia@example.test','SL'],['Daniel Tan','daniel@example.test','DT'],['Maya Chen','maya@example.test','MC']];
-                H(b,'<div class="row">
+                H(b,`<div class="row">
                     <div class="side" id="ct-list"></div>
                     <div class="main" id="ct-detail">
                         <h2>Contacts</h2>
                         <p>Select a contact.</p>
                     </div>
-                </div>');
+                </div>`);
                 const list=$('#ct-list',b),detail=$('#ct-detail',b);list.innerHTML=people.map((p,i)=>`<div data-i="${i}">${p[0]}</div>`).join('');$$('div[data-i]',list).forEach(x=>x.onclick=()=>{const p=people[+x.dataset.i];detail.innerHTML=`<div style="text-align:center;padding:28px">
                     <div style="width:76px;height:76px;border-radius:50%;margin:auto;background:linear-gradient(135deg,#9bbbe0,#566e9a);display:grid;place-items:center;color:#fff;font-size:23px">${p[2]}</div>
                     <h2 style="margin-top:12px">${p[0]}</h2>
@@ -1138,7 +1138,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 </div>`;$$('div',list).forEach(d=>d.classList.toggle('a',d===x))});
                 },[580,420]);
                 app('podcasts','Podcasts','◖','#a78be8,#5641a4',(b)=>{
-                H(b,'<div class="main">
+                H(b,`<div class="main">
                     <div class="app-hero">
                         <div style="font-size:12px">PODCASTS</div>
                         <h2 style="margin-top:8px">Ideas worth a moment.</h2>
@@ -1150,30 +1150,30 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <div class="ml"><b>Small Things, Big Ideas</b>
                         <p style="font-size:11px;color:#888;margin-top:4px">A sample episode description</p>
                     </div>
-                </div>');
+                </div>`);
                 $('#pod-play',b).onclick=()=>{const playing=$('#pod-play',b).dataset.play!=='1';$('#pod-play',b).dataset.play=playing?'1':'0';$('#pod-play',b).textContent=playing?'Ⅱ Pause preview':'▶ Play preview';$('#pod-state',b).textContent=playing?'Preview playing':'Paused';toast(playing?'Playing sample preview':'Preview paused')};
                 },[520,420]);
                 app('home','Home','⌂','#e6b96c,#b46f32',(b)=>{
-                H(b,'<div class="main">
+                H(b,`<div class="main">
                     <h2>My Home</h2>
-                    <p style="margin:6px 0 18px;color:#888">Demo accessories · Local controls only</p>'+['Living Room Light','Desk Lamp','Bedroom Light','Ambient Strip'].map((n,i)=>`<div class="settings-row">
+                    <p style="margin:6px 0 18px;color:#888">Demo accessories · Local controls only</p>`+['Living Room Light','Desk Lamp','Bedroom Light','Ambient Strip'].map((n,i)=>`<div class="settings-row">
                         <div><b>${n}</b><small>Smart light · Simulated</small></div><button class="settings-link home-toggle" data-on="1">On</button>
-                    </div>`).join('')+'
-                </div>');
+                    </div>`).join('')+`
+                </div>`);
                 $$('.home-toggle',b).forEach(x=>x.onclick=()=>{const on=x.dataset.on!=='1';x.dataset.on=on?'1':'0';x.textContent=on?'On':'Off';x.style.background=on?'#dceaff':'#eceef2'});
                 },[520,430]);
                 app('monitor','Activity Monitor','◫','#e1e6ec,#7b8796',(b)=>{
-                H(b,'<div class="main">
+                H(b,`<div class="main">
                     <h2>System Monitor</h2>
                     <p style="margin:6px 0 16px;color:#888">Illustrative browser simulator metrics</p>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+[['CPU','18%'],['Memory','6.4 GB'],['Energy','Low']].map(([a,v])=>`<div class="app-hero"><small>${a}</small>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">`+[['CPU','18%'],['Memory','6.4 GB'],['Energy','Low']].map(([a,v])=>`<div class="app-hero"><small>${a}</small>
                             <h2 style="margin-top:8px">${v}</h2>
-                        </div>`).join('')+'</div>
-                    <h3 style="margin:18px 0 8px">Processes</h3>'+['Window Server','Files','Navigator','Soundwave','Blyns Settings'].map((n,i)=>`<div class="ml" style="display:flex;justify-content:space-between"><span>${n}</span><span style="color:#888">${(i*3+2)+'.'+(i*7)}%</span></div>`).join('')+'
-                </div>');
+                        </div>`).join('')+`</div>
+                    <h3 style="margin:18px 0 8px">Processes</h3>`+['Window Server','Files','Navigator','Soundwave','Blyns Settings'].map((n,i)=>`<div class="ml" style="display:flex;justify-content:space-between"><span>${n}</span><span style="color:#888">${(i*3+2)+'.'+(i*7)}%</span></div>`).join('')+`
+                </div>`);
                 },[580,460]);
                 app('keynote','Keynote','▧','#e7a45a,#c45f3b',(b)=>{
-                let slides=1;H(b,'<div class="bar"><button id="kn-add">＋ New Slide</button><button id="kn-present">Play Slideshow</button><span id="kn-count" style="margin-left:auto;font-size:11px;color:#888">1 slide</span></div>
+                let slides=1;H(b,`<div class="bar"><button id="kn-add">＋ New Slide</button><button id="kn-present">Play Slideshow</button><span id="kn-count" style="margin-left:auto;font-size:11px;color:#888">1 slide</span></div>
                 <div class="main" id="kn-stage" style="display:grid;place-items:center;background:#e9ebef">
                     <div style="width:min(92%,560px);aspect-ratio:16/9;background:linear-gradient(135deg,#233a58,#7188a9);border-radius:12px;box-shadow:0 12px 35px #0002;display:grid;place-items:center;text-align:center;color:#fff;padding:25px">
                         <div>
@@ -1181,30 +1181,30 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                             <p style="margin-top:10px">A new presentation</p>
                         </div>
                     </div>
-                </div>');
+                </div>`);
                 $('#kn-add',b).onclick=()=>{slides++;$('#kn-count',b).textContent=slides+' slides';$('#kn-title',b).textContent='Slide '+slides};$('#kn-present',b).onclick=()=>toast('Slideshow preview · '+slides+' slides');
                 },[640,480]);
-                GL.freeform='
+                GL.freeform=`
                 <path d="M25 28h50v46H25z" fill="#fff" opacity=".9" />
-                <path d="M32 40h35M32 49h27M32 58h31" stroke="#6391d8" stroke-width="4" stroke-linecap="round" />';
-                GL.books='
-                <path d="M21 25q16-8 29 2v50q-13-10-29-2zM50 27q13-10 29-2v50q-16-6-29 2z" fill="#fff" stroke="#684b37" stroke-width="3" />';
-                GL.contacts='
+                <path d="M32 40h35M32 49h27M32 58h31" stroke="#6391d8" stroke-width="4" stroke-linecap="round" />`;
+                GL.books=`
+                <path d="M21 25q16-8 29 2v50q-13-10-29-2zM50 27q13-10 29-2v50q-16-6-29 2z" fill="#fff" stroke="#684b37" stroke-width="3" />`;
+                GL.contacts=`
                 <circle cx="50" cy="36" r="17" fill="#fff" />
-                <path d="M19 82q2-27 31-27t31 27" fill="#fff" />';
-                GL.podcasts='
+                <path d="M19 82q2-27 31-27t31 27" fill="#fff" />`;
+                GL.podcasts=`
                 <circle cx="50" cy="50" r="33" fill="none" stroke="#fff" stroke-width="8" />
                 <circle cx="50" cy="50" r="15" fill="#fff" />
-                <path d="M50 65v20" stroke="#fff" stroke-width="8" />';
-                GL.home='
+                <path d="M50 65v20" stroke="#fff" stroke-width="8" />`;
+                GL.home=`
                 <path d="M13 49L50 18 87 49M23 44v38h54V44" stroke="#fff" stroke-width="8" fill="none" stroke-linejoin="round" />
-                <rect x="43" y="59" width="15" height="23" fill="#fff" />';
-                GL.monitor='
+                <rect x="43" y="59" width="15" height="23" fill="#fff" />`;
+                GL.monitor=`
                 <rect x="17" y="20" width="66" height="60" rx="8" fill="#fff" />
-                <path d="M28 64l12-17 10 8 19-24" stroke="#4c8cbd" stroke-width="5" fill="none" />';
-                GL.keynote='
+                <path d="M28 64l12-17 10 8 19-24" stroke="#4c8cbd" stroke-width="5" fill="none" />`;
+                GL.keynote=`
                 <rect x="16" y="21" width="68" height="58" rx="7" fill="#fff" />
-                <path d="M26 65l17-23 11 12 10-14 10 25z" fill="#dc8658" />';
+                <path d="M26 65l17-23 11 12 10-14 10 25z" fill="#dc8658" />`;
 
                 // Restore instant window rendering: all app content appears without the old fake splash panel.
                 // Add Spotlight Search to the menu bar and keyboard.
@@ -1310,10 +1310,10 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     // Blyns Settings: richer customization, persisted in this browser. Setup stays light.
                     APPS.settings.r=(b)=>{
                     let page='General';
-                    H(b,'<div class="row">
+                    H(b,`<div class="row">
                         <div class="side settings-nav" id="settings-nav"></div>
                         <div class="main settings-panel" id="settings-page"></div>
-                    </div>');
+                    </div>`);
                     const nav=$('#settings-nav',b),main=$('#settings-page',b);
                     const pages=['General','Appearance','Desktop & Dock','Dock Apps','Control Center','Wi-Fi','Bluetooth','Sound','Notifications','Keyboard','Privacy','Users & Groups','About'];
                     const row=(a,d,to,btn='Customize')=>`<div class="settings-row">
@@ -1593,8 +1593,8 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                             launchpad=function(){
                             const l=$('#lp');if(l.classList.contains('on')){l.classList.remove('on');return;}
                             const ids=Object.keys(APPS).filter(k=>k!=='launchpad'&&isBlynsInstalled(k));
-                            l.innerHTML='<input class="lps" placeholder="Search installed apps">
-                            <div class="lpg">'+ids.map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';
+                            l.innerHTML=`<input class="lps" placeholder="Search installed apps">
+                            <div class="lpg">`+ids.map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';
                             l.classList.add('on');$('.lps',l).oninput=e=>$$('.lpi',l).forEach(x=>x.style.display=x.textContent.toLowerCase().includes(e.target.value.toLowerCase())?'':'none');
                             l.onclick=e=>{const i=e.target.closest('.lpi');if(i||e.target===l||e.target.classList.contains('lpg')){l.classList.remove('on');if(i)openApp(i.dataset.k);}};
                             };
@@ -1695,14 +1695,14 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                 <div id="nav-page" style="flex:1;display:flex;min-height:0;position:relative"></div>`);
                                 const page=$('#nav-page',b),address=$('#nav-address',b);let history=[],index=-1,current='';
                                 const makeUrl=q=>{q=q.trim();if(!q)return '';if(/^https?:\/\//i.test(q))return q;if(/^[\w.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(q))return 'https://'+q;return 'https://www.google.com/search?igu=1&q='+encodeURIComponent(q);};
-                                const visit=(q,push=true)=>{const url=makeUrl(q);if(!url)return;current=url;address.value=url;if(push){history=history.slice(0,index+1);history.push(url);index++;}page.innerHTML='<div class="spl" style="color:#666">
+                                const visit=(q,push=true)=>{const url=makeUrl(q);if(!url)return;current=url;address.value=url;if(push){history=history.slice(0,index+1);history.push(url);index++;}page.innerHTML=`<div class="spl" style="color:#666">
                                     <div class="sp"></div>Loading page…
-                                </div>';setTimeout(()=>{if(!page.isConnected)return;const frame=document.createElement('iframe');frame.title='Web page';frame.src=url;frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='fullscreen; clipboard-read; clipboard-write; geolocation; microphone; camera';frame.allowFullscreen=true;frame.style.cssText='flex:1;width:100%;height:100%;border:0;background:#fff';page.replaceChildren(frame);},120);};
-                                const home=()=>{page.innerHTML='<div style="padding:22px;overflow:auto;color:#242832">
+                                </div>`;setTimeout(()=>{if(!page.isConnected)return;const frame=document.createElement('iframe');frame.title='Web page';frame.src=url;frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='fullscreen; clipboard-read; clipboard-write; geolocation; microphone; camera';frame.allowFullscreen=true;frame.style.cssText='flex:1;width:100%;height:100%;border:0;background:#fff';page.replaceChildren(frame);},120);};
+                                const home=()=>{page.innerHTML=`<div style="padding:22px;overflow:auto;color:#242832">
                                     <h3>Quick Sites</h3>
-                                    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">'+[['Google Search','https://www.google.com/search?igu=1','G'],['Google Sites','https://sites.google.com/','S'],['Wikipedia','https://wikipedia.org','W'],['MDN','https://developer.mozilla.org','M']].map(([n,u,i])=>`<button data-url="${u}" style="border:1px solid #dce1e9;background:#fff;border-radius:10px;padding:12px 15px;color:#303744">${i} · ${n}</button>`).join('')+'</div>
+                                    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">`+[['Google Search','https://www.google.com/search?igu=1','G'],['Google Sites','https://sites.google.com/','S'],['Wikipedia','https://wikipedia.org','W'],['MDN','https://developer.mozilla.org','M']].map(([n,u,i])=>`<button data-url="${u}" style="border:1px solid #dce1e9;background:#fff;border-radius:10px;padding:12px 15px;color:#303744">${i} · ${n}</button>`).join('')+`</div>
                                     <p style="font-size:11px;color:#858b95;margin-top:18px">Some sites set security rules that prevent iframe embedding. Use the ↗ button to open those sites in a new tab.</p>
-                                </div>';$$('[data-url]',page).forEach(x=>x.onclick=()=>visit(x.dataset.url));};
+                                </div>`;$$('[data-url]',page).forEach(x=>x.onclick=()=>visit(x.dataset.url));};
                                 $('#nav-go',b).onclick=()=>visit(address.value);address.onkeydown=e=>{if(e.key==='Enter')visit(address.value);};
                                 $('#nav-back',b).onclick=()=>{if(index>0){index--;visit(history[index],false);}else home();};$('#nav-forward',b).onclick=()=>{if(index<history.length-1){index++;visit(history[index],false);}};$('#nav-reload',b).onclick=()=>{if(current)visit(current,false);};$('#nav-external',b).onclick=()=>{if(current)window.open(current,'_blank','noopener');};home();
                                     };
@@ -2176,9 +2176,9 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                     </div>`;
                                                                     $$('[data-url]',page).forEach(x=>x.onclick=()=>visit(x.dataset.url));$('#nav-home-external',page).onclick=()=>window.open(homeUrl,'_blank','noopener');drawTabs();
                                                                     }
-                                                                    function visit(q,push=true){const url=makeUrl(q);if(!url)return;const t=tab();t.url=url;t.title=url.replace(/^https?:\/\//,'').split('/')[0].slice(0,24)||'Web page';if(push){t.history=t.history.slice(0,t.index+1);t.history.push(url);t.index++;}address.value=url;drawTabs();page.innerHTML='<div class="spl" style="color:#666">
+                                                                    function visit(q,push=true){const url=makeUrl(q);if(!url)return;const t=tab();t.url=url;t.title=url.replace(/^https?:\/\//,'').split('/')[0].slice(0,24)||'Web page';if(push){t.history=t.history.slice(0,t.index+1);t.history.push(url);t.index++;}address.value=url;drawTabs();page.innerHTML=`<div class="spl" style="color:#666">
                                                                         <div class="sp"></div>Loading page…
-                                                                    </div>';setTimeout(()=>{if(!page.isConnected||tabs[active]!==t)return;const frame=document.createElement('iframe');frame.title='Navigator web page';frame.src=url;frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='fullscreen; clipboard-read; clipboard-write';frame.allowFullscreen=true;page.replaceChildren(frame);const external=document.createElement('button');external.textContent='↗ Open externally';external.style.cssText='position:absolute;right:12px;top:12px;z-index:2;border:1px solid #ccd3df;background:#ffffffdf;border-radius:9px;padding:7px 10px;color:#243044;cursor:pointer';external.onclick=()=>window.open(url,'_blank','noopener');page.appendChild(external);},90);
+                                                                    </div>`;setTimeout(()=>{if(!page.isConnected||tabs[active]!==t)return;const frame=document.createElement('iframe');frame.title='Navigator web page';frame.src=url;frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='fullscreen; clipboard-read; clipboard-write';frame.allowFullscreen=true;page.replaceChildren(frame);const external=document.createElement('button');external.textContent='↗ Open externally';external.style.cssText='position:absolute;right:12px;top:12px;z-index:2;border:1px solid #ccd3df;background:#ffffffdf;border-radius:9px;padding:7px 10px;color:#243044;cursor:pointer';external.onclick=()=>window.open(url,'_blank','noopener');page.appendChild(external);},90);
                                                                     }
                                                                     function renderCurrent(){if(tab().url){address.value=tab().url;visit(tab().url,false)}else home();}
                                                                     $('#nav-go',b).onclick=()=>visit(address.value);address.onkeydown=e=>{if(e.key==='Enter')visit(address.value)};
@@ -2242,18 +2242,18 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                         <p style="font-size:11px;margin-top:7px">Search for a place to load a map view.</p>
                                                                                     </div>
                                                                                 </div>`);
-                                                                                const input=$('#atlas-search',b),area=$('#atlas-map',b);let current='';const go=()=>{const q=input.value.trim();if(!q)return;current='https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed';area.innerHTML='<div class="spl" style="color:#687384">
+                                                                                const input=$('#atlas-search',b),area=$('#atlas-map',b);let current='';const go=()=>{const q=input.value.trim();if(!q)return;current='https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed';area.innerHTML=`<div class="spl" style="color:#687384">
                                                                                     <div class="sp"></div>Loading map…
-                                                                                </div>';setTimeout(()=>{if(!area.isConnected)return;const f=document.createElement('iframe');f.src=current;f.title='Atlas map';f.style.cssText='width:100%;height:100%;min-height:260px;border:0;background:#fff';area.replaceChildren(f)},80)};
+                                                                                </div>`;setTimeout(()=>{if(!area.isConnected)return;const f=document.createElement('iframe');f.src=current;f.title='Atlas map';f.style.cssText='width:100%;height:100%;min-height:260px;border:0;background:#fff';area.replaceChildren(f)},80)};
                                                                                 $('#atlas-go',b).onclick=go;input.onkeydown=e=>{if(e.key==='Enter')go()};$('#atlas-external',b).onclick=()=>{if(current)window.open(current.replace('&output=embed',''),'_blank','noopener');else toast('Search for a place first')};
                                                                                 };
                                                                                 APPS.photos.r=function(b){
                                                                                 const images=Object.entries(FS).flatMap(([folder,list])=>(list||[]).map(f=>({...f,folder}))).filter(f=>f.t==='img');
                                                                                 H(b,`<div class="bar"><b>Gallery</b><span style="margin-left:auto;font-size:11px;color:#87909d">${images.length} image file(s)</span><button id="gallery-files">Open Files</button></div>
-                                                                                <div class="main" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));align-content:start;gap:10px">${images.map((f,i)=>`<button data-gallery-image="${i}" style="padding:7px;border:1px solid #e2e7ee;border-radius:11px;background:#fff;color:#303744;cursor:pointer;text-align:left"><span style="display:block;height:86px;border-radius:7px;background:${/^[#a-zA-Z0-9(),.%\s-]+$/.test(f.c||'')?f.c:'linear-gradient(145deg,#91a8d0,#d69bb8)'}"></span><b style="display:block;font-size:11px;margin-top:7px;overflow:hidden;text-overflow:ellipsis">${txt(f.n)}</b><small style="color:#8b929e;font-size:9px">${txt(f.folder)}</small></button>`).join('')||'<div style="grid-column:1/-1;padding:28px;text-align:center;color:#8a929f">
+                                                                                <div class="main" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));align-content:start;gap:10px">${images.map((f,i)=>`<button data-gallery-image="${i}" style="padding:7px;border:1px solid #e2e7ee;border-radius:11px;background:#fff;color:#303744;cursor:pointer;text-align:left"><span style="display:block;height:86px;border-radius:7px;background:${/^[#a-zA-Z0-9(),.%\s-]+$/.test(f.c||'')?f.c:'linear-gradient(145deg,#91a8d0,#d69bb8)'}"></span><b style="display:block;font-size:11px;margin-top:7px;overflow:hidden;text-overflow:ellipsis">${txt(f.n)}</b><small style="color:#8b929e;font-size:9px">${txt(f.folder)}</small></button>`).join('')||`<div style="grid-column:1/-1;padding:28px;text-align:center;color:#8a929f">
                                                                                         <div style="font-size:30px">▧</div><b style="display:block;margin-top:9px">Your gallery is empty</b>
                                                                                         <p style="font-size:11px;margin-top:6px">Add image files in Files to see them here.</p>
-                                                                                    </div>'}</div>`);
+                                                                                    </div>`}</div>`);
                                                                                 $('#gallery-files',b).onclick=()=>openApp('finder');$$('[data-gallery-image]',b).forEach(x=>x.onclick=()=>openFile(images[+x.dataset.galleryImage]));
                                                                                 };
                                                                                 APPS.messages.r=function(b){
@@ -2294,10 +2294,10 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                 // Functional account management and a new complete settings centre.
                                                                                 APPS.settings.r=function(b){
                                                                                 let page='General';
-                                                                                H(b,'<div class="row">
+                                                                                H(b,`<div class="row">
                                                                                     <div class="side settings-nav" id="settings-nav"></div>
                                                                                     <div class="main settings-panel" id="settings-page"></div>
-                                                                                </div>');
+                                                                                </div>`);
                                                                                 const nav=$('#settings-nav',b),main=$('#settings-page',b);
                                                                                 const pages=['General','Software Update','Appearance','Desktop & Dock','Dock Apps','Control Center','Sound','Keyboard','Privacy','Accounts','Storage','About','Erase All Content'];
                                                                                 const row=(label,desc,to,btn='View')=>`<div class="settings-row">
@@ -2498,7 +2498,9 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                 $('#account-save',main)?.addEventListener('click',async()=>{
                                                                                 const name=$('#account-name',main).value.trim(),pw=$('#account-password',main).value;
                                                                                 if(!name){toast('Account name cannot be empty');return;}
-                                                                                if(pw&&pw.length<8){toast('Use at least 8 characters for the new password.');return;} try{ if(pw)await saveBlynsPassword(pw); S.name=name;avatarColor=$('#account-avatar-color',main).value;avatarGlyph=$('#account-avatar-glyph',main).value; localStorage.setItem('mac_n',S.name);localStorage.setItem('blyns_avatar_color',avatarColor);localStorage.setItem('blyns_avatar_glyph',avatarGlyph); localStorage.removeItem('mac_p');applyProfile();$('#lnm').textContent=S.name;toast('Account updated');draw(); }catch(error){toast(error.message||'Account could not be saved.');} }); $('#account-avatar-glyph',main) && ($('#account-avatar-glyph',main).value=avatarGlyph); $('#account-lock',main)?.addEventListener('click',logout); $('#erase-now',main)?.addEventListener('click',requestFactoryErase); }; draw(); }; // Complete factory erase. Defaults include an empty desktop and no optional installs. factory=function(){ windowStateHold=true; const keys=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(/^(mac_|macos_|blyns_|navigator_)/i.test(k)))keys.push(k);}keys.forEach(k=>localStorage.removeItem(k));}catch(e){}
+                                                                                if(pw&&pw.length<8){toast('Use at least 8 characters for the new password.');return;} try{ if(pw)await saveBlynsPassword(pw); S.name=name;avatarColor=$('#account-avatar-color',main).value;avatarGlyph=$('#account-avatar-glyph',main).value; localStorage.setItem('mac_n',S.name);localStorage.setItem('blyns_avatar_color',avatarColor);localStorage.setItem('blyns_avatar_glyph',avatarGlyph); localStorage.removeItem('mac_p');applyProfile();$('#lnm').textContent=S.name;toast('Account updated');draw(); }catch(error){toast(error.message||'Account could not be saved.');} }); $('#account-avatar-glyph',main) && ($('#account-avatar-glyph',main).value=avatarGlyph); $('#account-lock',main)?.addEventListener('click',logout); $('#erase-now',main)?.addEventListener('click',requestFactoryErase); }; draw(); };
+                                                                                // Complete factory erase. Defaults include an empty desktop and no optional installs.
+                                                                                factory=function(){ windowStateHold=true; const keys=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(/^(mac_|macos_|blyns_|navigator_)/i.test(k)))keys.push(k);}keys.forEach(k=>localStorage.removeItem(k));}catch(e){}
                                                                                     S.name='';S.pwHash='';S.off=false;stageOn=false;brightness=100;stageExpanded=false;lastUsedWindowId=null;
                                                                                     installed=[];try{persistInstalled()}catch(e){}
                                                                                     FS={Desktop:[],Documents:[],Downloads:[]};sv('mac_fs',FS);sv('mac_notes',[]);
