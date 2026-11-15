@@ -71,7 +71,11 @@ function tick(){
   try{const p=JSON.parse(localStorage.getItem('macos_273_preferences')||'{}');format=p.timeFormat==='12'?'12':'24';}catch(e){}
   const hour12=format==='12';
   const clock=$('#clock'),date=$('#date'),menuTime=$('#mt');
-  if(clock)clock.textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12});
+  if(clock){
+    const formatted=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12});
+    const match=formatted.match(/^(.*?)(\s?(?:AM|PM))$/i);
+    clock.innerHTML=match?`${match[1]}<span class="clock-period">${match[2].trim()}</span>`:formatted;
+  }
   if(date)date.textContent=d.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'});
   if(menuTime)menuTime.textContent=d.toLocaleTimeString([], {weekday:'short',hour:'2-digit',minute:'2-digit',hour12});
 }
@@ -173,7 +177,7 @@ app('mail','Mail','✉️','#5ac8fa,#007aff',b=>{const M=[['Apple','Welcome to B
 app('maps','Maps','🗺️','#7be08a,#2a9d4a',b=>{H(b,'<div class="bar"><input placeholder="Search Maps"></div><svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" style="flex:1;background:#e9efdc"><path d="M0 300 Q200 220 360 320 T600 260 V400H0Z" fill="#a8d4f5"/><path d="M0 120 H600 M200 0 V400 M420 0 V400 M0 220 H600" stroke="#fff" stroke-width="9"/><path d="M60 40 L540 360" stroke="#f7d86a" stroke-width="7"/><circle cx="300" cy="170" r="9" fill="#ff3b30"/></svg>')});
 app('photos','Photos','🌸','#ffd166,#ef476f',b=>{H(b,'<div class="main" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px">'+Array.from({length:18},(_,i)=>`<div class="ph2" style="height:110px;background:linear-gradient(${i*37}deg,hsl(${i*47},80%,60%),hsl(${i*47+60},80%,45%))"></div>`).join('')+'</div>')});
 app('calendar','Calendar','📅','#fff,#ddd',b=>{const d=new Date(),f=new Date(d.getFullYear(),d.getMonth(),1).getDay(),n=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();let c='';for(let i=0;i<f;i++)c+='<div></div>';for(let i=1;i<=n;i++)c+=`<div style="padding:12px;border:1px solid #e5e5e8;${i==d.getDate()?'background:#ff3b30;color:#fff;border-radius:8px':''}">${i}</div>`;H(b,`<div class="main"><h2 style="color:#ff3b30">${d.toLocaleString([],{month:'long',year:'numeric'})}</h2><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:12px;text-align:center">${['S','M','T','W','T','F','S'].map(x=>`<b>${x}</b>`).join('')}${c}</div></div>`)},[520,460]);
-app('notes','Notes','📝','#ffe066,#f4b400',b=>{const N=['Welcome','Ideas','Groceries'];const m=sideApp(b,N,(n)=>`<textarea style="width:100%;height:100%;border:0;outline:none;font-size:15px;resize:none;background:none;color:#222" placeholder="Start typing…">${n=='Welcome'?'Welcome to Notes on BlynsOS 1.1!':''}</textarea>`)});
+app('notes','Notes','📝','#ffe066,#f4b400',b=>{const N=['Welcome','Ideas','Groceries'];const m=sideApp(b,N,(n)=>`<textarea style="width:100%;height:100%;border:0;outline:none;font-size:15px;resize:none;background:none;color:#222" placeholder="Start typing…">${n=='Welcome'?'Welcome to Notes on BlynsOS 1.2!':''}</textarea>`)});
 app('reminders','Reminders','☑️','#fff,#ddd',b=>{H(b,'<div class="main"><h2 style="color:#0a84ff;margin-bottom:10px">Today</h2><div id="rl"></div><input class="in" id="ri" placeholder="New Reminder" style="width:100%;margin:10px 0"></div>');const add=t=>$('#rl',b).insertAdjacentHTML('beforeend',`<label style="display:block;padding:7px 0;border-bottom:1px solid #eee"><input type="checkbox"> ${t}</label>`);['Buy milk','Call Mom'].forEach(add);$('#ri',b).onkeydown=e=>{if(e.key=='Enter'&&e.target.value){add(e.target.value.replace(/</g,'&lt;'));e.target.value=''}}},[420,440]);
 app('music','Music','🎵','#ff6b81,#fa233b',b=>{sideApp(b,['Listen Now','Browse','Radio','Library'],n=>`<h3>${n}</h3><div style="margin:12px 0">`+['Golden Hour','Night Drive','Lo-fi Loop','Sunrise'].map((s,i)=>`<div class="ml" onclick="toast('Playing ${s}')">▶ ${s} <span style="float:right;color:#999">3:${10+i*7}</span></div>`).join('')+'</div>')},[620,420]);
 app('weather','Weather','⛅','#4facfe,#1a5fd0',b=>{H(b,`<div style="flex:1;background:linear-gradient(#3a7bd5,#00d2ff);color:#fff;padding:24px;text-align:center"><div>Labuan</div><div style="font-size:72px;font-weight:200">31°</div><div>Partly Cloudy</div><div style="display:flex;gap:10px;justify-content:center;margin-top:24px">${['Wed ⛅ 31','Thu 🌧️ 28','Fri ☀️ 32','Sat ⛅ 30'].map(x=>`<div style="background:rgba(255,255,255,.2);padding:10px;border-radius:12px">${x}°</div>`).join('')}</div></div>`)},[400,420]);
@@ -187,7 +191,7 @@ const o=$('#o',b),commands={
  whoami:()=>S.name||'User',
  ls:()=>['Desktop','Documents','Downloads'].map(n=>n+': '+((FS&&FS[n]||[]).length)+' item(s)').join('\n'),
  apps:()=>Object.values(APPS).map(a=>a.n).sort().join('\n'),
- version:'BlynsOS 1.1'
+ version:'BlynsOS 1.2'
 };
 const input=$('#t',b);
 input.onkeydown=e=>{
@@ -209,7 +213,7 @@ sideApp(b,sec,(n,i,m)=>{if(n=='Wi-Fi')return'<h3>Wi-Fi</h3><p style="margin-top:
 if(n=='Appearance'){setTimeout(()=>{const r=$('#lg',m),c=$('#hc',m);r.oninput=()=>{const v=+r.value;document.documentElement.style.setProperty('--blur',v*.6+'px');document.documentElement.style.setProperty('--g',(v/100*.6).toFixed(2))};c.onchange=()=>document.body.classList.toggle('hc',c.checked);c.checked=document.body.classList.contains('hc')});return'<h3>Appearance</h3><p style="margin:16px 0 6px">Liquid Glass transparency</p><input id="lg" type="range" min="0" max="100" value="50" style="width:100%"><p style="margin:18px 0"><label><input id="hc" type="checkbox"> High-contrast window borders</label></p>'}
 if(n=='Sound'){setTimeout(()=>{$('#vs',m).oninput=e=>{S.vol=+e.target.value;hud()}});return`<h3>Sound</h3><p style="margin:16px 0 6px">Output volume</p><input id="vs" type="range" min="0" max="8" value="${S.vol}" style="width:100%">`}
 if(n=='Users & Groups'){setTimeout(()=>$('#lo',m).onclick=logout);return`<h3>Users & Groups</h3><p style="margin:12px 0">${S.name} (Admin)</p><button class="pb" id="lo">🔒 Lock Screen / Log Out</button>`}
-return'<h3>About BlynsOS</h3><p style="margin-top:10px">BlynsOS 1.1<br>Chip: Blyns Core<br>Memory: 32 GB</p><p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>'+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
+return'<h3>About BlynsOS</h3><p style="margin-top:10px">BlynsOS 1.2<br>Chip: Blyns Core<br>Memory: 32 GB</p><p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>'+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
 /* ===== 27.2 ===== */
 document.body.insertAdjacentHTML('beforeend','<div id="am"></div><div id="lp"></div><div id="mc"></div><div id="dlg"></div>');
 $('#desk').insertAdjacentHTML('afterbegin','<div id="ds"></div>');
@@ -248,7 +252,7 @@ function wire(d){d.onclick=()=>{const id=d.dataset.id;if(id=='launchpad')return 
 function dockBuild(){dk.innerHTML=PIN.map(dHTML).join('');$$('.di',dk).forEach(wire)}
 function dI(id){let e=$(`.di[data-id="${id}"]`);if(!e){dk.insertAdjacentHTML('beforeend',dHTML(id));e=dk.lastElementChild;wire(e)}return e}
 const ld=(k,d)=>window.BlynsStorage.get(k,d),sv=(k,v)=>window.BlynsStorage.set(k,v);
-const defFS=()=>({Desktop:[{n:'Welcome.txt',t:'txt',c:'Welcome to BlynsOS 1.1!\n\nDouble-click files to open them. Edit and press Save.'},{n:'Sunset.png',t:'img',c:'linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)'}],Documents:[{n:'Todo.txt',t:'txt',c:'1. Mission Control (M)\n2. Stage Manager (S)\n3. Window snap (W)\n4. Launchpad (L)'},{n:'Aurora.png',t:'img',c:'linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)'}],Downloads:[{n:'Ocean.jpg',t:'img',c:'linear-gradient(180deg,#89f7fe,#0a5fb4)'}]});
+const defFS=()=>({Desktop:[{n:'Welcome.txt',t:'txt',c:'Welcome to BlynsOS 1.2!\n\nDouble-click files to open them. Edit and press Save.'},{n:'Sunset.png',t:'img',c:'linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)'}],Documents:[{n:'Todo.txt',t:'txt',c:'1. Mission Control (M)\n2. Stage Manager (S)\n3. Window snap (W)\n4. Launchpad (L)'},{n:'Aurora.png',t:'img',c:'linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)'}],Downloads:[{n:'Ocean.jpg',t:'img',c:'linear-gradient(180deg,#89f7fe,#0a5fb4)'}]});
 let FS=ld('mac_fs',null)||defFS();
 // Remove only the original gradient-image placeholders; keep files created by the user.
 const seededPreviewImages=new Set([
@@ -298,7 +302,7 @@ function requestFactoryErase(){
 }
 $('#ap').innerHTML='<img class="blyns-menu-logo" src="https://i.postimg.cc/FHNw8SMW/Blyns-OS-Logo.jpg" alt="BlynsOS">';
 $('#ap').onclick=()=>menu(8,28,[['About BlynsOS',()=>openApp('settings')],['Blyns Settings…',()=>openApp('settings')],['Blyns Store…',()=>openApp('store')],null,['Force Quit Front App',()=>{const w=topWin();w&&$('.tl i',w).click()}],null,['Lock Screen',logout],['Restart…',()=>restart()],['Shut Down…',()=>shutdown()],null,['Erase All Content and Settings…',requestFactoryErase],['Log Out '+S.name+'…',()=>ask('Log out '+S.name+'?','Log Out',logout)]]);
-$('#desk').oncontextmenu=e=>{e.preventDefault();if(e.target.closest('.win'))return;menu(e.clientX,e.clientY,[['New Text File',()=>{FS.Desktop.push({n:'Untitled '+(FS.Desktop.length+1)+'.txt',t:'txt',c:''});saveFS()}],['App Library',launchpad],['Mission Control',mc],null,['Blyns Settings…',()=>openApp('settings')]])};
+$('#desk').oncontextmenu=e=>{e.preventDefault();if(e.target.closest('.win'))return;menu(e.clientX,e.clientY,[['New Text File',()=>{FS.Desktop.push({n:'Untitled '+(FS.Desktop.length+1)+'.txt',t:'txt',c:''});saveFS()}],['Launchpad',launchpad],['Mission Control',mc],null,['Blyns Settings…',()=>openApp('settings')]])};
 function launchpad(){const l=$('#lp');if(l.classList.contains('on')){l.classList.remove('on');return}l.innerHTML='<input class="lps" placeholder="Search"><div class="lpg">'+Object.keys(APPS).filter(k=>k!='launchpad').map((k,i)=>`<div class="lpi" data-k="${k}" style="animation-delay:${i*28}ms"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')+'</div>';l.classList.add('on');
 $('.lps',l).oninput=e=>$$('.lpi',l).forEach(x=>x.style.display=x.textContent.toLowerCase().includes(e.target.value.toLowerCase())?'':'none');
 l.onclick=e=>{const i=e.target.closest('.lpi');if(i||e.target==l||e.target.classList.contains('lpg')){l.classList.remove('on');i&&openApp(i.dataset.k)}}}
@@ -314,7 +318,7 @@ dockBuild();rd();
 
 
 /* ================= BlynsOS 1.1 ================= */
-const RELEASE='BlynsOS 1.1';
+const RELEASE='BlynsOS 1.2';
 const installKey='mac_installed_272';
 let installed=(()=>{try{return JSON.parse(localStorage.getItem(installKey)||'[]')}catch(e){return []}})();
 let wifiOn=true,bluetoothOn=true,stageOn=false,brightness=100;
@@ -374,9 +378,9 @@ APPS.settings.r=(b)=>{
  const draw=()=>{
   nav.innerHTML=pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');
   let html='';
-  if(page==='General')html=`<h2>General</h2><p>Manage core BlynsOS preferences.</p>${row('Software Update','BlynsOS 1.1','Software Update','View')}${row('Storage','Local demo storage overview','Storage','View')}<div class="settings-row"><div><b>Appearance</b><small>BlynsOS light appearance is enabled</small></div><span style="color:#777;font-size:12px">Light</span></div>`;
-  if(page==='Software Update')html=`<h2>Software Update</h2><p>BlynsOS 1.1 is installed and up to date.</p><div class="app-hero" style="margin:18px 0"><div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div><h3 style="margin-top:8px">BlynsOS 1.1</h3><p style="font-size:12px;margin-top:5px">Version 1.0 · Release Candidate</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span></div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
-  if(page==='Update Details')html=`<h2>BlynsOS 1.1</h2><p>Complete release notes for this build.</p><div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px"><h3 style="margin:4px 0 8px">New features and improvements</h3><ul style="padding-left:20px;margin-bottom:18px"><li>New BlynsOS identity and B-only menu-bar logo.</li><li>Full BlynsOS wordmark on the startup screen.</li><li>Files can be dragged to independent positions around the desktop; positions are remembered.</li><li>Files adds New Folder, New File, Edit, Rename, Open Selected, Select All, Move To and Delete actions.</li><li>Files supports nested folders and opening selected files or applications.</li><li>F opens Files from the desktop.</li><li>Ctrl + S opens Spotlight Search.</li><li>Stage Manager now lists open window titles without miniature app previews.</li><li>Power, restart and startup black screens hide the mouse pointer; only 0 powers on from the black screen.</li><li>Browser iframe handling is friendlier to Google Search and Google Sites pages where the destination site permits embedding.</li><li>Software Update now documents this release, including additions, removals and rebrands.</li><li>Existing window restore, Dock preferences, dark appearance, accent colours, wallpaper choices, Control Center and Spotlight features are retained.</li></ul><h3 style="margin:4px 0 8px">Files and desktop changes</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Replaced the single right-side desktop stack with movable desktop icons.</li><li>Added folder navigation and multi-selection inside Files.</li><li>Added file editing and saving, folder creation, renaming and moving between Desktop, Documents and Downloads.</li><li>Only installed Store apps receive desktop shortcuts; uninstalled catalogue apps stay in Blyns Store.</li></ul><h3 style="margin:4px 0 8px">Rebranded apps</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Finder → Files</li><li>Safari → Navigator</li><li>Siri → Blyns Assistant</li><li>Messages → Chatline</li><li>Mail → Inbox</li><li>Maps → Atlas</li><li>Photos → Gallery</li><li>Calendar → Daybook</li><li>Notes → Jotter</li><li>Reminders → Tasks</li><li>Music → Soundwave</li><li>Weather → Forecast</li><li>Clock → World Clock</li><li>Calculator → Math Desk</li><li>Terminal → Console</li><li>App Store → Blyns Store</li><li>System Settings → Blyns Settings</li><li>Launchpad → App Library</li><li>TextEdit → Writer</li><li>Preview → Image Viewer</li><li>Freeform → Canvas</li><li>Books → Reader</li><li>Contacts → People</li><li>Podcasts → Broadcasts</li><li>Home → Smart Home</li><li>Activity Monitor → System Monitor</li><li>Keynote → Slides</li><li>Pages → Documents</li><li>Weather Plus → Forecast Plus</li></ul><h3 style="margin:4px 0 8px">Removed or replaced</h3><ul style="padding-left:20px"><li>Removed the Apple logo from the menu bar and replaced it with the Blyns B logo.</li><li>Removed the app-thumbnail preview cards from Stage Manager.</li><li>Removed the single-column desktop icon stack.</li><li>Removed desktop shortcuts for apps that have not been installed.</li><li>Removed non-zero keyboard shortcuts from boot and shutdown screens; 0 is the sole power-on key there.</li><li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li><li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li></ul><p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.1 · System, account and app improvements for your personal workspace.</p></div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
+  if(page==='General')html=`<h2>General</h2><p>Manage core BlynsOS preferences.</p>${row('Software Update','BlynsOS 1.2','Software Update','View')}${row('Storage','Local demo storage overview','Storage','View')}<div class="settings-row"><div><b>Appearance</b><small>BlynsOS light appearance is enabled</small></div><span style="color:#777;font-size:12px">Light</span></div>`;
+  if(page==='Software Update')html=`<h2>Software Update</h2><p>BlynsOS 1.2 is installed and up to date.</p><div class="app-hero" style="margin:18px 0"><div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div><h3 style="margin-top:8px">BlynsOS 1.2</h3><p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span></div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
+  if(page==='Update Details')html=`<h2>BlynsOS 1.2</h2><p>Complete release notes for this build.</p><div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px"><h3 style="margin:4px 0 8px">New features and improvements</h3><ul style="padding-left:20px;margin-bottom:18px"><li>New BlynsOS identity and B-only menu-bar logo.</li><li>Full BlynsOS wordmark on the startup screen.</li><li>Files can be dragged to independent positions around the desktop; positions are remembered.</li><li>Files adds New Folder, New File, Edit, Rename, Open Selected, Select All, Move To and Delete actions.</li><li>Files supports nested folders and opening selected files or applications.</li><li>F opens Files from the desktop.</li><li>Ctrl + S opens Spotlight Search.</li><li>Stage Manager now lists open window titles without miniature app previews.</li><li>Power, restart and startup black screens hide the mouse pointer; only 0 powers on from the black screen.</li><li>Browser iframe handling is friendlier to Google Search and Google Sites pages where the destination site permits embedding.</li><li>Software Update now documents this release, including additions, removals and rebrands.</li><li>Existing window restore, Dock preferences, dark appearance, accent colours, wallpaper choices, Control Center and Spotlight features are retained.</li></ul><h3 style="margin:4px 0 8px">Files and desktop changes</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Replaced the single right-side desktop stack with movable desktop icons.</li><li>Added folder navigation and multi-selection inside Files.</li><li>Added file editing and saving, folder creation, renaming and moving between Desktop, Documents and Downloads.</li><li>Only installed Store apps receive desktop shortcuts; uninstalled catalogue apps stay in Blyns Store.</li></ul><h3 style="margin:4px 0 8px">Rebranded apps</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Finder → Files</li><li>Safari → Navigator</li><li>Siri → Blyns Assistant</li><li>Messages → Chatline</li><li>Mail → Inbox</li><li>Maps → Atlas</li><li>Photos → Gallery</li><li>Calendar → Daybook</li><li>Notes → Jotter</li><li>Reminders → Tasks</li><li>Music → Soundwave</li><li>Weather → Forecast</li><li>Clock → World Clock</li><li>Calculator → Math Desk</li><li>Terminal → Console</li><li>App Store → Blyns Store</li><li>System Settings → Blyns Settings</li><li>Launchpad → Launchpad</li><li>TextEdit → Writer</li><li>Preview → Image Viewer</li><li>Freeform → Canvas</li><li>Books → Reader</li><li>Contacts → People</li><li>Podcasts → Broadcasts</li><li>Home → Smart Home</li><li>Activity Monitor → System Monitor</li><li>Keynote → Slides</li><li>Pages → Documents</li><li>Weather Plus → Forecast Plus</li></ul><h3 style="margin:4px 0 8px">Removed or replaced</h3><ul style="padding-left:20px"><li>Removed the Apple logo from the menu bar and replaced it with the Blyns B logo.</li><li>Removed the app-thumbnail preview cards from Stage Manager.</li><li>Removed the single-column desktop icon stack.</li><li>Removed desktop shortcuts for apps that have not been installed.</li><li>Removed non-zero keyboard shortcuts from boot and shutdown screens; 0 is the sole power-on key there.</li><li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li><li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li></ul><p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.2 · System, account and app improvements for your personal workspace.</p></div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
   if(page==='Wi-Fi')html=`<h2>Wi-Fi</h2><p>Wireless connection controls</p><div class="settings-row"><div><b>Wi-Fi</b><small>${wifiOn?'On · Golden Gate Home (demo)':'Off'}</small></div><button class="settings-link" data-action="wifi">${wifiOn?'Turn Off':'Turn On'}</button></div>`;
   if(page==='Bluetooth')html=`<h2>Bluetooth</h2><p>Manage nearby Bluetooth devices</p><div class="settings-row"><div><b>Bluetooth</b><small>${bluetoothOn?'On':'Off'}</small></div><button class="settings-link" data-action="bluetooth">${bluetoothOn?'Turn Off':'Turn On'}</button></div>`;
   if(page==='Sound')html=`<h2>Sound</h2><p>Output volume</p><div class="cc-slider" style="margin-top:18px"><label><span>Volume</span><span id="settings-volume-label">${Math.round(S.vol/8*100)}%</span></label><input id="settings-volume" type="range" min="0" max="8" value="${S.vol}"></div>`;
@@ -395,7 +399,7 @@ APPS.settings.r=(b)=>{
 };
 
 // Compact Control Center. Network switches are UI-state demos; no real network adapter is changed.
-if(!$('#ccpanel'))document.body.insertAdjacentHTML('beforeend',`<div id="ccpanel"><div style="display:flex;justify-content:space-between;align-items:center;margin:1px 2px 12px"><b style="font-size:14px">Control Center</b><span style="font-size:10px;color:#858993">BlynsOS 1.1</span></div><div class="ccgrid"><button class="cc-tile" id="cc-wifi"><span class="cc-symbol">⌁</span><span><strong>Wi-Fi</strong><small id="cc-wifi-state">On</small></span></button><button class="cc-tile" id="cc-bt"><span class="cc-symbol">ᛒ</span><span><strong>Bluetooth</strong><small id="cc-bt-state">On</small></span></button><button class="cc-tile" id="cc-stage"><span class="cc-symbol">▣</span><span><strong>Stage Manager</strong><small id="cc-stage-state">Off</small></span></button><button class="cc-tile" id="cc-settings"><span class="cc-symbol">⚙</span><span><strong>Blyns Settings</strong><small>Open settings</small></span></button></div><div class="cc-slider"><label><span>Display brightness</span><span id="cc-bright-label">100%</span></label><input id="cc-bright" type="range" min="55" max="120" value="100"></div><div class="cc-slider"><label><span>Sound</span><span id="cc-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="cc-vol" type="range" min="0" max="8" value="${S.vol}"></div><div class="cc-foot"><span>Light appearance · ${RELEASE}</span><button id="cc-close">Done</button></div></div>`);
+if(!$('#ccpanel'))document.body.insertAdjacentHTML('beforeend',`<div id="ccpanel"><div style="display:flex;justify-content:space-between;align-items:center;margin:1px 2px 12px"><b style="font-size:14px">Control Center</b><span style="font-size:10px;color:#858993">BlynsOS 1.2</span></div><div class="ccgrid"><button class="cc-tile" id="cc-wifi"><span class="cc-symbol">⌁</span><span><strong>Wi-Fi</strong><small id="cc-wifi-state">On</small></span></button><button class="cc-tile" id="cc-bt"><span class="cc-symbol">ᛒ</span><span><strong>Bluetooth</strong><small id="cc-bt-state">On</small></span></button><button class="cc-tile" id="cc-stage"><span class="cc-symbol">▣</span><span><strong>Stage Manager</strong><small id="cc-stage-state">Off</small></span></button><button class="cc-tile" id="cc-settings"><span class="cc-symbol">⚙</span><span><strong>Blyns Settings</strong><small>Open settings</small></span></button></div><div class="cc-slider"><label><span>Display brightness</span><span id="cc-bright-label">100%</span></label><input id="cc-bright" type="range" min="55" max="120" value="100"></div><div class="cc-slider"><label><span>Sound</span><span id="cc-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="cc-vol" type="range" min="0" max="8" value="${S.vol}"></div><div class="cc-foot"><span>Light appearance · ${RELEASE}</span><button id="cc-close">Done</button></div></div>`);
 function syncCC(){const p=$('#ccpanel');if(!p)return;[['#cc-wifi',wifiOn,'#cc-wifi-state','On','Off'],['#cc-bt',bluetoothOn,'#cc-bt-state','On','Off'],['#cc-stage',stageOn,'#cc-stage-state','On','Off']].forEach(([sel,on,state,a,z])=>{$(sel).classList.toggle('on',on);$(state).textContent=on?a:z});$('#cc-bright').value=brightness;$('#cc-bright-label').textContent=brightness+'%';$('#cc-vol').value=S.vol;$('#cc-vol-label').textContent=Math.round(S.vol/8*100)+'%'}
 function setBrightness(v){brightness=+v;document.documentElement.style.setProperty('--screen-dim',String(Math.max(0,(100-brightness)/100*.62)));$('#cc-bright-label').textContent=brightness+'%'}
 function toggleStage(){stageOn=!stageOn;$('#desk').classList.toggle('stage-on',stageOn);if(stageOn){const w=topWin();w?stageFocus(w.dataset.id):renderStageRail()}else{$('#stage-rail')?.remove();$$('.win').forEach(w=>w.classList.remove('stage-hidden'));}syncCC()}
@@ -412,7 +416,7 @@ setBrightness(100);syncCC();
 const menuItems={
  File:[['New Text File',()=>{FS.Desktop.push({n:'Untitled '+(FS.Desktop.length+1)+'.txt',t:'txt',c:''});saveFS()}],['Open Files',()=>openApp('finder')],['Open Blyns Store',()=>openApp('store')],null,['Close Front Window',()=>{const w=topWin();w&&$('.tl i',w).click()}]],
  Window:[['Mission Control',mc],['Minimize Front Window',()=>{const w=topWin();w&&minim(w)}],['Zoom Front Window',()=>{const w=topWin();if(w)$('.tl i:nth-child(3)',w).click()}],null,['Close All Windows (Minimize)',()=>Object.values(W).forEach(w=>{if(!w.classList.contains('min'))minim(w)})]],
- Work:[['Stage Manager',toggleStage],['Show All Windows',()=>{Object.values(W).forEach(w=>w.classList.remove('stage-hidden'));renderStageRail()}],['App Library',launchpad],['Mission Control',mc]],
+ Work:[['Stage Manager',toggleStage],['Show All Windows',()=>{Object.values(W).forEach(w=>w.classList.remove('stage-hidden'));renderStageRail()}],['Launchpad',launchpad],['Mission Control',mc]],
  Settings:[['Blyns Settings…',()=>openApp('settings')],['Software Update…',()=>{openApp('settings');setTimeout(()=>{const el=$('#settings-nav [data-page="General"]');if(el)el.click();setTimeout(()=>{const a=$('#settings-page [data-go="Software Update"]');a&&a.click()},40)},60)}],['Control Center',()=>$('#ccbtn').click()],null,['Lock Screen',logout]]
 };
 $$('#mb .mbmenu').forEach(el=>el.onclick=e=>{e.stopPropagation();$$('#mb .mbmenu').forEach(x=>x.classList.toggle('active',x===el));const r=el.getBoundingClientRect();menu(r.left,r.bottom,menuItems[el.dataset.menu]||[])});
@@ -439,7 +443,7 @@ dockBuild();rd();
 /* ================= BlynsOS 1.1 final refinements ================= */
 
 // Elegant Lock Screen clock and glass user panel.
-if(!$('.lock-eyebrow'))$('#clock').insertAdjacentHTML('beforebegin','<div class="lock-eyebrow">GOLDEN GATE  ·  WORKSPACE</div>');
+// v1.2 lock screen intentionally has no brand or workspace eyebrow.
 
 // Save window geometry so Lock Screen and Restart can rebuild the same desktop.
 const WINDOW_STATE_KEY='mac_2721_window_state';
@@ -880,9 +884,9 @@ APPS.settings.r=(b)=>{
  const draw=()=>{
   nav.innerHTML=pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');
   let html='';
-  if(page==='General')html=`<h2>General</h2><p>System information and software preferences.</p>${row('Software Update','BlynsOS 1.1','Software Update','View')}${row('Storage','Local browser storage overview','Storage','View')}${row('About BlynsOS','Version, chip and memory','About','View')}`;
-  if(page==='Software Update')html=`<h2>Software Update</h2><p>BlynsOS 1.1 is installed and up to date.</p><div class="app-hero" style="margin:18px 0"><div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div><h3 style="margin-top:8px">BlynsOS 1.1</h3><p style="font-size:12px;margin-top:5px">Version 1.0 · Release Candidate</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span></div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
-  if(page==='Update Details')html=`<h2>BlynsOS 1.1</h2><p>Complete release notes for this build.</p><div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px"><h3 style="margin:4px 0 8px">New features and improvements</h3><ul style="padding-left:20px;margin-bottom:18px"><li>New BlynsOS identity and B-only menu-bar logo.</li><li>Full BlynsOS wordmark on the startup screen.</li><li>Files can be dragged to independent positions around the desktop; positions are remembered.</li><li>Files adds New Folder, New File, Edit, Rename, Open Selected, Select All, Move To and Delete actions.</li><li>Files supports nested folders and opening selected files or applications.</li><li>F opens Files from the desktop.</li><li>Ctrl + S opens Spotlight Search.</li><li>Stage Manager now lists open window titles without miniature app previews.</li><li>Power, restart and startup black screens hide the mouse pointer; only 0 powers on from the black screen.</li><li>Browser iframe handling is friendlier to Google Search and Google Sites pages where the destination site permits embedding.</li><li>Software Update now documents this release, including additions, removals and rebrands.</li><li>Existing window restore, Dock preferences, dark appearance, accent colours, wallpaper choices, Control Center and Spotlight features are retained.</li></ul><h3 style="margin:4px 0 8px">Files and desktop changes</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Replaced the single right-side desktop stack with movable desktop icons.</li><li>Added folder navigation and multi-selection inside Files.</li><li>Added file editing and saving, folder creation, renaming and moving between Desktop, Documents and Downloads.</li><li>Only installed Store apps receive desktop shortcuts; uninstalled catalogue apps stay in Blyns Store.</li></ul><h3 style="margin:4px 0 8px">Rebranded apps</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Finder → Files</li><li>Safari → Navigator</li><li>Siri → Blyns Assistant</li><li>Messages → Chatline</li><li>Mail → Inbox</li><li>Maps → Atlas</li><li>Photos → Gallery</li><li>Calendar → Daybook</li><li>Notes → Jotter</li><li>Reminders → Tasks</li><li>Music → Soundwave</li><li>Weather → Forecast</li><li>Clock → World Clock</li><li>Calculator → Math Desk</li><li>Terminal → Console</li><li>App Store → Blyns Store</li><li>System Settings → Blyns Settings</li><li>Launchpad → App Library</li><li>TextEdit → Writer</li><li>Preview → Image Viewer</li><li>Freeform → Canvas</li><li>Books → Reader</li><li>Contacts → People</li><li>Podcasts → Broadcasts</li><li>Home → Smart Home</li><li>Activity Monitor → System Monitor</li><li>Keynote → Slides</li><li>Pages → Documents</li><li>Weather Plus → Forecast Plus</li></ul><h3 style="margin:4px 0 8px">Removed or replaced</h3><ul style="padding-left:20px"><li>Removed the Apple logo from the menu bar and replaced it with the Blyns B logo.</li><li>Removed the app-thumbnail preview cards from Stage Manager.</li><li>Removed the single-column desktop icon stack.</li><li>Removed desktop shortcuts for apps that have not been installed.</li><li>Removed non-zero keyboard shortcuts from boot and shutdown screens; 0 is the sole power-on key there.</li><li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li><li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li></ul><p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.1 · System, account and app improvements for your personal workspace.</p></div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
+  if(page==='General')html=`<h2>General</h2><p>System information and software preferences.</p>${row('Software Update','BlynsOS 1.2','Software Update','View')}${row('Storage','Local browser storage overview','Storage','View')}${row('About BlynsOS','Version, chip and memory','About','View')}`;
+  if(page==='Software Update')html=`<h2>Software Update</h2><p>BlynsOS 1.2 is installed and up to date.</p><div class="app-hero" style="margin:18px 0"><div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div><h3 style="margin-top:8px">BlynsOS 1.2</h3><p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span></div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
+  if(page==='Update Details')html=`<h2>BlynsOS 1.2</h2><p>Complete release notes for this build.</p><div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px"><h3 style="margin:4px 0 8px">New features and improvements</h3><ul style="padding-left:20px;margin-bottom:18px"><li>New BlynsOS identity and B-only menu-bar logo.</li><li>Full BlynsOS wordmark on the startup screen.</li><li>Files can be dragged to independent positions around the desktop; positions are remembered.</li><li>Files adds New Folder, New File, Edit, Rename, Open Selected, Select All, Move To and Delete actions.</li><li>Files supports nested folders and opening selected files or applications.</li><li>F opens Files from the desktop.</li><li>Ctrl + S opens Spotlight Search.</li><li>Stage Manager now lists open window titles without miniature app previews.</li><li>Power, restart and startup black screens hide the mouse pointer; only 0 powers on from the black screen.</li><li>Browser iframe handling is friendlier to Google Search and Google Sites pages where the destination site permits embedding.</li><li>Software Update now documents this release, including additions, removals and rebrands.</li><li>Existing window restore, Dock preferences, dark appearance, accent colours, wallpaper choices, Control Center and Spotlight features are retained.</li></ul><h3 style="margin:4px 0 8px">Files and desktop changes</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Replaced the single right-side desktop stack with movable desktop icons.</li><li>Added folder navigation and multi-selection inside Files.</li><li>Added file editing and saving, folder creation, renaming and moving between Desktop, Documents and Downloads.</li><li>Only installed Store apps receive desktop shortcuts; uninstalled catalogue apps stay in Blyns Store.</li></ul><h3 style="margin:4px 0 8px">Rebranded apps</h3><ul style="padding-left:20px;margin-bottom:18px"><li>Finder → Files</li><li>Safari → Navigator</li><li>Siri → Blyns Assistant</li><li>Messages → Chatline</li><li>Mail → Inbox</li><li>Maps → Atlas</li><li>Photos → Gallery</li><li>Calendar → Daybook</li><li>Notes → Jotter</li><li>Reminders → Tasks</li><li>Music → Soundwave</li><li>Weather → Forecast</li><li>Clock → World Clock</li><li>Calculator → Math Desk</li><li>Terminal → Console</li><li>App Store → Blyns Store</li><li>System Settings → Blyns Settings</li><li>Launchpad → Launchpad</li><li>TextEdit → Writer</li><li>Preview → Image Viewer</li><li>Freeform → Canvas</li><li>Books → Reader</li><li>Contacts → People</li><li>Podcasts → Broadcasts</li><li>Home → Smart Home</li><li>Activity Monitor → System Monitor</li><li>Keynote → Slides</li><li>Pages → Documents</li><li>Weather Plus → Forecast Plus</li></ul><h3 style="margin:4px 0 8px">Removed or replaced</h3><ul style="padding-left:20px"><li>Removed the Apple logo from the menu bar and replaced it with the Blyns B logo.</li><li>Removed the app-thumbnail preview cards from Stage Manager.</li><li>Removed the single-column desktop icon stack.</li><li>Removed desktop shortcuts for apps that have not been installed.</li><li>Removed non-zero keyboard shortcuts from boot and shutdown screens; 0 is the sole power-on key there.</li><li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li><li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li></ul><p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.2 · System, account and app improvements for your personal workspace.</p></div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
   if(page==='Appearance')html=`<h2>Appearance</h2><p>Personalize the visual style of Golden Gate.</p><div class="settings-row"><div><b>Appearance Mode</b><small>Choose a system appearance. Setup Assistant always stays light.</small></div><div class="settings-choice" style="margin:0"><button data-dark="0" class="${!prefs273.dark?'active':''}">Light</button><button data-dark="1" class="${prefs273.dark?'active':''}">Dark</button></div></div><h3 style="margin-top:18px;font-size:14px">Accent Colour</h3><div class="settings-choice">${[['#70a7ff','Blue'],['#b49aff','Purple'],['#65c9bb','Teal'],['#f0a45e','Orange'],['#f18bb4','Pink']].map(([c,n])=>`<button data-accent="${c}" class="${prefs273.accent===c?'active':''}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};margin-right:5px"></span>${n}</button>`).join('')}</div><h3 style="margin-top:18px;font-size:14px">Wallpaper</h3><div class="settings-choice">${[['golden','Golden Gate'],['aurora','Aurora'],['ocean','Pacific'],['midnight','Midnight']].map(([v,n])=>`<button data-wall="${v}" class="${prefs273.wallpaper===v?'active':''}">${n}</button>`).join('')}</div><div style="margin-top:20px"><label style="display:flex;justify-content:space-between;font-size:12px"><b>Glass intensity</b><span id="glass-val">${prefs273.glass}%</span></label><input id="glass-range" type="range" min="15" max="100" value="${prefs273.glass}" style="width:100%;accent-color:var(--accent);margin-top:10px"></div><div style="margin-top:18px">${toggle('Reduce Motion','Reduce some desktop and dock animations','reduceMotion')}</div>`;
   if(page==='Desktop & Dock')html=`<h2>Desktop & Dock</h2><p>Control desktop visibility and Dock behaviour.</p>${toggle('Automatically hide Dock','Hide Dock while app windows are open; move pointer to bottom to reveal','dockAutoHide')}${toggle('Automatically hide Stage Manager','Hide Stage Manager previews; move pointer to left edge to reveal','stageAutoHide') }<div style="margin-top:18px"><label style="display:flex;justify-content:space-between;font-size:12px"><b>Dock icon size</b><span id="dock-size-value">${Math.round(prefs273.dockSize*46)} px</span></label><input id="dock-size-range" type="range" min="0.72" max="1.45" step="0.05" value="${prefs273.dockSize}" style="width:100%;accent-color:var(--accent);margin-top:10px"></div><div class="settings-row" style="margin-top:15px"><div><b>Desktop windows</b><small>${Object.keys(W).length} open or minimized app windows</small></div><button class="settings-link" id="show-all">Show All</button></div>`;
   if(page==='Dock Apps')html=`<h2>Dock Apps</h2><p>Choose which applications stay pinned in the Dock. Core apps remain available.</p><div class="settings-apps-list">${Object.keys(APPS).filter(id=>id!=='launchpad').map(id=>`<label class="settings-app-row"><u>${ico(id)}</u><span>${APPS[id].n}</span><input type="checkbox" data-pin="${id}" ${PIN.includes(id)?'checked':''} ${['finder','settings'].includes(id)?'disabled':''}></label>`).join('')}</div><p style="font-size:11px;margin-top:12px">You can also right-click a Dock icon to pin or unpin it.</p>`;
@@ -891,10 +895,10 @@ APPS.settings.r=(b)=>{
   if(page==='Bluetooth')html=`<h2>Bluetooth</h2><p>Nearby device connectivity</p><div class="settings-row"><div><b>Bluetooth</b><small>${bluetoothOn?'On':'Off'}</small></div><button class="settings-link" id="bt-toggle">${bluetoothOn?'Turn Off':'Turn On'}</button></div>`;
   if(page==='Sound')html=`<h2>Sound</h2><p>Output volume</p><div class="cc-slider" style="margin-top:18px"><label><span>Volume</span><span id="set-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="set-vol" type="range" min="0" max="8" value="${S.vol}" style="width:100%"></div><div class="settings-row" style="margin-top:15px"><div><b>Play interface sounds</b><small>Startup chime uses browser audio support</small></div><span style="font-size:12px;color:#888">Enabled</span></div>`;
   if(page==='Notifications')html=`<h2>Notifications</h2><p>Manage simulated system alerts.</p>${toggle('Allow Notifications','Show app and system toast messages','notifications')}`;
-  if(page==='Keyboard')html=`<h2>Keyboard Shortcuts</h2><p>Quick desktop controls.</p>${[['F','Open Files'],['Ctrl + S','Spotlight Search'],['M','Mission Control'],['S','Stage Manager'],['W','Snap left / right / fullscreen'],['Q','Minimize / maximize last window'],['R','Force quit last active app'],['L','App Library'],['0','Power on from the black screen']].map(([k,v])=>`<div class="settings-row"><b style="font-size:12px">${k}</b><small>${v}</small></div>`).join('')}`;
+  if(page==='Keyboard')html=`<h2>Keyboard Shortcuts</h2><p>Quick desktop controls.</p>${[['F','Open Files'],['Ctrl + S','Spotlight Search'],['M','Mission Control'],['S','Stage Manager'],['W','Snap left / right / fullscreen'],['Q','Minimize / maximize last window'],['R','Force quit last active app'],['L','Launchpad'],['0','Power on from the black screen']].map(([k,v])=>`<div class="settings-row"><b style="font-size:12px">${k}</b><small>${v}</small></div>`).join('')}`;
   if(page==='Privacy')html=`<h2>Privacy</h2><p>Local simulator storage and browser permissions.</p><div class="settings-row"><div><b>Local Data</b><small>Account, notes, Dock pins and preferences are kept in this browser.</small></div><span style="font-size:11px;color:#888">On device</span></div><div class="settings-row"><div><b>Network access</b><small>Navigator can open web pages; some websites block embedding.</small></div><span style="font-size:11px;color:#888">Browser</span></div>`;
   if(page==='Users & Groups')html=`<h2>Users & Groups</h2><p style="margin:14px 0">${S.name} · Administrator</p><button class="settings-link" id="settings-logout">Lock Screen / Log Out</button>`;
-  if(page==='About')html=`<h2>About BlynsOS</h2><div class="app-hero" style="margin-top:16px"><div style="font-size:30px;font-weight:800">B.</div><h3 style="margin-top:8px">BlynsOS 1.1</h3><p style="margin-top:6px">Chip: Blyns Core<br>Memory: 32 GB<br>Display: BlynsOS</p></div>`;
+  if(page==='About')html=`<h2>About BlynsOS</h2><div class="app-hero" style="margin-top:16px"><div style="font-size:30px;font-weight:800">B.</div><h3 style="margin-top:8px">BlynsOS 1.2</h3><p style="margin-top:6px">Chip: Blyns Core<br>Memory: 32 GB<br>Display: BlynsOS</p></div>`;
   if(page==='Storage')html=`<h2>Storage</h2><p>Files, notes and installed app preferences are stored locally by this browser.</p>`;
   main.innerHTML=html;
   $$('[data-page]',nav).forEach(x=>x.onclick=()=>{page=x.dataset.page;draw()});
@@ -940,7 +944,7 @@ updateDesktopState273();syncCC();dockBuild();
 /* ================= BlynsOS 1.1 functional update ================= */
 document.body.classList.add('black-screen');
 const BLYNS_APP_NAMES={
- finder:'Files',safari:'Navigator',siri:'Blyns Assistant',messages:'Chatline',mail:'Inbox',maps:'Atlas',photos:'Gallery',calendar:'Daybook',notes:'Jotter',reminders:'Tasks',music:'Soundwave',weather:'Forecast',clock:'World Clock',calc:'Math Desk',terminal:'Console',store:'Blyns Store',settings:'Blyns Settings',launchpad:'App Library',textedit:'Writer',preview:'Image Viewer',freeform:'Canvas',books:'Reader',contacts:'People',podcasts:'Broadcasts',home:'Smart Home',monitor:'System Monitor',keynote:'Slides',pages:'Documents',weatherplus:'Forecast Plus'
+ finder:'Files',safari:'Navigator',siri:'Blyns Assistant',messages:'Chatline',mail:'Inbox',maps:'Atlas',photos:'Gallery',calendar:'Daybook',notes:'Jotter',reminders:'Tasks',music:'Soundwave',weather:'Forecast',clock:'World Clock',calc:'Math Desk',terminal:'Console',store:'Blyns Store',settings:'Blyns Settings',launchpad:'Launchpad',textedit:'Writer',preview:'Image Viewer',freeform:'Canvas',books:'Reader',contacts:'People',podcasts:'Broadcasts',home:'Smart Home',monitor:'System Monitor',keynote:'Slides',pages:'Documents',weatherplus:'Forecast Plus'
 };
 Object.entries(BLYNS_APP_NAMES).forEach(([id,name])=>{if(APPS[id])APPS[id].n=name;if(typeof installedApps!=='undefined'&&installedApps[id])installedApps[id].n=name;});
 $('#an').textContent='Files';
@@ -983,7 +987,7 @@ addEventListener('keydown',e=>{
   }
 },true);
 
-// Store-only apps are kept out of desktop shortcuts, Finder's installed-app view and App Library until installed.
+// Store-only apps are kept out of desktop shortcuts, Finder's installed-app view and Launchpad until installed.
 function isBlynsInstalled(id){return !Object.prototype.hasOwnProperty.call(installedApps,id)||installed.includes(id);}
 
 // Free-position desktop icons. File coordinates live with the file; app coordinates use a separate local preference.
@@ -1146,7 +1150,7 @@ if(blynsMenuItems){
 
 /* ================= BlynsOS 1.1 ================= */
 (()=>{
-  const V2='BlynsOS 1.1';
+  const V2='BlynsOS 1.2';
   const WORDMARK='https://i.postimg.cc/Dy8SsWjX/Blyns-OS-Logo.png';
   const B_MARK='https://i.postimg.cc/Pxv27fKS/Blyns-OS-Logo.png';
   const txt=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1190,7 +1194,7 @@ if(blynsMenuItems){
       <div class="cc-v2-slider"><label><span>Brightness</span><span id="cc-bright-label">${brightness}%</span></label><input id="cc-bright" type="range" min="55" max="120" value="${brightness}"></div>
       <div class="cc-v2-slider"><label><span>Sound</span><span id="cc-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="cc-vol" type="range" min="0" max="8" value="${S.vol}"></div>
     </div>
-    <div class="cc-v2-foot"><span>BlynsOS 1.1</span><button id="cc-done">Done</button></div>`;
+    <div class="cc-v2-foot"><span>BlynsOS 1.2</span><button id="cc-done">Done</button></div>`;
 
   syncCC=function(){
     const p=$('#ccpanel');if(!p)return;
@@ -1303,24 +1307,65 @@ if(blynsMenuItems){
       return {id,name:meta.name||APPS[id].n,description:meta.description||'A useful application for your workspace.',category:meta.category||'Apps',version:meta.version||'1.0.0'};
     });
   }
+  function requestInstallPassword(itemName){
+    return new Promise(resolve=>{
+      const host=$('#dlg');
+      if(!host){resolve(false);return;}
+      let settled=false,busy=false;
+      const finish=value=>{if(settled)return;settled=true;host.classList.remove('on');host.replaceChildren();host.onpointerdown=null;resolve(value);};
+      host.innerHTML=`<div class="dbx power-auth-box"><h3>Confirm Installation</h3><p class="power-auth-copy">Enter your BlynsOS account password to install ${String(itemName||'this item').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}.</p><form id="store-auth-form" class="power-auth-form"><label class="power-auth-label" for="store-auth-password">Account password</label><input id="store-auth-password" class="power-auth-input" type="password" autocomplete="current-password" required><p id="store-auth-error" class="power-auth-error" role="alert"></p><div class="power-auth-actions"><button type="button" class="pb power-auth-cancel" id="store-auth-cancel">Cancel</button><button type="submit" class="pb power-auth-primary" id="store-auth-submit">Install</button></div></form></div>`;
+      host.classList.add('on');
+      const form=$('#store-auth-form',host),field=$('#store-auth-password',host),error=$('#store-auth-error',host),submit=$('#store-auth-submit',host);
+      $('#store-auth-cancel',host).onclick=()=>finish(false);
+      host.onpointerdown=event=>{if(event.target===host&&!busy)finish(false)};
+      form.onsubmit=async event=>{
+        event.preventDefault();if(busy||settled)return;
+        if(!field.value){error.textContent='Please enter your password.';field.focus();return;}
+        busy=true;field.disabled=true;submit.disabled=true;submit.textContent='Checking…';error.textContent='';
+        try{
+          const valid=await verifyBlynsPassword(field.value);
+          if(!valid){error.textContent='Incorrect password. Please try again.';field.value='';field.disabled=false;submit.disabled=false;submit.textContent='Install';busy=false;field.focus();return;}
+          finish(true);
+        }catch(err){error.textContent=err?.message||'Password verification is unavailable.';field.disabled=false;submit.disabled=false;submit.textContent='Install';busy=false;field.focus();}
+      };
+      field.focus();
+    });
+  }
+  let customWallpaperUrl='';
+  let customWallpaperMetadata=null;
   function applyWallpaperChoice(id){
     prefs273.wallpaper=id;savePrefs273();applyPrefs273();
-    const pack=wallpaperCatalog.find(w=>w.id===id);
-    if(pack){document.body.classList.add('custom-wallpaper');document.documentElement.style.setProperty('--blyns-wallpaper-image',`url("${pack.src}")`);}
-    else{document.body.classList.remove('custom-wallpaper');document.documentElement.style.removeProperty('--blyns-wallpaper-image');}
   }
   const baseApplyPrefsForWallpaper=applyPrefs273;
   applyPrefs273=function(){
     baseApplyPrefsForWallpaper();
-    const pack=wallpaperCatalog.find(w=>w.id===prefs273.wallpaper);
+    if(prefs273.wallpaper==='custom'&&customWallpaperUrl){
+      document.body.classList.add('custom-wallpaper');
+      document.documentElement.style.setProperty('--blyns-wallpaper-image',`url("${customWallpaperUrl}")`);
+      return;
+    }
+    const pack=wallpaperCatalog.find(w=>w.id===prefs273.wallpaper&&installedWallpaperIds.includes(w.id));
     document.body.classList.toggle('custom-wallpaper',!!pack);
     if(pack)document.documentElement.style.setProperty('--blyns-wallpaper-image',`url("${pack.src}")`);
     else document.documentElement.style.removeProperty('--blyns-wallpaper-image');
   };
+  async function restoreCustomWallpaper(){
+    const id=prefs273.customWallpaperId;
+    if(!id||!window.BlynsFileVault)return false;
+    try{
+      const record=await window.BlynsFileVault.getImage(id);
+      if(!record?.blob)return false;
+      if(customWallpaperUrl)window.BlynsFileVault.revokeObjectURL(customWallpaperUrl);
+      customWallpaperUrl=window.BlynsFileVault.createObjectURL(record);
+      customWallpaperMetadata={id:record.id,name:record.name,type:record.type,size:record.size};
+      if(prefs273.wallpaper==='custom')applyPrefs273();
+      return true;
+    }catch(error){console.warn('BlynsOS could not restore the uploaded wallpaper.',error);return false;}
+  }
   // Make package wallpapers available to Setup and Appearance as well as the Store.
   wallpaperCatalog.forEach(w=>{if(!wallpaperOptions.some(item=>item[0]===w.id))wallpaperOptions.push([w.id,w.name,`url("${w.preview||w.src}") center/cover`]);});
-  APPS.store.r=function(b){
-    let tab='apps';
+  APPS.store.r=function(b,w,arg){
+    let tab=arg==='wallpapers'?'wallpapers':'apps';
     const escText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const catalog=()=>Array.isArray(window.BLYNS_APP_CATALOG)?window.BLYNS_APP_CATALOG:[];
     const draw=()=>{
@@ -1328,7 +1373,7 @@ if(blynsMenuItems){
       const appRows=apps.map(item=>{
         const ready=installed.includes(item.id);
         const icon=item.icon||window.BlynsRegistry?.iconPath(item.id)||window.BlynsRegistry?.fallbackIcon()||'';
-        return `<div class="store-card"><div class="store-icon"><img src="${escText(icon)}" alt=""></div><div class="store-meta"><b>${escText(item.name)}</b><small>${escText(item.description)} · ${escText(item.category)} · v${escText(item.version)}</small></div><button class="store-install" data-app-install="${escText(item.id)}">${ready?'Open':'Get'}</button></div>`;
+        return `<div class="store-card"><div class="store-icon"><img src="${escText(icon)}" alt=""></div><div class="store-meta"><b>${escText(item.name)}</b><small>${escText(item.description)} · ${escText(item.category)} · v${escText(item.version)}</small></div><button class="store-install" data-app-install="${escText(item.id)}">${ready?'Open':'Get'}</button>${ready?`<button class="store-update" data-app-update="${escText(item.id)}" hidden>Update</button>`:''}</div>`;
       }).join('');
       const wallpaperRows=wallpaperCatalog.map(w=>{
         const ready=installedWallpaperIds.includes(w.id),active=prefs273.wallpaper===w.id;
@@ -1336,9 +1381,31 @@ if(blynsMenuItems){
       }).join('');
       H(b,`<div class="main"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><h2>Blyns Store</h2><p style="color:#818895;font-size:12px;margin-top:4px">Applications and wallpapers</p></div><span style="font-size:11px;color:#8b929e">${tab==='apps'?apps.length+' apps':wallpaperCatalog.length+' wallpapers'}</span></div><div class="store-tabs"><button data-store-tab="apps" class="${tab==='apps'?'active':''}">Apps</button><button data-store-tab="wallpapers" class="${tab==='wallpapers'?'active':''}">Wallpapers</button></div><div id="store-package-list">${tab==='apps'?(appRows||'<div class="store-empty-note">No applications are available yet.</div>'):(wallpaperRows||'<div class="store-empty-note">No wallpapers are available yet.</div>')}</div></div>`);
       $$('[data-store-tab]',b).forEach(btn=>btn.onclick=()=>{tab=btn.dataset.storeTab;draw();});
+      if(tab==='apps'&&window.BlynsPackages?.checkUpdates){
+        window.BlynsPackages.checkUpdates().then(updates=>updates.forEach(item=>{
+          const button=$(`[data-app-update=\"${item.id}\"]`,b);
+          if(button){button.hidden=false;button.title=`Update ${item.name} from ${item.installedVersion} to ${item.availableVersion}`;}
+        })).catch(error=>console.warn('BlynsOS update check failed.',error));
+      }
+      $$('[data-app-update]',b).forEach(btn=>btn.onclick=async()=>{
+        const id=btn.dataset.appUpdate;
+        const item=apps.find(entry=>entry.id===id);
+        if(!await requestInstallPassword(item?.name||id))return;
+        btn.disabled=true;btn.textContent='Updating…';
+        try{
+          const started=await window.BlynsPackages.update(id);
+          if(!started){btn.disabled=false;btn.textContent='Update';toast('This app is already up to date.');}
+        }catch(error){
+          btn.disabled=false;btn.textContent='Retry';
+          toast(error?.message||'App update could not be started.');
+          console.error('BlynsOS package update failed:',id,error);
+        }
+      });
       $$('[data-app-install]',b).forEach(btn=>btn.onclick=async()=>{
         const id=btn.dataset.appInstall;
         if(installed.includes(id)){openApp(id);return;}
+        const item=apps.find(entry=>entry.id===id);
+        if(!await requestInstallPassword(item?.name||id))return;
         btn.disabled=true;btn.textContent='Installing…';
         try{
           await window.BlynsPackages.install(id);
@@ -1349,12 +1416,18 @@ if(blynsMenuItems){
           console.error('BlynsOS package install failed:',id,error);
         }
       });
-      $$('[data-wall-install]',b).forEach(btn=>btn.onclick=()=>{
+      $$('[data-wall-install]',b).forEach(btn=>btn.onclick=async()=>{
         const id=btn.dataset.wallInstall;
-        if(!installedWallpaperIds.includes(id)){installedWallpaperIds.push(id);saveInstalledWallpapers();}
-        applyWallpaperChoice(id);draw();toast('Wallpaper applied.');
+        const wasInstalled=installedWallpaperIds.includes(id);
+        if(!wasInstalled){
+          const item=wallpaperCatalog.find(entry=>entry.id===id);
+          if(!await requestInstallPassword(item?.name||'this wallpaper'))return;
+          if(!installedWallpaperIds.includes(id)){installedWallpaperIds.push(id);saveInstalledWallpapers();}
+        }
+        applyWallpaperChoice(id);draw();toast(wasInstalled?'Wallpaper applied.':'Wallpaper installed and applied.');
       });
     };
+    w.q=nextTab=>{if(nextTab==='wallpapers'||nextTab==='apps'){tab=nextTab;draw();}};
     draw();
   };
   // Store app candidates are not surfaced until the user has installed them.
@@ -1437,7 +1510,7 @@ if(blynsMenuItems){
       ['Add App Shortcut…',addDesktopApp],
       ['Remove Selected from Desktop',removeDesktopSelection],
       ['Arrange by Grid',()=>{FS.Desktop.forEach((f,i)=>{const p=gridXY(defaultCell(i).col,defaultCell(i).row);f.x=p.x;f.y=p.y});desktopApps.forEach((id,i)=>{const p=gridXY(defaultCell(FS.Desktop.length+i).col,defaultCell(FS.Desktop.length+i).row);blynsDesktopAppPos[id]=p});sv('mac_fs',FS);sv(BLYNS_DESKTOP_APP_POS,blynsDesktopAppPos);renderDesktop();}],
-      null,['App Library',launchpad],['Blyns Settings…',()=>openApp('settings')]
+      null,['Launchpad',launchpad],['Blyns Settings…',()=>openApp('settings')]
     ]);
   }
   $('#desk').oncontextmenu=desktopContext;
@@ -1448,7 +1521,7 @@ if(blynsMenuItems){
   addEventListener('resize',()=>{if(S.ph==='desk')renderDesktop();});
   renderDesktop();
 
-  // Cleaner Stage Manager with live mini window content, short subnames, and a 3-item fold.
+  // Stage Manager presentation is finalized by the v1.2 five-window controller.
   let stageExpanded=false;
   function previewMarkup(w){
     const clone=w.cloneNode(true);clone.classList.remove('min','gone','stage-hidden','mcw','drag','is-fullscreen');clone.classList.add('stage-window-preview');clone.removeAttribute('id');
@@ -1590,41 +1663,49 @@ if(blynsMenuItems){
     const row=(label,desc,to,btn='View')=>`<div class="settings-row"><div><b>${label}</b><small>${desc}</small></div><button class="settings-link" data-go="${to}">${btn}</button></div>`;
     const prefToggle=(label,desc,key)=>`<div class="settings-row"><div><b>${label}</b><small>${desc}</small></div><input class="settings-switch" type="checkbox" data-pref="${key}" ${prefs273[key]?'checked':''}></div>`;
     const releaseNotes=`
-      <h3>BlynsOS 1.1 · Minor Update</h3>
+      <h3>BlynsOS 1.2 · Major Update · 15 November 2026</h3>
       <ul style="padding-left:19px;margin:8px 0 18px">
-        <li>Moved the startup animation controller into Core/boot.js.</li>
-        <li>Moved password-confirmed shutdown and restart into Core/off.js.</li>
-        <li>Shutdown and restart now show a password check and a second confirmation before a two-second fade.</li>
-        <li>Moved the first-run Setup Assistant into the independent Setup folder.</li>
-        <li>Added a selectable 12-hour or 24-hour clock format.</li>
-        <li>Changed Dock clicks to open, restore a minimized window or close its visible app window.</li>
-        <li>Minimized windows become fully hidden after their Dock animation.</li>
-        <li>Added softer fade transitions for Control Center, Spotlight and Settings detail views.</li>
-        <li>Added a real app-package loader and Focus Timer as an independently installable example.</li>
-        <li>Added an IndexedDB File Vault service for image Blobs and metadata.</li>
+        <li>Fixed the uploaded-wallpaper persistence issue by reconnecting Appearance to the IndexedDB image vault.</li>
+        <li>Desktop alignment grid stays hidden and appears only while a desktop item is being dragged.</li>
+        <li>Appearance lists built-in and installed wallpapers only; uninstalled wallpapers are available through Get More.</li>
+        <li>Installing an app or wallpaper now requires the account password.</li>
+        <li>Renamed App Library to Launchpad and kept only installed apps in its grid.</li>
+        <li>Updated account security: new password hashes use PBKDF2-SHA-256 with a 600,000-iteration work factor; existing hashes remain supported.</li>
+        <li>Added a user profile card to the Settings sidebar and refreshed the lock-screen user avatar.</li>
+        <li>Stage Manager shows up to five open apps, minimizes overflow windows and has no scrolling or expand control.</li>
+        <li>Refined glass surfaces, Dock appearance, motion and range/scrollbar styling.</li>
+        <li>Rounded lock-screen clock with smaller AM/PM text; the separate workspace label and password glass panel have been removed.</li>
+        <li>Fixed profile and avatar containers so they remain perfectly circular.</li>
       </ul>
-      <h3>Compatibility and scope</h3>
+      <h3>App architecture</h3>
       <ul style="padding-left:19px;margin:8px 0 18px">
-        <li>Existing account credentials, preferences, desktop files, notes and wallpaper settings are retained by the upgrade path.</li>
-        <li>Legacy built-in apps remain available. Their extraction into separate modules is staged to avoid breaking shared Core dependencies.</li>
-        <li>Image Vault is available as a storage service; the full Files/Gallery import interface and old-image migration are not part of this minor build yet.</li>
+        <li>Apps/Packages continues to support independently installed and updated app modules.</li>
+        <li>Legacy built-in apps remain hosted by Core in this compatibility release; their extraction into individual Apps/BuiltIn modules is staged to protect shared Files, window and storage dependencies.</li>
       </ul>
-      <p style="font-size:11px;color:#777;margin-top:14px">BlynsOS 1.1 · Your account, apps and personal settings are stored in this browser profile.</p>`;
+      <p style="font-size:11px;color:#777;margin-top:14px">BlynsOS 1.2 · Appearance, installation security, Stage Manager and desktop refinements.</p>`;
     const draw=()=>{
-      nav.innerHTML=pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');let html='';
+      const profileDisplay=avatarGlyph==='initial'?txt((S.name||'B').trim().slice(0,1).toUpperCase()):txt(avatarGlyph);
+      nav.innerHTML=`<button class="settings-user-card" id="settings-user-card" type="button"><span class="settings-user-avatar" style="background:linear-gradient(145deg,${avatarColor},color-mix(in srgb,${avatarColor} 60%,#17243a))">${profileDisplay}</span><span class="settings-user-meta"><b>${txt(S.name||'User')}</b><small>Personal Account</small></span><span class="settings-user-chevron">›</span></button>`+pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');let html='';
       if(page==='General')html=`<h2>General</h2><p>System identity and update settings.</p>${row('Software Update',V2,'Software Update','View')}${row('Storage','Local browser data and file overview','Storage')}${row('Accounts','Manage your profile and sign-in details','Accounts')}${row('Control Center','Quick system controls','Control Center')}<div class="settings-row"><div><b>Time format</b><small>Choose a 12-hour or 24-hour clock.</small></div><select id="time-format" class="settings-select"><option value="24" ${prefs273.timeFormat!=='12'?'selected':''}>24-hour</option><option value="12" ${prefs273.timeFormat==='12'?'selected':''}>12-hour</option></select></div>`;
-      if(page==='Software Update')html=`<h2>Software Update</h2><p>${V2} is installed.</p><div class="app-hero" style="margin:18px 0;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="display:block;width:min(230px,85%);height:78px;object-fit:contain;margin:0 auto 12px"><h3>${V2}</h3><p style="font-size:12px;margin-top:5px">Version 1.1 · Minor Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Installed</span></div>${row('Update Details','Full additions, removed features, fixes and rebrands','Update Details','View Details')}`;
+      if(page==='Software Update')html=`<h2>Software Update</h2><p>${V2} is installed.</p><div class="app-hero" style="margin:18px 0;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="display:block;width:min(230px,85%);height:78px;object-fit:contain;margin:0 auto 12px"><h3>${V2}</h3><p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Installed</span></div>${row('Update Details','Full additions, removed features, fixes and rebrands','Update Details','View Details')}`;
       if(page==='Update Details')html=`<h2>${V2}</h2><p>Complete release notes for this build.</p><div class="v2-section" style="margin-top:16px;color:inherit;line-height:1.65;font-size:12px">${releaseNotes}</div><button class="settings-link" data-go="Software Update" style="margin-top:12px">Back to Software Update</button>`;
-      if(page==='Appearance')html=`<h2>Appearance</h2><p>Choose your colour mode, accent and desktop background.</p><div class="settings-row"><div><b>Appearance</b><small>Light or dark appearance across BlynsOS.</small></div><div class="settings-choice" style="margin:0"><button data-dark="0" class="${!prefs273.dark?'active':''}">Light</button><button data-dark="1" class="${prefs273.dark?'active':''}">Dark</button></div></div><h3 style="margin:17px 0 6px;font-size:14px">Accent colour</h3><div class="settings-choice">${[['#70a7ff','Blue'],['#b49aff','Purple'],['#65c9bb','Teal'],['#f0a45e','Orange'],['#f18bb4','Pink'],['#5dc3a5','Mint'],['#e0a2e8','Lilac']].map(([c,n])=>`<button data-accent="${c}" class="${prefs273.accent===c?'active':''}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};margin-right:5px"></span>${n}</button>`).join('')}</div><h3 style="margin:17px 0 7px;font-size:14px">Wallpaper</h3><div class="settings-choice">${wallpaperOptions.map(([id,n,g])=>`<button class="v2-wallpaper-choice ${prefs273.wallpaper===id?'active':''}" data-wall="${id}"><span class="v2-wallpaper-preview" style="display:block;background:${g}"></span>${n}</button>`).join('')}</div><div style="margin-top:18px"><label style="display:flex;justify-content:space-between;font-size:12px"><b>Glass intensity</b><span id="glass-val">${prefs273.glass}%</span></label><input id="glass-range" type="range" min="15" max="100" value="${prefs273.glass}" style="width:100%;accent-color:var(--accent);margin-top:8px"></div><div style="margin-top:14px">${prefToggle('Reduce Motion','Reduce window, Dock and interface transitions','reduceMotion')}</div>`;
+      if(page==='Appearance'){
+        const builtInWallpapers=wallpaperOptions.slice(0,10);
+        const installedExtraWallpapers=wallpaperCatalog.filter(w=>installedWallpaperIds.includes(w.id)).map(w=>[w.id,w.name,`url(\"${w.preview||w.src}\") center/cover`]);
+        const visibleWallpapers=[...builtInWallpapers,...installedExtraWallpapers.filter(w=>!builtInWallpapers.some(base=>base[0]===w[0]))];
+        const wallpaperButtons=visibleWallpapers.map(([id,name,preview])=>`<button class=\"v2-wallpaper-choice ${prefs273.wallpaper===id?'active':''}\" data-wall=\"${txt(id)}\"><span class=\"v2-wallpaper-preview\" style=\"display:block;background:${preview}\"></span>${txt(name)}</button>`).join('');
+        const customLabel=customWallpaperMetadata?.name||prefs273.customWallpaperName||'Uploaded wallpaper';
+        html=`<h2>Appearance</h2><p>Choose your colour mode, accent and desktop background.</p><div class=\"settings-row\"><div><b>Appearance</b><small>Light or dark appearance across BlynsOS.</small></div><div class=\"settings-choice\" style=\"margin:0\"><button data-dark=\"0\" class=\"${!prefs273.dark?'active':''}\">Light</button><button data-dark=\"1\" class=\"${prefs273.dark?'active':''}\">Dark</button></div></div><h3 style=\"margin:17px 0 6px;font-size:14px\">Accent colour</h3><div class=\"settings-color-selector\">${[['#70a7ff','Blue'],['#b49aff','Purple'],['#65c9bb','Teal'],['#f0a45e','Orange'],['#f18bb4','Pink'],['#5dc3a5','Mint'],['#e0a2e8','Lilac']].map(([c,n])=>`<button type=\"button\" data-accent=\"${c}\" aria-label=\"${n} accent colour\" aria-pressed=\"${prefs273.accent===c?'true':'false'}\" title=\"${n}\" class=\"settings-color-swatch ${prefs273.accent===c?'active':''}\"><span style=\"background:${c}\"></span><small>${n}</small></button>`).join('')}</div><div class=\"wallpaper-heading\"><h3>Installed wallpapers</h3><button class=\"settings-link\" id=\"wallpaper-get-more\">Get More</button></div><div class=\"v2-wallpaper-grid\">${wallpaperButtons}</div><div class=\"wallpaper-upload-panel\"><div><b>Personal wallpaper</b><small>Upload an image from your computer. It is saved in this browser profile.</small></div><label class=\"wallpaper-upload-button\" for=\"wallpaper-upload\">Choose Image</label><input id=\"wallpaper-upload\" type=\"file\" accept=\"image/*\" hidden>${prefs273.customWallpaperId?`<div class=\"wallpaper-saved-row\"><span>${txt(customLabel)}</span><button class=\"settings-link\" id=\"wallpaper-use-saved\">${prefs273.wallpaper==='custom'?'Applied':'Use Saved'}</button></div>`:''}<p id=\"wallpaper-upload-status\" class=\"wallpaper-upload-status\"></p></div><div style=\"margin-top:18px\"><label style=\"display:flex;justify-content:space-between;font-size:12px\"><b>Glass intensity</b><span id=\"glass-val\">${prefs273.glass}%</span></label><input id=\"glass-range\" type=\"range\" min=\"15\" max=\"100\" value=\"${prefs273.glass}\" style=\"width:100%;accent-color:var(--accent);margin-top:8px\"></div><div style=\"margin-top:14px\">${prefToggle('Reduce Motion','Reduce window, Dock and interface transitions','reduceMotion')}</div>`;
+      }
       if(page==='Desktop & Dock')html=`<h2>Desktop & Dock</h2><p>Manage the desktop workspace and Dock behaviour.</p>${prefToggle('Automatically hide Dock','Hide Dock while app windows are open','dockAutoHide')}${prefToggle('Automatically hide Stage Manager','Hide the preview rail until the pointer reaches the left edge','stageAutoHide')}<div style="margin-top:17px"><label style="display:flex;justify-content:space-between;font-size:12px"><b>Dock icon size</b><span id="dock-size-value">${Math.round(prefs273.dockSize*46)} px</span></label><input id="dock-size-range" type="range" min="0.72" max="1.45" step="0.05" value="${prefs273.dockSize}" style="width:100%;accent-color:var(--accent);margin-top:8px"></div><div class="settings-row" style="margin-top:14px"><div><b>Desktop shortcuts</b><small>${desktopApps.length} app shortcuts on the desktop. Right-click the desktop to add or remove them.</small></div><button class="settings-link" id="desktop-shortcuts">Manage</button></div>`;
       if(page==='Dock Apps')html=`<h2>Dock Apps</h2><p>Choose installed apps to keep pinned in the Dock.</p><div class="settings-apps-list">${Object.keys(APPS).filter(id=>id!=='launchpad'&&!APPS[id].__transient&&isBlynsInstalled(id)).map(id=>`<label class="settings-app-row"><u>${ico(id)}</u><span>${txt(APPS[id].n)}</span><input type="checkbox" data-pin="${id}" ${PIN.includes(id)?'checked':''} ${['finder','settings'].includes(id)?'disabled':''}></label>`).join('')}</div>`;
       if(page==='Control Center')html=`<h2>Control Center</h2><p>Manage the BlynsOS interface and quick system controls.</p>${prefToggle('Focus mode','Suppress toast notifications while enabled','focusMode')}${prefToggle('Reduce Motion','Reduce interface animations','reduceMotion')}${prefToggle('Automatically hide Dock','Hide the Dock when windows are open','dockAutoHide')}<div class="settings-row"><div><b>Stage Manager</b><small>${stageOn?'Currently on':'Currently off'} · Preview open windows</small></div><button class="settings-link" id="stage-settings">${stageOn?'Turn Off':'Turn On'}</button></div><div class="settings-row"><div><b>Brightness</b><small>Adjust display brightness</small></div><input id="settings-brightness" type="range" min="55" max="120" value="${brightness}" style="max-width:130px"></div>`;
       if(page==='Sound')html=`<h2>Sound</h2><p>Adjust BlynsOS interface and sample-app audio.</p><div class="cc-v2-slider" style="margin-top:16px"><label><span>Output volume</span><span id="set-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="set-vol" type="range" min="0" max="8" value="${S.vol}" style="width:100%"></div><div class="settings-row" style="margin-top:14px"><div><b>Startup sound</b><small>Browser-generated startup chime</small></div><span style="font-size:11px;color:#888">Available</span></div>`;
-      if(page==='Keyboard')html=`<h2>Keyboard Shortcuts</h2><p>Shortcuts are active on the desktop when a text field is not focused.</p>${[['F','Open Files'],['Ctrl + S','Open Spotlight Search'],['C','Open Control Center'],['Esc','Dismiss overlay or close active app'],['M','Mission Control'],['S','Stage Manager'],['W','Snap active window'],['Q','Minimize or restore active window'],['R','Force quit active app'],['L','App Library'],['0','Power on from black screen']].map(([key,desc])=>`<div class="settings-row"><b style="font-size:12px;min-width:80px">${key}</b><small>${desc}</small></div>`).join('')}`;
+      if(page==='Keyboard')html=`<h2>Keyboard Shortcuts</h2><p>Shortcuts are active on the desktop when a text field is not focused.</p>${[['F','Open Files'],['Ctrl + S','Open Spotlight Search'],['C','Open Control Center'],['Esc','Dismiss overlay or close active app'],['M','Mission Control'],['S','Stage Manager'],['W','Snap active window'],['Q','Minimize or restore active window'],['R','Force quit active app'],['L','Launchpad'],['0','Power on from black screen']].map(([key,desc])=>`<div class="settings-row"><b style="font-size:12px;min-width:80px">${key}</b><small>${desc}</small></div>`).join('')}`;
       if(page==='Privacy')html=`<h2>Privacy</h2><p>Manage local account data and browser permissions.</p><div class="settings-row"><div><b>Account and preferences</b><small>Saved in this browser's local storage; they do not create a device-level account.</small></div><span style="font-size:11px;color:#828a96">Local</span></div><div class="settings-row"><div><b>Navigator websites</b><small>Websites can restrict iframe embedding and external access.</small></div><span style="font-size:11px;color:#828a96">Browser policy</span></div><div class="settings-row"><div><b>Physical device controls</b><small>System preferences are saved to this browser profile.</small></div><span style="font-size:11px;color:#828a96">Not connected</span></div>`;
       if(page==='Accounts')html=`<h2>Account Management</h2><p>Update your local BlynsOS profile and lock-screen appearance.</p><div class="v2-section" style="display:flex;align-items:center;gap:14px"><div class="v2-profile-avatar" id="v2-profile-preview" style="background:${avatarColor}">${avatarGlyph==='initial'?txt((S.name||'B').slice(0,1).toUpperCase()):txt(avatarGlyph)}</div><div><b>${txt(S.name||'User')}</b><small style="display:block;color:#808894;margin-top:3px">Local administrator account</small></div></div><label style="display:block;margin-top:15px;font-size:12px;font-weight:650">Account name<input id="account-name" value="${txt(S.name)}" maxlength="28" style="display:block;width:100%;margin-top:6px;padding:9px;border:1px solid #d5dbe4;border-radius:9px;background:#fff;color:#222"></label><label style="display:block;margin-top:12px;font-size:12px;font-weight:650">New password <span style="font-weight:400;color:#858c97">(leave blank to keep current)</span><input id="account-password" type="password" placeholder="Enter a new password" style="display:block;width:100%;margin-top:6px;padding:9px;border:1px solid #d5dbe4;border-radius:9px;background:#fff;color:#222"></label><div style="display:flex;align-items:center;gap:12px;margin-top:14px"><label style="font-size:12px;font-weight:650">Avatar colour</label><input id="account-avatar-color" type="color" value="${avatarColor}" style="width:50px;height:36px;padding:2px;border:1px solid #ccd3de;border-radius:8px"></div><label style="display:block;margin-top:12px;font-size:12px;font-weight:650">Avatar symbol<select id="account-avatar-glyph" style="display:block;width:100%;margin-top:6px;padding:9px;border:1px solid #d5dbe4;border-radius:9px;background:#fff;color:#222"><option value="initial">Account initial</option><option value="🙂">🙂 Smile</option><option value="🌟">🌟 Star</option><option value="🌙">🌙 Moon</option><option value="💎">💎 Gem</option><option value="🌿">🌿 Leaf</option><option value="🚀">🚀 Rocket</option></select></label><button id="account-save" class="settings-link" style="margin-top:16px">Save account changes</button><button id="account-lock" class="settings-link" style="margin:10px 0 0">Lock screen / log out</button><p style="font-size:10px;color:#858c97;margin-top:12px">Your password is stored as a salted PBKDF2 hash in this browser profile.</p>`;
       if(page==='Storage')html=`<h2>Storage</h2><p>Files and app information kept in this browser.</p><div class="settings-row"><div><b>Desktop files</b><small>${FS.Desktop.length} item(s)</small></div></div><div class="settings-row"><div><b>Documents</b><small>${FS.Documents.length} item(s)</small></div></div><div class="settings-row"><div><b>Downloads</b><small>${FS.Downloads.length} item(s)</small></div></div><div class="settings-row"><div><b>Installed Store apps</b><small>${installed.length} installed extra app(s)</small></div></div>`;
-      if(page==='About')html=`<h2>About BlynsOS</h2><div class="app-hero" style="margin-top:16px;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="width:min(210px,80%);height:70px;object-fit:contain"><h3 style="margin-top:8px">Version 1.1</h3><p style="margin-top:6px">Minor Update</p></div><p style="margin-top:14px;color:#777">BlynsOS brings your apps, files and personal settings together in one desktop workspace.</p>`;
+      if(page==='About')html=`<h2>About BlynsOS</h2><div class="app-hero" style="margin-top:16px;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="width:min(210px,80%);height:70px;object-fit:contain"><h3 style="margin-top:8px">Version 1.2</h3><p style="margin-top:6px">Major Update</p></div><p style="margin-top:14px;color:#777">BlynsOS brings your apps, files and personal settings together in one desktop workspace.</p>`;
       if(page==='Erase All Content')html=`<h2>Erase All Content and Settings</h2><p>This resets BlynsOS to its first-run defaults.</p><div class="v2-section"><b>This will remove</b><ul style="padding:10px 0 0 19px;line-height:1.8;font-size:12px"><li>Account name, password and avatar</li><li>Desktop files, documents, downloads and notes</li><li>Installed optional apps and saved Dock pins</li><li>Appearance, wallpaper, browser and window preferences</li><li>Desktop app shortcuts and saved window positions</li></ul></div><button id="erase-now" class="settings-link" style="margin-top:14px;background:#ffe6e6;color:#b42318">Erase All Content and Restart Setup</button>`;
       main.innerHTML=html;
       const timeFormatSelect=$('#time-format',main);
@@ -1632,10 +1713,34 @@ if(blynsMenuItems){
         prefs273.timeFormat=timeFormatSelect.value==='12'?'12':'24';
         savePrefs273();tick();
       };
-      $$('[data-page]',nav).forEach(x=>x.onclick=()=>{page=x.dataset.page;draw()});$$('[data-go]',main).forEach(x=>x.onclick=()=>{page=x.dataset.go;draw()});
+      $$('[data-page]',nav).forEach(x=>x.onclick=()=>{page=x.dataset.page;draw()});
+      $('#settings-user-card',nav)?.addEventListener('click',()=>{page='Accounts';draw()});
+      $$('[data-go]',main).forEach(x=>x.onclick=()=>{page=x.dataset.go;draw()});
       $$('[data-dark]',main).forEach(x=>x.onclick=()=>{prefs273.dark=x.dataset.dark==='1';savePrefs273();applyPrefs273();draw();syncCC()});
       $$('[data-accent]',main).forEach(x=>x.onclick=()=>{prefs273.accent=x.dataset.accent;savePrefs273();applyPrefs273();draw()});
       $$('[data-wall]',main).forEach(x=>x.onclick=()=>{prefs273.wallpaper=x.dataset.wall;savePrefs273();applyPrefs273();draw()});
+      $('#wallpaper-get-more',main)?.addEventListener('click',()=>openApp('store','wallpapers'));
+      $('#wallpaper-use-saved',main)?.addEventListener('click',async()=>{
+        if(!customWallpaperUrl)await restoreCustomWallpaper();
+        if(customWallpaperUrl){prefs273.wallpaper='custom';savePrefs273();applyPrefs273();draw();toast('Saved wallpaper applied.');}
+        else toast('The uploaded wallpaper could not be loaded from browser storage.');
+      });
+      $('#wallpaper-upload',main)?.addEventListener('change',async event=>{
+        const file=event.target.files?.[0];if(!file)return;
+        const status=$('#wallpaper-upload-status',main);if(status)status.textContent='Saving image…';
+        try{
+          if(!window.BlynsFileVault)throw new Error('Image storage is unavailable.');
+          const metadata=await window.BlynsFileVault.saveImage(file,{folder:'Wallpapers'});
+          const record=await window.BlynsFileVault.getImage(metadata.id);
+          if(!record?.blob)throw new Error('The saved wallpaper could not be reopened.');
+          if(customWallpaperUrl)window.BlynsFileVault.revokeObjectURL(customWallpaperUrl);
+          customWallpaperUrl=window.BlynsFileVault.createObjectURL(record);
+          customWallpaperMetadata=metadata;
+          prefs273.customWallpaperId=metadata.id;prefs273.customWallpaperName=metadata.name;prefs273.wallpaper='custom';
+          savePrefs273();applyPrefs273();
+          toast('Wallpaper saved and applied.');draw();
+        }catch(error){if(status)status.textContent=error?.message||'Wallpaper upload failed.';toast(error?.message||'Wallpaper upload failed.');}
+      });
       $$('[data-pref]',main).forEach(x=>x.onchange=()=>{prefs273[x.dataset.pref]=x.checked;savePrefs273();applyPrefs273();if(x.dataset.pref==='reduceMotion')syncCC();syncCC()});
       $$('[data-pin]',main).forEach(x=>x.onchange=()=>{dockSetPin273(x.dataset.pin,x.checked);draw()});
       const glass=$('#glass-range',main);if(glass)glass.oninput=()=>{prefs273.glass=+glass.value;$('#glass-val',main).textContent=glass.value+'%';savePrefs273();document.documentElement.style.setProperty('--glass-level',String(+glass.value/100))};
@@ -1719,7 +1824,7 @@ if(blynsMenuItems){
 
   // Final version strings and refreshed desktop/system surfaces.
   const ccVersion=$('#ccpanel .cc-v2-head small');if(ccVersion)ccVersion.textContent=V2;
-  if($('.lock-eyebrow'))$('.lock-eyebrow').textContent='BLYNSOS  ·  WORKSPACE';
+  $('.lock-eyebrow')?.remove();
   dockBuild();renderDesktop();syncCC();
   // Make the boot wordmark and menu mark use their separate intended assets.
   const bootLogo=$('#boot .boot-logo');if(bootLogo){bootLogo.alt='BlynsOS';}
@@ -1835,6 +1940,113 @@ if(blynsMenuItems){
     shutdown=function(){return window.BlynsOff.request('shutdown');};
     restart=function(){return window.BlynsOff.request('restart');};
   }
+
+  // ===== BlynsOS 1.2 final interaction rules =====
+  // The alignment grid is visible only while a desktop file/app is actually being dragged.
+  let gridHideTimer=null,gridPointerStart=null;
+  const desktopGridHost=$('#desk');
+  const desktopGridArea=$('#ds');
+  desktopGridArea.addEventListener('pointerdown',event=>{
+    if(event.target.closest('.desktop-icon')&&event.button===0){
+      gridPointerStart={id:event.pointerId,x:event.clientX,y:event.clientY};
+      clearTimeout(gridHideTimer);
+    }
+  },true);
+  desktopGridArea.addEventListener('pointermove',event=>{
+    if(!gridPointerStart||gridPointerStart.id!==event.pointerId||!event.buttons)return;
+    if(Math.hypot(event.clientX-gridPointerStart.x,event.clientY-gridPointerStart.y)>=5){
+      desktopGridHost.classList.add('desktop-grid-moving','desktop-grid-visible');
+    }
+  },true);
+  const hideDesktopGrid=()=>{
+    gridPointerStart=null;
+    desktopGridHost.classList.remove('desktop-grid-moving');
+    clearTimeout(gridHideTimer);
+    gridHideTimer=setTimeout(()=>desktopGridHost.classList.remove('desktop-grid-visible'),150);
+  };
+  addEventListener('pointerup',hideDesktopGrid,true);
+  addEventListener('pointercancel',()=>{
+    gridPointerStart=null;
+    desktopGridHost.classList.remove('desktop-grid-moving','desktop-grid-visible');
+    clearTimeout(gridHideTimer);
+  },true);
+
+  // Enforce the five-window Stage Manager capacity. Overflow is minimized, not scrolled.
+  function enforceStageWindowLimit(activeId){
+    if(!stageOn)return;
+    const active=W[activeId]||getLastWindow()||topWin();
+    const opened=Object.values(W).filter(win=>!win.classList.contains('gone')&&!win.classList.contains('min'))
+      .sort((a,b)=>(+b.style.zIndex||0)-(+a.style.zIndex||0));
+    if(active?.classList.contains('is-fullscreen')){
+      opened.filter(win=>win!==active).forEach(win=>minim(win));
+      return;
+    }
+    while(opened.length>5){
+      const victim=[...opened].reverse().find(win=>win!==active)||opened[opened.length-1];
+      if(!victim)break;
+      minim(victim);
+      opened.splice(opened.indexOf(victim),1);
+    }
+  }
+  renderStageRail=function(active){
+    if(!stageOn)return;
+    enforceStageWindowLimit(active);
+    const wins=Object.values(W).filter(win=>!win.classList.contains('gone')&&!win.classList.contains('min'))
+      .sort((a,b)=>(+b.style.zIndex||0)-(+a.style.zIndex||0)).slice(0,5);
+    let rail=$('#stage-rail');
+    if(!rail){$('#desk').insertAdjacentHTML('beforeend','<div id="stage-rail" aria-label="Stage Manager"></div>');rail=$('#stage-rail');}
+    rail.innerHTML=wins.map(win=>{
+      const id=win.dataset.id,title=$('.tb span',win)?.textContent||APPS[id]?.n||id;
+      const safeTitle=String(title).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      return `<button type="button" class="stage-card ${active===id||(!active&&win===topWin())?'active':''}" data-stage-id="${id}" title="${safeTitle}"><span class="stage-window-mark">▱</span><span class="stage-card-label">${safeTitle}</span></button>`;
+    }).join('')||'<span class="stage-empty">No open windows</span>';
+    $$('.stage-card[data-stage-id]',rail).forEach(button=>button.onclick=()=>stageFocus(button.dataset.stageId));
+  };
+  const stageFocusBeforeV12=stageFocus;
+  stageFocus=function(id){
+    const win=W[id];
+    if(win?.classList.contains('min')){win.classList.remove('min');win.removeAttribute('aria-hidden');win.style.transform='';}
+    stageFocusBeforeV12(id);
+    enforceStageWindowLimit(id);
+    renderStageRail(id);
+  };
+  const toggleStageBeforeV12=toggleStage;
+  toggleStage=function(){
+    toggleStageBeforeV12();
+    if(stageOn){const active=getLastWindow()||topWin();enforceStageWindowLimit(active?.dataset.id);renderStageRail(active?.dataset.id);}
+  };
+  const openAppBeforeV12=openApp;
+  openApp=function(id,arg){
+    openAppBeforeV12(id,arg);
+    if(stageOn){enforceStageWindowLimit(id);renderStageRail(id);}
+  };
+  const minimBeforeV12=minim;
+  minim=function(win){
+    minimBeforeV12(win);
+    if(stageOn)setTimeout(()=>renderStageRail(getLastWindow()?.dataset.id),180);
+  };
+  $('#wins').addEventListener('click',event=>{
+    if(!event.target.closest('.tl i:nth-child(3)'))return;
+    const win=event.target.closest('.win');
+    setTimeout(()=>{
+      if(stageOn&&win&&!win.classList.contains('gone')){
+        enforceStageWindowLimit(win.dataset.id);
+        renderStageRail(win.dataset.id);
+      }
+    },0);
+  },true);
+
+  // Show a small confirmation after a package update has been restored at its new version.
+  addEventListener('blyns:package-updated',event=>{
+    const details=event.detail||{};
+    toast(`${details.name||details.id||'App'} updated to v${details.version||''}`);
+  });
+
+  // The former App Library surface is Launchpad; never surface uninstalled packages.
+  if(APPS.launchpad)APPS.launchpad.n='Launchpad';
+  if($('.lock-eyebrow'))$('.lock-eyebrow').remove();
+  $('#lav')?.setAttribute('aria-label','User profile icon');
+  restoreCustomWallpaper();
 
   // User-facing time format is controlled by macos_273_preferences.timeFormat.
   try{tick();}catch(e){}

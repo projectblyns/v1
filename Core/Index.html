@@ -7,10 +7,10 @@
   <meta name="description" content="BlynsOS — personal workspace">
   <title>BlynsOS</title>
 
-<link rel="apple-touch-icon" sizes="180x180" href="/v1/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/v1/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/v1/favicon-16x16.png">
-<link rel="manifest" href="/v1/site.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="manifest" href="../site.webmanifest">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,11 +55,12 @@
   </section>
 
   <section class="ph wall" id="lock" aria-label="Lock screen">
-    <div id="clock"></div>
-    <div id="date"></div>
+    <div id="clock" aria-label="Current time"></div>
+    <div id="date" aria-label="Current date"></div>
     <div id="lu">
-      <div class="av" id="lav"></div>
+      <div class="av" id="lav" role="img" aria-label="User profile"></div>
       <b id="lnm"></b>
+      <label class="lock-password-label" for="pw">Unlock BlynsOS</label>
       <input autocomplete="current-password" id="pw" placeholder="Enter password" type="password">
       <p id="unlock-error" role="alert"></p>
     </div>

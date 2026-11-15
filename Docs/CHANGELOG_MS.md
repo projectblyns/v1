@@ -1,26 +1,23 @@
-# BlynsOS 1.1 — Minor Update
+# BlynsOS 1.2 — Kemas Kini Utama
 
-**Tarikh pakej:** 12 November 2026
+**Tarikh:** 15 November 2026
 
-## Perubahan dalam build ini
+## Perubahan dan pembaikan
 
-- Boot visual dipindahkan ke `Core/boot.js` dan Core hanya memanggil controller tersebut.
-- Shutdown/restart dipindahkan ke `Core/off.js`.
-- Shutdown/restart dari desktop atau lock screen memerlukan kata laluan diikuti pengesahan kedua.
-- Peralihan shutdown/restart menggunakan fade sehingga 2 saat (kecuali Reduce Motion diaktifkan).
-- Setup Assistant dipindahkan ke folder `Setup/` dan boleh dibuka melalui `Setup/Index.html` secara berasingan.
-- Jam menyokong format 12 jam dan 24 jam di Blyns Settings → General.
-- Dock mempunyai tingkah laku toggle: buka aplikasi, klik lagi untuk tutup; aplikasi minimized akan dipulihkan.
-- Window minimized disembunyikan selepas animasi ke Dock selesai supaya tidak kelihatan mengintai di desktop.
-- Control Center, Spotlight dan paparan detail Settings menggunakan transisi fade/transform yang lebih lembut.
-- Store menggunakan katalog pakej dan memuatkan JavaScript/CSS aplikasi apabila pengguna memilih Get.
-- `Focus Timer` disediakan sebagai contoh aplikasi sebenar yang boleh dipasang dan dipulihkan selepas refresh.
-- `Systems/file-vault.js` menambah asas IndexedDB untuk simpan Blob gambar dan metadata.
-- Label versi dipaparkan sebagai BlynsOS 1.1; label versi lama dan hint tambahan dibuang daripada antara muka.
-- Hint visual dikekalkan hanya pada skrin kuasa: `0` untuk power on.
+- Memperbaiki bug wallpaper yang dimuat naik secara manual supaya imej disimpan dalam IndexedDB dan dipulihkan selepas refresh.
+- Grid desktop disembunyikan secara lalai dan hanya dipaparkan ketika ikon/fail sedang diseret.
+- Appearance hanya memaparkan wallpaper terbina dalam dan wallpaper yang sudah dipasang; wallpaper lain boleh dicapai melalui **Get More**.
+- Pemasangan aplikasi dan wallpaper memerlukan pengesahan kata laluan akaun.
+- App Library dinamakan semula kepada Launchpad dan hanya memaparkan aplikasi yang dipasang.
+- Pakej aplikasi modular menyemak versi manifest dan menawarkan **Update** dengan pengesahan kata laluan; kemas kini pakej memuat semula aset berversi untuk mengelakkan cache lama.
+- Protokol hash kata laluan baharu menggunakan PBKDF2-SHA-256 dengan 600,000 iterasi; hash lama masih disokong.
+- Menambah kad profil pengguna pada sidebar Settings.
+- Stage Manager memaparkan maksimum lima tetingkap; tetingkap lebihan diminimumkan dan tiada scrollbar/expand button.
+- Memperkemas animasi, kaca Dock, glass surfaces, scrollbar, slider dan progress bar.
+- Reka bentuk lock screen dikemas kini: jam rounded/glass, AM/PM lebih kecil, kalendar glass dan tiada label Workspace.
+- Membuang bingkai glass daripada kawasan kata laluan lock screen.
+- Memperbaiki avatar supaya kekal bulat walaupun ruang flex berubah.
 
-## Belum selesai / sengaja ditangguhkan
+## Nota seni bina aplikasi
 
-- Semua aplikasi warisan belum dipindahkan keluar daripada `Core/core.js`. Hanya laluan pakej optional dan Focus Timer dipisahkan dalam update ini. Apps lama berkongsi helper dan state dalaman; pemindahan perlu dibuat satu per satu supaya data dan tingkah laku tidak rosak.
-- File Vault sudah tersedia sebagai servis IndexedDB, tetapi UI import/preview penuh ke Files dan Gallery serta migrasi gambar dari model lama belum dibuat.
-- Auto-update, checksum tandatangan pakej dan sandbox aplikasi pihak ketiga belum disediakan.
+Aplikasi tambahan yang menggunakan `Apps/Packages/` boleh dipasang secara berasingan. Kebanyakan aplikasi terbina dalam masih berada di `Core/core.js` kerana ia berkongsi fungsi window manager, Files dan storan. Pemindahan menyeluruh ke modul `Apps/BuiltIn/` perlu dibuat secara berperingkat dan bukan sebahagian daripada migrasi kompatibiliti v1.2 ini.

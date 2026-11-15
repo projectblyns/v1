@@ -1,7 +1,7 @@
 /* BlynsOS Security — PBKDF2-SHA-256 password hashing via Web Crypto. */
 (() => {
   'use strict';
-  const ITERATIONS = 310000;
+  const ITERATIONS = 600000; // New hashes use a stronger work factor; older hashes remain verifiable.
   const encoder = new TextEncoder();
   const toBase64 = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes)));
   const fromBase64 = value => Uint8Array.from(atob(value), c => c.charCodeAt(0));

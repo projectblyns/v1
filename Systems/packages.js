@@ -3,6 +3,7 @@
   'use strict';
 
   const STORAGE_KEY = 'mac_installed_272';
+  const VERSION_KEY = 'blyns_package_versions';
   const loadedScripts = new Map();
   const loadedStyles = new Set();
   const pendingInstalls = new Map();
@@ -15,7 +16,7 @@
       name: 'Focus Timer',
       description: 'A quiet focus timer with start, pause and reset controls.',
       category: 'Productivity',
-      version: '1.1.0',
+      version: '1.2.0',
       symbol: '◷',
       colors: '#b8d5ff,#5f83ca',
       size: [480, 430],
@@ -31,6 +32,27 @@
       const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       return Array.isArray(value) ? value : [];
     } catch (_) { return []; }
+  }
+
+  function readVersions() {
+    try {
+      const value = JSON.parse(localStorage.getItem(VERSION_KEY) || '{}');
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    } catch (_) { return {}; }
+  }
+
+  function writeVersions(value) {
+    try { localStorage.setItem(VERSION_KEY, JSON.stringify(value)); } catch (_) {}
+  }
+
+  function compareVersions(left, right) {
+    const a = String(left || '0').split(/[.+-]/).slice(0, 3).map(part => Number.parseInt(part, 10) || 0);
+    const b = String(right || '0').split(/[.+-]/).slice(0, 3).map(part => Number.parseInt(part, 10) || 0);
+    for (let i = 0; i < 3; i++) {
+      if ((a[i] || 0) > (b[i] || 0)) return 1;
+      if ((a[i] || 0) < (b[i] || 0)) return -1;
+    }
+    return 0;
   }
 
   function isSafeRelativePath(value) {
@@ -58,11 +80,18 @@
     if (manifest.icon && !isSafeRelativePath(manifest.icon)) {
       throw new Error('The package manifest has an invalid icon path.');
     }
+    const version = String(manifest.version || item.version || '1.0.0');
+    const versioned = value => {
+      if (!value) return '';
+      const url = new URL(value, manifestUrl);
+      url.searchParams.set('blyns_version', version);
+      return url.href;
+    };
     return {
       ...item,
       ...manifest,
-      entry: new URL(manifest.entry, manifestUrl).href,
-      styles: manifest.styles ? new URL(manifest.styles, manifestUrl).href : '',
+      entry: versioned(manifest.entry),
+      styles: versioned(manifest.styles),
       icon: manifest.icon ? new URL(manifest.icon, manifestUrl).href : ''
     };
   }
@@ -158,12 +187,56 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
         }
       }
+      const versions = readVersions();
+      versions[id] = String(manifest.version || item.version || '1.0.0');
+      writeVersions(versions);
+      try {
+        const pending = JSON.parse(localStorage.getItem('blyns_pending_package_update') || 'null');
+        if (pending?.id === id && pending.version === versions[id]) {
+          localStorage.removeItem('blyns_pending_package_update');
+          window.dispatchEvent(new CustomEvent('blyns:package-updated', { detail: { id, name: manifest.name || item.name, version: versions[id] } }));
+        }
+      } catch (_) {}
       return true;
     })();
 
     pendingInstalls.set(id, task);
     try { return await task; }
     finally { pendingInstalls.delete(id); }
+  }
+
+  async function checkUpdates() {
+    const installedIds = readInstalled();
+    const versions = readVersions();
+    const updates = [];
+    for (const id of installedIds) {
+      const item = catalogue.find(entry => entry.id === id);
+      if (!item) continue;
+      try {
+        const manifest = await readManifest(item);
+        const installedVersion = String(versions[id] || '0.0.0');
+        const availableVersion = String(manifest.version || item.version || '1.0.0');
+        if (compareVersions(availableVersion, installedVersion) > 0) {
+          updates.push({ id, name: manifest.name || item.name, installedVersion, availableVersion });
+        }
+      } catch (error) {
+        console.warn('BlynsOS could not check package update:', id, error);
+      }
+    }
+    return updates;
+  }
+
+  async function update(id) {
+    if (!readInstalled().includes(id)) throw new Error('Install this app before updating it.');
+    const updates = await checkUpdates();
+    const updateInfo = updates.find(entry => entry.id === id);
+    if (!updateInfo) return false;
+    try {
+      localStorage.setItem('blyns_pending_package_update', JSON.stringify({ id, version: updateInfo.availableVersion, requestedAt: new Date().toISOString() }));
+    } catch (_) {}
+    // A reload gives the app module a clean registry and loads the new versioned script URL.
+    window.location.reload();
+    return true;
   }
 
   function uninstall(id) {
@@ -181,8 +254,11 @@
     catalogue,
     registerApp,
     install,
+    update,
+    checkUpdates,
     uninstall,
-    getInstalled: readInstalled
+    getInstalled: readInstalled,
+    getInstalledVersions: readVersions
   });
 
   // Deferred scripts run before DOMContentLoaded, so Core is ready by restoration.

@@ -10,12 +10,12 @@
 - `security.js`: derivasi kata laluan PBKDF2-SHA-256.
 - `registry.js`: standard laluan ikon dan carian wallpaper.
 - `wallpapers.js`: senarai pakej wallpaper.
-- `packages.js`: registry aplikasi pilihan dan metadata Store.
+- `packages.js`: katalog aplikasi pilihan, pemasangan, semakan versi manifest dan kemas kini pakej berasingan.
 
 ## Apps
 
-Setiap aplikasi pilihan didaftarkan sebagai manifest melalui `BlynsPackages.registerApp`. Store membaca manifest dan memberikan kawalan Get/Install. Aplikasi sistem teras kekal di dalam enjin Core.
+Aplikasi pilihan didaftarkan sebagai pakej manifest melalui `BlynsPackages.registerApp`. Store membaca manifest, memasang pakej, menyemak versi dan menawarkan Update apabila versi baharu tersedia. Pakej pilihan dimuatkan daripada folder sendiri. Aplikasi sistem teras masih kekal di dalam enjin Core dalam binaan kompatibiliti v1.2.
 
 ## Assets
 
-`Assets/Icons` mengandungi PNG yang digunakan oleh Dock, App Library, Files, Store dan desktop shortcut. `Assets/Wallpapers` mengandungi imej latar sistem dan wallpaper yang boleh dipasang.
+`Assets/Icons` mengandungi PNG yang digunakan oleh Dock, Launchpad, Files, Store dan desktop shortcut. `Assets/Wallpapers` mengandungi imej latar sistem dan wallpaper yang boleh dipasang.

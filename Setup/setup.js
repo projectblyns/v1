@@ -85,7 +85,7 @@
         <div class="setup-shade" aria-hidden="true"></div>
         <section class="setup-card" aria-live="polite">
           <div class="setup-topline">
-            <span class="setup-brand">BLYNS OS <span>1.1</span></span>
+            <span class="setup-brand">BLYNS OS <span>1.2</span></span>
             <span class="step-counter" id="step-counter">1 / 10</span>
           </div>
           <div class="step-track" aria-hidden="true"><div class="step-track-fill" id="step-track-fill"></div></div>
@@ -101,7 +101,7 @@
     if (!$('#step-content',root)) {
       root.innerHTML=`
         <section class="setup-card" aria-live="polite">
-          <div class="setup-topline"><span class="setup-brand">BLYNS OS <span>1.1</span></span><span class="step-counter" id="step-counter">1 / 10</span></div>
+          <div class="setup-topline"><span class="setup-brand">BLYNS OS <span>1.2</span></span><span class="step-counter" id="step-counter">1 / 10</span></div>
           <div class="step-track"><div class="step-track-fill" id="step-track-fill"></div></div>
           <div id="step-content" class="step-content"></div>
           <div class="setup-footer"><button id="back-button" class="back-button" type="button" hidden>Back</button><button id="continue-button" class="continue-button" type="button">Continue <span>→</span></button></div>

@@ -2,7 +2,7 @@
 
 ## Prinsip asas
 
-Setiap aplikasi ialah satu fail JavaScript di dalam `Apps/`. Aplikasi mendaftarkan manifest menggunakan `window.BlynsPackages.registerApp(...)`. BlynsOS akan memaparkan manifest itu dalam Blyns Store. Pengguna menekan **Get** untuk memasang; selepas dipasang aplikasi muncul di App Library dan boleh diletakkan di Dock melalui Settings.
+Setiap aplikasi ialah satu fail JavaScript di dalam `Apps/`. Aplikasi mendaftarkan manifest menggunakan `window.BlynsPackages.registerApp(...)`. BlynsOS akan memaparkan manifest itu dalam Blyns Store. Pengguna menekan **Get** untuk memasang; selepas dipasang aplikasi muncul di Launchpad dan boleh diletakkan di Dock melalui Settings.
 
 ## Langkah menambah aplikasi
 
@@ -67,3 +67,10 @@ Wallpaper bukan aplikasi. Tambah fail imej ke `Assets/Wallpapers/`, kemudian tam
   category: 'Abstract'
 }
 ```
+
+
+## Versi dan kemas kini pakej
+
+Naikkan medan `version` dalam `manifest.json` apabila menerbitkan kemas kini. Store membandingkan versi yang dipasang dengan manifest semasa. Butang **Update** hanya muncul apabila versi manifest lebih baharu; pengguna perlu mengesahkan kata laluan. BlynsOS memuat semula sesi dan mengambil fail JavaScript/CSS dengan parameter versi supaya cache lama tidak digunakan.
+
+Ciri ini terpakai kepada aplikasi yang benar-benar menggunakan sistem `Apps/Packages/`. Aplikasi terbina dalam yang masih berada dalam `Core/core.js` belum mendapat kitaran kemas kini berasingan.

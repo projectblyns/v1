@@ -92,7 +92,7 @@ Gunakan class CSS khusus seperti `.my-app`. Jangan ubah style global `body`, `.w
 4. Loader membaca manifest, mengesahkan ID dan menyelesaikan path `entry`, `styles` serta `icon`.
 5. `style.css` dan `app.js` dimuatkan daripada fail statik GitHub Pages.
 6. App mendaftarkan `render()` ke BlynsOS Core.
-7. Core menyimpan ID pemasangan dan menyegarkan Dock/App Library.
+7. Core menyimpan ID pemasangan dan menyegarkan Dock/Launchpad.
 8. Apabila halaman dibuka semula, package loader membaca ID yang sudah dipasang dan memuatkan semula skrip pakej tersebut.
 
 **Nota teknikal penting:** Pada GitHub Pages, browser tidak boleh menulis fail terus ke repository atau menyalin kod aplikasi ke folder `Apps/` milik pelawat. Jadi “install” di sini bermaksud browser memuatkan modul yang telah diterbitkan oleh pembangun dan menyimpan status pemasangan secara setempat. Kod app kekal di repository; pengguna tidak perlu mengedit fail untuk memasangnya.
@@ -108,8 +108,13 @@ Gunakan class CSS khusus seperti `.my-app`. Jangan ubah style global `body`, `.w
 
 ## G. Nyahpasang
 
-API `window.BlynsPackages.uninstall('my-app')` disediakan untuk app yang berdaftar dalam katalog. UI nyahpasang pengguna boleh ditambah kemudian di App Library atau Settings.
+API `window.BlynsPackages.uninstall('my-app')` disediakan untuk app yang berdaftar dalam katalog. UI nyahpasang pengguna boleh ditambah kemudian di Launchpad atau Settings.
 
 ## H. Kemas kini versi
 
 Naikkan medan `version` dalam katalog dan manifest, kemas kini fail `app.js`/`style.css`, kemudian terbitkan perubahan ke GitHub. Untuk build statik, pengguna perlu refresh halaman agar browser memuat turun versi fail yang terkini. Sistem auto-update dengan checksum/rollback belum dibina dalam release ini.
+
+
+## Kemas kini pakej
+
+Apabila versi `manifest.json` dinaikkan, Store akan memaparkan butang **Update** pada aplikasi berkenaan jika versi yang dipasang lebih lama. Pengguna mengesahkan kata laluan sebelum BlynsOS memuat semula modul dengan URL berparameter versi.

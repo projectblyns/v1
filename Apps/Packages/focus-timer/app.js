@@ -6,7 +6,7 @@
     name: 'Focus Timer',
     description: 'A quiet focus timer with start, pause and reset controls.',
     category: 'Productivity',
-    version: '1.1.0',
+    version: '1.2.0',
     symbol: '◷',
     colors: '#b8d5ff,#5f83ca',
     size: [480, 430],
@@ -32,6 +32,7 @@
             <button type="button" data-minutes="15">15 min</button>
             <button type="button" data-minutes="25" class="selected">25 min</button>
             <button type="button" data-minutes="45">45 min</button>
+            <button type="button" data-minutes="60">60 min</button>
           </div>
           <p class="focus-package-status" id="focus-status" aria-live="polite">Ready when you are.</p>
         </section>`;

@@ -1,4 +1,4 @@
-# Panduan proses indeks BlynsOS 1.1
+# Panduan proses indeks BlynsOS 1.2
 
 ## 1. Tujuan indeks
 
