@@ -130,7 +130,15 @@ $('#sq').addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.value.trim()
 const W={};
 const APPS={};
 function app(id,n,i,c,r,sz){APPS[id]={n,i,c,r,sz:sz||[620,440]}}
-function openApp(id,arg){if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
+function openApp(id,arg){
+
+  // Launchpad is a system overlay, never a normal window.
+  if(id==='launchpad'){
+    launchpad();
+    return;
+  }
+
+  if(W[id]){if(W[id]){const w=W[id];w.classList.remove('min');w.style.transform='';focus(w);if(arg&&w.q)w.q(arg);return}
 const a=APPS[id],n=Object.keys(W).length,w=document.createElement('div');w.className='win';w.dataset.id=id;
 const [ww,wh]=a.sz,mw=Math.min(ww,innerWidth-20),mh=Math.min(wh,innerHeight-120);Object.assign(w.style,{width:mw+'px',height:mh+'px',left:Math.max(8,(innerWidth-mw)/2+(n%6)*28-70)+'px',top:(50+(n%6)*26)+'px',opacity:0,transform:'scale(.86) translateY(24px)'});
 w.innerHTML=`<div class="tb">
