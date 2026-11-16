@@ -1,0 +1,6 @@
+/* Styles scoped to the Writer package. Keep global Core selectors untouched. */
+.blyns-pkg-writer { display:flex; flex:1; min-width:0; min-height:0; height:100%; overflow:hidden; }
+.blyns-pkg-writer .blyns-package-surface { display:flex; flex:1; min-width:0; min-height:0; height:100%; overflow:hidden; }
+.blyns-pkg-writer .blyns-package-mount { display:flex; flex:1; min-width:0; min-height:0; width:100%; overflow:hidden; }
+.blyns-pkg-writer .blyns-package-loading { margin:auto; padding:18px; color:#858c98; font-size:12px; }
+.blyns-pkg-writer .blyns-package-error { margin:auto; max-width:360px; padding:22px; color:#b42318; font-size:12px; }

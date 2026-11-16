@@ -72,8 +72,8 @@ const hour12=format==='12';
 const clock=$('#clock'),date=$('#date'),menuTime=$('#mt');
 if(clock){
 const formatted=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12});
-const match=formatted.match(/^(.*?)(\s?(?:AM|PM))$/i);
-clock.innerHTML=match?`${match[1]}<span class="clock-period">${match[2].trim()}</span>`:formatted;
+// The lock screen keeps a clean time-only display; AM/PM remains in the desktop menu bar.
+clock.textContent=formatted.replace(/\s?(?:AM|PM)$/i,'').trim();
 }
 if(date)date.textContent=d.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'});
 if(menuTime)menuTime.textContent=d.toLocaleTimeString([], {weekday:'short',hour:'2-digit',minute:'2-digit',hour12});
@@ -265,7 +265,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 <h2 style="color:#ff3b30">${d.toLocaleString([],{month:'long',year:'numeric'})}</h2>
                 <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:12px;text-align:center">${['S','M','T','W','T','F','S'].map(x=>`<b>${x}</b>`).join('')}${c}</div>
             </div>`)},[520,460]);
-            app('notes','Notes','📝','#ffe066,#f4b400',b=>{const N=['Welcome','Ideas','Groceries'];const m=sideApp(b,N,(n)=>`<textarea style="width:100%;height:100%;border:0;outline:none;font-size:15px;resize:none;background:none;color:#222" placeholder="Start typing…">${n=='Welcome'?'Welcome to Notes on BlynsOS 1.2!':''}</textarea>`)});
+            app('notes','Notes','📝','#ffe066,#f4b400',b=>{const N=['Welcome','Ideas','Groceries'];const m=sideApp(b,N,(n)=>`<textarea style="width:100%;height:100%;border:0;outline:none;font-size:15px;resize:none;background:none;color:#222" placeholder="Start typing…">${n=='Welcome'?'Welcome to Notes on BlynsOS 1.3!':''}</textarea>`)});
             app('reminders','Reminders','☑️','#fff,#ddd',b=>{H(b,`<div class="main">
                 <h2 style="color:#0a84ff;margin-bottom:10px">Today</h2>
                 <div id="rl"></div><input class="in" id="ri" placeholder="New Reminder" style="width:100%;margin:10px 0">
@@ -294,7 +294,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 whoami:()=>S.name||'User',
                 ls:()=>['Desktop','Documents','Downloads'].map(n=>n+': '+((FS&&FS[n]||[]).length)+' item(s)').join('\n'),
                 apps:()=>Object.values(APPS).map(a=>a.n).sort().join('\n'),
-                version:'BlynsOS 1.2'
+                version:'BlynsOS 1.3'
                 };
                 const input=$('#t',b);
                 input.onkeydown=e=>{
@@ -324,7 +324,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 if(n=='Users & Groups'){setTimeout(()=>$('#lo',m).onclick=logout);return`<h3>Users & Groups</h3>
                 <p style="margin:12px 0">${S.name} (Admin)</p><button class="pb" id="lo">🔒 Lock Screen / Log Out</button>`}
                 return`<h3>About BlynsOS</h3>
-                <p style="margin-top:10px">BlynsOS 1.2<br>Chip: Blyns Core<br>Memory: 32 GB</p>
+                <p style="margin-top:10px">BlynsOS 1.3<br>Chip: Blyns Core<br>Memory: 32 GB</p>
                 <p style="margin-top:18px"><button class="pb" style="background:#ff3b30" id="fr">Erase All Content and Settings…</button></p>`+(setTimeout(()=>{const x=$('#fr',m);x&&(x.onclick=requestFactoryErase)}),'')},0)},[680,460]);
                 /* ===== 27.2 ===== */
                 document.body.insertAdjacentHTML('beforeend',`<div id="am"></div>
@@ -334,7 +334,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 $('#desk').insertAdjacentHTML('afterbegin','<div id="ds"></div>');
                 $('#off').innerHTML='<div class="power-hint">0 to turn on</div>';
                 $('#off').onclick=()=>{if(S.off){S.off=false;$('#off').classList.remove('on');boot()}};
-                const PIN=['finder','launchpad','safari','siri','messages','mail','maps','photos','calendar','notes','reminders','music','store','terminal','settings'];
+                const PIN=['finder','launchpad','safari','siri','mail','photos','calendar','notes','reminders','music','store','terminal','settings'];
                 const CHG='Welcome to Notes on BlynsOS.\n\nYour notes are saved locally in this browser profile.';
                 const GL={
                 finder:`
@@ -436,7 +436,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 function dockBuild(){dk.innerHTML=PIN.map(dHTML).join('');$$('.di',dk).forEach(wire)}
                 function dI(id){let e=$(`.di[data-id="${id}"]`);if(!e){dk.insertAdjacentHTML('beforeend',dHTML(id));e=dk.lastElementChild;wire(e)}return e}
                 const ld=(k,d)=>window.BlynsStorage.get(k,d),sv=(k,v)=>window.BlynsStorage.set(k,v);
-                const defFS=()=>({Desktop:[{n:'Welcome.txt',t:'txt',c:'Welcome to BlynsOS 1.2!\n\nDouble-click files to open them. Edit and press Save.'},{n:'Sunset.png',t:'img',c:'linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)'}],Documents:[{n:'Todo.txt',t:'txt',c:'1. Mission Control (M)\n2. Stage Manager (S)\n3. Window snap (W)\n4. Launchpad (L)'},{n:'Aurora.png',t:'img',c:'linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)'}],Downloads:[{n:'Ocean.jpg',t:'img',c:'linear-gradient(180deg,#89f7fe,#0a5fb4)'}]});
+                const defFS=()=>({Desktop:[{n:'Welcome.txt',t:'txt',c:'Welcome to BlynsOS 1.3!\n\nDouble-click files to open them. Edit and press Save.'},{n:'Sunset.png',t:'img',c:'linear-gradient(160deg,#1b2a5e,#d9638f,#ffb86b)'}],Documents:[{n:'Todo.txt',t:'txt',c:'1. Mission Control (M)\n2. Stage Manager (S)\n3. Window snap (W)\n4. Launchpad (L)'},{n:'Aurora.png',t:'img',c:'linear-gradient(200deg,#0f2027,#2c9d8a,#9be15d)'}],Downloads:[{n:'Ocean.jpg',t:'img',c:'linear-gradient(180deg,#89f7fe,#0a5fb4)'}]});
                 let FS=ld('mac_fs',null)||defFS();
                 // Remove only the original gradient-image placeholders; keep files created by the user.
                 const seededPreviewImages=new Set([
@@ -466,7 +466,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     <div class="main"></div>
                 </div>`);const L=['Applications','Desktop','Documents','Downloads'];
                 const rf=()=>{$('.side',b).innerHTML=L.map(x=>`<div class="${x==loc?'a':''}">${x=='Applications'?'🅰️':'📁'} ${x}</div>`).join('');$$('.side div',b).forEach((d,i)=>d.onclick=()=>{loc=L[i];sel=null;rf()});const m=$('.main',b);$('#pt',b).textContent=loc;
-                m.innerHTML=loc=='Applications'?Object.keys(APPS).filter(k=>k!='launchpad').map(k=>`<div class="tile" data-k="${k}"><u>${ico(k)}</u>${APPS[k].n}</div>`).join(''):(FS[loc].map((f,i)=>`<div class="tile" data-i="${i}">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')||'<p style="color:#999">Folder is empty</p>');
+                m.innerHTML=loc=='Applications'?Object.keys(APPS).filter(k=>k!='launchpad'&&isBlynsInstalled(k)).map(k=>`<div class="tile" data-k="${k}"><u>${ico(k)}</u>${APPS[k].n}</div>`).join(''):(FS[loc].map((f,i)=>`<div class="tile" data-i="${i}">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')||'<p style="color:#999">Folder is empty</p>');
                 $$('.tile',m).forEach(t=>{t.onclick=()=>{sel=t.dataset.i;$$('.tile',m).forEach(x=>x.style.background='');t.style.background='#cfe1ff';t.style.borderRadius='8px'};t.ondblclick=()=>t.dataset.k?openApp(t.dataset.k):openFile(FS[loc][t.dataset.i])})};
                 $('#nf',b).onclick=()=>{if(loc=='Applications')return;let n=1;while(FS[loc].some(f=>f.n=='Untitled '+n+'.txt'))n++;FS[loc].push({n:'Untitled '+n+'.txt',t:'txt',c:''});saveFS();rf()};
                 $('#dl',b).onclick=()=>{if(sel!=null&&loc!='Applications'){FS[loc].splice(sel,1);sel=null;saveFS();rf()}};rf()};APPS.finder.sz=[680,440];
@@ -521,7 +521,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
 
 
                 /* ================= BlynsOS 1.1 ================= */
-                const RELEASE='BlynsOS 1.2';
+                const RELEASE='BlynsOS 1.3';
                 const installKey='mac_installed_272';
                 let installed=(()=>{try{return JSON.parse(localStorage.getItem(installKey)||'[]')}catch(e){return []}})();
                 let wifiOn=true,bluetoothOn=true,stageOn=false,brightness=100;
@@ -624,17 +624,17 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 nav.innerHTML=pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');
                 let html='';
                 if(page==='General')html=`<h2>General</h2>
-                <p>Manage core BlynsOS preferences.</p>${row('Software Update','BlynsOS 1.2','Software Update','View')}${row('Storage','Local demo storage overview','Storage','View')}<div class="settings-row">
+                <p>Manage core BlynsOS preferences.</p>${row('Software Update','BlynsOS 1.3','Software Update','View')}${row('Storage','Local demo storage overview','Storage','View')}<div class="settings-row">
                     <div><b>Appearance</b><small>BlynsOS light appearance is enabled</small></div><span style="color:#777;font-size:12px">Light</span>
                 </div>`;
                 if(page==='Software Update')html=`<h2>Software Update</h2>
-                <p>BlynsOS 1.2 is installed and up to date.</p>
+                <p>BlynsOS 1.3 is installed and up to date.</p>
                 <div class="app-hero" style="margin:18px 0">
                     <div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div>
-                    <h3 style="margin-top:8px">BlynsOS 1.2</h3>
-                    <p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span>
+                    <h3 style="margin-top:8px">BlynsOS 1.3</h3>
+                    <p style="font-size:12px;margin-top:5px">Version 1.3 · App Package Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span>
                 </div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
-                if(page==='Update Details')html=`<h2>BlynsOS 1.2</h2>
+                if(page==='Update Details')html=`<h2>BlynsOS 1.3</h2>
                 <p>Complete release notes for this build.</p>
                 <div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px">
                     <h3 style="margin:4px 0 8px">New features and improvements</h3>
@@ -701,7 +701,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                         <li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li>
                         <li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li>
                     </ul>
-                    <p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.2 · System, account and app improvements for your personal workspace.</p>
+                    <p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.3 · System, account and app improvements for your personal workspace.</p>
                 </div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
                 if(page==='Wi-Fi')html=`<h2>Wi-Fi</h2>
                 <p>Wireless connection controls</p>
@@ -745,7 +745,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
 
                 // Compact Control Center. Network switches are UI-state demos; no real network adapter is changed.
                 if(!$('#ccpanel'))document.body.insertAdjacentHTML('beforeend',`<div id="ccpanel">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin:1px 2px 12px"><b style="font-size:14px">Control Center</b><span style="font-size:10px;color:#858993">BlynsOS 1.2</span></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin:1px 2px 12px"><b style="font-size:14px">Control Center</b><span style="font-size:10px;color:#858993">BlynsOS 1.3</span></div>
                     <div class="ccgrid"><button class="cc-tile" id="cc-wifi"><span class="cc-symbol">⌁</span><span><strong>Wi-Fi</strong><small id="cc-wifi-state">On</small></span></button><button class="cc-tile" id="cc-bt"><span class="cc-symbol">ᛒ</span><span><strong>Bluetooth</strong><small id="cc-bt-state">On</small></span></button><button class="cc-tile" id="cc-stage"><span class="cc-symbol">▣</span><span><strong>Stage Manager</strong><small id="cc-stage-state">Off</small></span></button><button class="cc-tile" id="cc-settings"><span class="cc-symbol">⚙</span><span><strong>Blyns Settings</strong><small>Open settings</small></span></button></div>
                     <div class="cc-slider"><label><span>Display brightness</span><span id="cc-bright-label">100%</span></label><input id="cc-bright" type="range" min="55" max="120" value="100"></div>
                     <div class="cc-slider"><label><span>Sound</span><span id="cc-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="cc-vol" type="range" min="0" max="8" value="${S.vol}"></div>
@@ -1010,7 +1010,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 $('#nf',b).disabled=apps;$('#dl',b).disabled=apps||sel==null;
                 $('#oa',b).disabled=selectedApps.size===0;
                 $('#oa',b).textContent=`Open Selected (${selectedApps.size})`;
-                $('#fa',b).textContent=selectedApps.size===Object.keys(APPS).filter(k=>k!=='launchpad').length?'Deselect All':'Select All';
+                $('#fa',b).textContent=selectedApps.size===Object.keys(APPS).filter(k=>k!=='launchpad'&&isBlynsInstalled(k)).length?'Deselect All':'Select All';
                 };
                 const openSelected=()=>{
                 const ids=[...selectedApps].filter(id=>APPS[id]);
@@ -1023,7 +1023,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 $$('.side div',b).forEach((d,i)=>d.onclick=()=>{loc=L[i];sel=null;selectedApps.clear();rf()});
                 const m=$('.main',b);$('#pt',b).textContent=loc;
                 m.innerHTML=loc==='Applications'
-                ?Object.keys(APPS).filter(k=>k!=='launchpad').map(k=>`<div class="tile finder-app ${selectedApps.has(k)?'selected':''}" data-k="${k}"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')
+                ?Object.keys(APPS).filter(k=>k!=='launchpad'&&isBlynsInstalled(k)).map(k=>`<div class="tile finder-app ${selectedApps.has(k)?'selected':''}" data-k="${k}"><u>${ico(k)}</u><span>${APPS[k].n}</span></div>`).join('')
                 :(FS[loc].map((f,i)=>`<div class="tile" data-i="${i}">${fi(f)}<span>${esc(f.n)}</span></div>`).join('')||'<p style="color:#999">Folder is empty</p>');
                 $$('.tile',m).forEach(t=>{
                 t.onclick=()=>{
@@ -1041,7 +1041,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                 refreshActions();
                 };
                 $('#fa',b).onclick=()=>{
-                const ids=Object.keys(APPS).filter(k=>k!=='launchpad');
+                const ids=Object.keys(APPS).filter(k=>k!=='launchpad'&&isBlynsInstalled(k));
                 if(selectedApps.size===ids.length)selectedApps.clear();else ids.forEach(id=>selectedApps.add(id));
                 rf();
                 };
@@ -1326,15 +1326,15 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     nav.innerHTML=pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');
                     let html='';
                     if(page==='General')html=`<h2>General</h2>
-                    <p>System information and software preferences.</p>${row('Software Update','BlynsOS 1.2','Software Update','View')}${row('Storage','Local browser storage overview','Storage','View')}${row('About BlynsOS','Version, chip and memory','About','View')}`;
+                    <p>System information and software preferences.</p>${row('Software Update','BlynsOS 1.3','Software Update','View')}${row('Storage','Local browser storage overview','Storage','View')}${row('About BlynsOS','Version, chip and memory','About','View')}`;
                     if(page==='Software Update')html=`<h2>Software Update</h2>
-                    <p>BlynsOS 1.2 is installed and up to date.</p>
+                    <p>BlynsOS 1.3 is installed and up to date.</p>
                     <div class="app-hero" style="margin:18px 0">
                         <div style="font-size:32px;font-weight:800;letter-spacing:-3px">B.</div>
-                        <h3 style="margin-top:8px">BlynsOS 1.2</h3>
-                        <p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span>
+                        <h3 style="margin-top:8px">BlynsOS 1.3</h3>
+                        <p style="font-size:12px;margin-top:5px">Version 1.3 · App Package Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Up to date</span>
                     </div>${row('Release information','Full list of new features, changes, removals and rebrands','Update Details','View Details')}<button class="settings-link" data-go="General" style="margin-top:12px">Back</button>`;
-                    if(page==='Update Details')html=`<h2>BlynsOS 1.2</h2>
+                    if(page==='Update Details')html=`<h2>BlynsOS 1.3</h2>
                     <p>Complete release notes for this build.</p>
                     <div style="margin-top:18px;padding:16px;border-radius:13px;background:#fff;border:1px solid #e7e9ed;color:#30343b;line-height:1.65;font-size:13px">
                         <h3 style="margin:4px 0 8px">New features and improvements</h3>
@@ -1401,7 +1401,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                             <li>Removed the visible mouse pointer during boot, restart and shutdown black screens.</li>
                             <li>Replaced Apple/macOS product naming and app labels with BlynsOS branding and Blyns app names.</li>
                         </ul>
-                        <p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.2 · System, account and app improvements for your personal workspace.</p>
+                        <p style="font-size:11px;margin-top:16px;color:#777">Build: BlynsOS 1.3 · System, account and app improvements for your personal workspace.</p>
                     </div><button class="settings-link" data-go="Software Update" style="margin-top:14px">Back to Software Update</button>`;
                     if(page==='Appearance')html=`<h2>Appearance</h2>
                     <p>Personalize the visual style of Golden Gate.</p>
@@ -1462,7 +1462,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     if(page==='About')html=`<h2>About BlynsOS</h2>
                     <div class="app-hero" style="margin-top:16px">
                         <div style="font-size:30px;font-weight:800">B.</div>
-                        <h3 style="margin-top:8px">BlynsOS 1.2</h3>
+                        <h3 style="margin-top:8px">BlynsOS 1.3</h3>
                         <p style="margin-top:6px">Chip: Blyns Core<br>Memory: 32 GB<br>Display: BlynsOS</p>
                     </div>`;
                     if(page==='Storage')html=`<h2>Storage</h2>
@@ -1488,7 +1488,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     };
 
                     // Update the Control Center wording and persist settings state when toggles change.
-                    $('#ccpanel').querySelector('.cc-foot span').textContent='Dark appearance · BlynsOS 1.1';
+                    $('#ccpanel').querySelector('.cc-foot span').textContent='Dark appearance · BlynsOS 1.3';
                     const ccStageOld=$('#cc-stage').onclick;
                     $('#cc-stage').onclick=()=>toggleStage();
                     $('#cc-wifi').onclick=()=>{wifiOn=!wifiOn;prefs273.wifiPreference=wifiOn;savePrefs273();syncCC()};
@@ -1503,7 +1503,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     $('#wins').addEventListener('click',e=>{const w=e.target.closest('.win');if(w&&w.dataset.id){lastUsedWindowId=w.dataset.id;updateDesktopState273()}},true);
 
                     // Update release strings inside the existing status panel.
-                    const ccTitle=$('#ccpanel').querySelector('div span');if(ccTitle)ccTitle.textContent='BlynsOS 1.1';
+                    const ccTitle=$('#ccpanel').querySelector('div span');if(ccTitle)ccTitle.textContent='BlynsOS 1.3';
                     updateDesktopState273();syncCC();dockBuild();
 
 
@@ -1511,7 +1511,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     /* ================= BlynsOS 1.1 functional update ================= */
                     document.body.classList.add('black-screen');
                     const BLYNS_APP_NAMES={
-                    finder:'Files',safari:'Navigator',siri:'Blyns Assistant',messages:'Chatline',mail:'Inbox',maps:'Atlas',photos:'Gallery',calendar:'Daybook',notes:'Jotter',reminders:'Tasks',music:'Soundwave',weather:'Forecast',clock:'World Clock',calc:'Math Desk',terminal:'Console',store:'Blyns Store',settings:'Blyns Settings',launchpad:'Launchpad',textedit:'Writer',preview:'Image Viewer',freeform:'Canvas',books:'Reader',contacts:'People',podcasts:'Broadcasts',home:'Smart Home',monitor:'System Monitor',keynote:'Slides',pages:'Documents',weatherplus:'Forecast Plus'
+                    finder:'Files',safari:'Navigator',siri:'Blyns Assistant',messages:'Chatline',mail:'Inbox',maps:'Atlas',photos:'Gallery',calendar:'Daybook',notes:'Jotter',reminders:'Tasks',music:'Soundwave',weather:'Forecast',clock:'World Clock',calc:'Calculator',terminal:'Console',store:'Blyns Store',settings:'Blyns Settings',launchpad:'Launchpad',textedit:'Writer',preview:'Image Viewer',freeform:'Canvas',books:'Reader',contacts:'People',podcasts:'Broadcasts',home:'Smart Home',monitor:'System Monitor',keynote:'Slides',pages:'Documents',weatherplus:'Forecast Plus'
                     };
                     Object.entries(BLYNS_APP_NAMES).forEach(([id,name])=>{if(APPS[id])APPS[id].n=name;if(typeof installedApps!=='undefined'&&installedApps[id])installedApps[id].n=name;});
                     $('#an').textContent='Files';
@@ -1555,7 +1555,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                     },true);
 
                     // Store-only apps are kept out of desktop shortcuts, Finder's installed-app view and Launchpad until installed.
-                    function isBlynsInstalled(id){return !Object.prototype.hasOwnProperty.call(installedApps,id)||installed.includes(id);}
+                    function isBlynsInstalled(id){if(id==='messages'||id==='maps')return installed.includes(id);return !Object.prototype.hasOwnProperty.call(installedApps,id)||installed.includes(id);}
 
                     // Free-position desktop icons. File coordinates live with the file; app coordinates use a separate local preference.
                     const BLYNS_DESKTOP_APP_POS='blyns_desktop_app_positions';
@@ -1720,7 +1720,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
 
                                     /* ================= BlynsOS 1.1 ================= */
                                     (()=>{
-                                    const V2='BlynsOS 1.2';
+                                    const V2='BlynsOS 1.3';
                                     const WORDMARK='https://i.postimg.cc/Dy8SsWjX/Blyns-OS-Logo.png';
                                     const B_MARK='https://i.postimg.cc/Pxv27fKS/Blyns-OS-Logo.png';
                                     const txt=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1766,7 +1766,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                 <div class="cc-v2-slider"><label><span>Brightness</span><span id="cc-bright-label">${brightness}%</span></label><input id="cc-bright" type="range" min="55" max="120" value="${brightness}"></div>
                                                 <div class="cc-v2-slider"><label><span>Sound</span><span id="cc-vol-label">${Math.round(S.vol/8*100)}%</span></label><input id="cc-vol" type="range" min="0" max="8" value="${S.vol}"></div>
                                             </div>
-                                            <div class="cc-v2-foot"><span>BlynsOS 1.2</span><button id="cc-done">Done</button></div>`;
+                                            <div class="cc-v2-foot"><span>BlynsOS 1.3</span><button id="cc-done">Done</button></div>`;
 
                                             syncCC=function(){
                                             const p=$('#ccpanel');if(!p)return;
@@ -1859,7 +1859,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
 
                                             // Register optional app packages supplied from the Apps folder.
                                             (window.BLYNS_APP_PACKAGES||[]).forEach(pkg=>{
-                                            if(!pkg||!pkg.id||typeof pkg.render!=='function'||APPS[pkg.id])return;
+                                            if(!pkg||pkg.coreId||!pkg.id||typeof pkg.render!=='function'||APPS[pkg.id])return;
                                             const renderer=(container,win,args)=>pkg.render(container,{
                                             window:win,args,
                                             toast:(message)=>toast(message),
@@ -2326,7 +2326,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                     <li>Apps/Packages continues to support independently installed and updated app modules.</li>
                                                                                     <li>Legacy built-in apps remain hosted by Core in this compatibility release; their extraction into individual Apps/BuiltIn modules is staged to protect shared Files, window and storage dependencies.</li>
                                                                                 </ul>
-                                                                                <p style="font-size:11px;color:#777;margin-top:14px">BlynsOS 1.2 · Appearance, installation security, Stage Manager and desktop refinements.</p>`;
+                                                                                <p style="font-size:11px;color:#777;margin-top:14px">BlynsOS 1.3 · App packages, setup and lock-screen refinements, Stage Manager and desktop refinements.</p>`;
                                                                                 const draw=()=>{
                                                                                 const profileDisplay=avatarGlyph==='initial'?txt((S.name||'B').trim().slice(0,1).toUpperCase()):txt(avatarGlyph);
                                                                                 nav.innerHTML=`<button class="settings-user-card" id="settings-user-card" type="button"><span class="settings-user-avatar" style="background:linear-gradient(145deg,${avatarColor},color-mix(in srgb,${avatarColor} 60%,#17243a))">${profileDisplay}</span><span class="settings-user-meta"><b>${txt(S.name||'User')}</b><small>Personal Account</small></span><span class="settings-user-chevron">›</span></button>`+pages.map(x=>`<div data-page="${x}" class="${x===page?'a':''}">${x}</div>`).join('');let html='';
@@ -2341,7 +2341,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                 <p>${V2} is installed.</p>
                                                                                 <div class="app-hero" style="margin:18px 0;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="display:block;width:min(230px,85%);height:78px;object-fit:contain;margin:0 auto 12px">
                                                                                     <h3>${V2}</h3>
-                                                                                    <p style="font-size:12px;margin-top:5px">Version 1.2 · Major Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Installed</span>
+                                                                                    <p style="font-size:12px;margin-top:5px">Version 1.3 · App Package Update</p><span style="display:inline-block;margin-top:12px;padding:5px 10px;border-radius:20px;background:#d9f4e4;color:#187a42;font-size:11px">Installed</span>
                                                                                 </div>${row('Update Details','Full additions, removed features, fixes and rebrands','Update Details','View Details')}`;
                                                                                 if(page==='Update Details')html=`<h2>${V2}</h2>
                                                                                 <p>Complete release notes for this build.</p>
@@ -2436,7 +2436,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                 </div>`;
                                                                                 if(page==='About')html=`<h2>About BlynsOS</h2>
                                                                                 <div class="app-hero" style="margin-top:16px;text-align:center"><img src="${WORDMARK}" alt="BlynsOS" style="width:min(210px,80%);height:70px;object-fit:contain">
-                                                                                    <h3 style="margin-top:8px">Version 1.2</h3>
+                                                                                    <h3 style="margin-top:8px">Version 1.3</h3>
                                                                                     <p style="margin-top:6px">Major Update</p>
                                                                                 </div>
                                                                                 <p style="margin-top:14px;color:#777">BlynsOS brings your apps, files and personal settings together in one desktop workspace.</p>`;
@@ -2507,7 +2507,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                     desktopApps=[];sv('blyns_v2_desktop_apps',desktopApps);blynsDesktopAppPos={};sv(BLYNS_DESKTOP_APP_POS,blynsDesktopAppPos);
                                                                                     prefs273=Object.assign({},defaults273,{wallpaper:'golden',dark:false,focusMode:false});savePrefs273();applyPrefs273();
                                                                                     avatarColor='#648fc5';avatarGlyph='initial';
-                                                                                    try{PIN.splice(0,PIN.length,'finder','launchpad','safari','siri','messages','mail','maps','photos','calendar','notes','reminders','music','store','terminal','settings');saveDock273();}catch(e){}
+                                                                                    try{PIN.splice(0,PIN.length,'finder','launchpad','safari','siri','mail','photos','calendar','notes','reminders','music','store','terminal','settings');saveDock273();}catch(e){}
                                                                                     selectedDesktop=null;renderDesktop();clearWins();closeCC();$('#lp').classList.remove('on');$('#mc').classList.remove('on');$('#spotlight')?.classList.remove('on');$('#am').classList.remove('on');
                                                                                     if(window.BlynsOff)window.BlynsOff.execute('restart');else restart();
                                                                                     };
@@ -2542,7 +2542,7 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                     $('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')setTimeout(()=>{if(S.ph==='desk')e.target.blur();},0)});
 
                                                                                     // Hide unfinished sample/prototype apps until real implementations or service integrations are supplied.
-                                                                                    const deferredSampleApps273=['weather','weatherplus','home','monitor','podcasts','books','contacts','keynote','pages'];
+                                                                                    const deferredSampleApps273=['weather','weatherplus','home','monitor','podcasts','books','contacts','keynote','pages','messages','maps'];
                                                                                     deferredSampleApps273.forEach(id=>{delete APPS[id];delete installedApps[id];});
                                                                                     for(const id of deferredSampleApps273){const pinIndex=PIN.indexOf(id);if(pinIndex!==-1)PIN.splice(pinIndex,1);}
                                                                                     installed=installed.filter(id=>!deferredSampleApps273.includes(id));
@@ -2577,6 +2577,9 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                     toast:message=>toast(message),
                                                                                     storage:window.BlynsStorage,
                                                                                     files:window.BlynsFileVault,
+                                                                                    desktop:window.BlynsPackageDesktop,
+                                                                                    fetch:window.fetch.bind(window),
+                                                                                    download:(url,name,options)=>window.BlynsPackageDesktop?.download(url,name,options),
                                                                                     openApp:(id,arg)=>openApp(id,arg),
                                                                                     onClose:callback=>{if(win&&typeof callback==='function')win.__blynsCleanup=callback;}
                                                                                     });
@@ -2775,6 +2778,81 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                             },0);
                                                                                             },true);
 
+                                                                                            // BlynsOS v1.3 — the nine selected apps now enter through independent package folders.
+                                                                                            // The legacy renderer is retained as a compatibility adapter while each app is redesigned.
+                                                                                            const blynsPackageDesktopAPI=Object.freeze({
+                                                                                                list(folder='Desktop'){
+                                                                                                    const items=Array.isArray(FS?.[folder])?FS[folder]:[];
+                                                                                                    return items.map(item=>({...item}));
+                                                                                                },
+                                                                                                save(file,{folder='Desktop'}={}){
+                                                                                                    if(!['Desktop','Documents','Downloads'].includes(folder))throw new Error('Unsupported desktop folder.');
+                                                                                                    if(!file||typeof file!=='object'||!String(file.n||'').trim())throw new TypeError('A file name is required.');
+                                                                                                    if(!Array.isArray(FS[folder]))FS[folder]=[];
+                                                                                                    const record={...file,n:String(file.n).slice(0,180),t:file.t||'txt'};
+                                                                                                    if(record.vaultId)throw new TypeError('Use download() to store binary files.');
+                                                                                                    FS[folder].push(record);sv('mac_fs',FS);rd();
+                                                                                                    if(folder==='Desktop'&&typeof renderDesktop==='function')renderDesktop();
+                                                                                                    return {...record};
+                                                                                                },
+                                                                                                async download(url,name,{folder='Downloads'}={}){
+                                                                                                    if(!['Desktop','Documents','Downloads'].includes(folder))throw new Error('Unsupported desktop folder.');
+                                                                                                    if(!window.BlynsFileVault?.saveFile)throw new Error('Desktop file storage is unavailable.');
+                                                                                                    const response=await fetch(url);
+                                                                                                    if(!response.ok)throw new Error(`Download failed (${response.status}).`);
+                                                                                                    const blob=await response.blob();
+                                                                                                    const metadata=await window.BlynsFileVault.saveFile(blob,{name:name||'Downloaded file',folder});
+                                                                                                    const record={n:metadata.name,t:'blob',vaultId:metadata.id,type:metadata.type,size:metadata.size};
+                                                                                                    if(!Array.isArray(FS[folder]))FS[folder]=[];
+                                                                                                    FS[folder].push(record);sv('mac_fs',FS);rd();
+                                                                                                    if(folder==='Desktop'&&typeof renderDesktop==='function')renderDesktop();
+                                                                                                    return {...record};
+                                                                                                },
+                                                                                                async read(file){
+                                                                                                    if(!file)return null;
+                                                                                                    if(file.vaultId){const record=await window.BlynsFileVault?.getFile?.(file.vaultId);return record?.blob||null;}
+                                                                                                    return file.c??null;
+                                                                                                },
+                                                                                                async remove(index,{folder='Desktop'}={}){
+                                                                                                    if(!['Desktop','Documents','Downloads'].includes(folder))throw new Error('Unsupported desktop folder.');
+                                                                                                    const item=FS[folder]?.[index];if(!item)return false;
+                                                                                                    if(item.vaultId)await window.BlynsFileVault?.deleteFile?.(item.vaultId);
+                                                                                                    FS[folder].splice(index,1);sv('mac_fs',FS);rd();
+                                                                                                    if(folder==='Desktop'&&typeof renderDesktop==='function')renderDesktop();
+                                                                                                    return true;
+                                                                                                }
+                                                                                            });
+                                                                                            window.BlynsPackageDesktop=blynsPackageDesktopAPI;
+                                                                                            (window.BLYNS_APP_PACKAGES||[]).forEach(pkg=>{
+                                                                                                if(!pkg||typeof pkg.render!=='function')return;
+                                                                                                if(!pkg.coreId){
+                                                                                                    try{window.BlynsCore.registerPackage(pkg);}
+                                                                                                    catch(error){console.error('BlynsOS standalone package registration failed:',pkg.id,error);}
+                                                                                                    return;
+                                                                                                }
+                                                                                                const target=APPS[pkg.coreId];
+                                                                                                if(!target){console.warn('BlynsOS package target was not found:',pkg.coreId);return;}
+                                                                                                const legacyRenderer=target.r;
+                                                                                                target.n=pkg.name||target.n;
+                                                                                                target.icon=pkg.icon||window.BlynsRegistry?.iconPath(pkg.coreId)||target.icon||'';
+                                                                                                target.sz=pkg.size||target.sz;
+                                                                                                target.r=(container,win,args)=>pkg.render(container,{
+                                                                                                    window:win,args,
+                                                                                                    toast:message=>toast(message),
+                                                                                                    storage:window.BlynsStorage,
+                                                                                                    files:window.BlynsFileVault,
+                                                                                                    desktop:blynsPackageDesktopAPI,
+                                                                                                    fetch:window.fetch.bind(window),
+                                                                                                    download:(url,name,options)=>blynsPackageDesktopAPI.download(url,name,options),
+                                                                                                    openApp:(id,arg)=>openApp(id,arg),
+                                                                                                    legacyRender:(targetContainer=container)=>legacyRenderer(targetContainer,win,args),
+                                                                                                    onClose:callback=>{if(win&&typeof callback==='function')win.__blynsCleanup=callback;}
+                                                                                                });
+                                                                                            });
+                                                                                            // Optional next-wave packages stay out of Launchpad and Dock until installed.
+                                                                                            ['messages','maps'].forEach(id=>{const index=PIN.indexOf(id);if(index>=0)PIN.splice(index,1);});
+                                                                                            try{saveDock273();}catch(error){console.warn('Could not refresh the Dock package list.',error);}
+
                                                                                             // Show a small confirmation after a package update has been restored at its new version.
                                                                                             addEventListener('blyns:package-updated',event=>{
                                                                                             const details=event.detail||{};
@@ -2792,4 +2870,4 @@ app('messages','Messages','💬','#5be26b,#1db23a',b=>{
                                                                                             dockBuild();
 
                                                                                             })();
-                                                                                            /* ================= end BlynsOS 1.2 ================= */
+                                                                                            /* ================= end BlynsOS 1.3 ================= */

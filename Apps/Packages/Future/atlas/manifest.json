@@ -1,0 +1,20 @@
+{
+  "id": "atlas",
+  "name": "Atlas",
+  "description": "Map and place discovery workspace (planned for a later release).",
+  "category": "Travel",
+  "version": "0.1.0",
+  "entry": "app.js",
+  "template": "index.html",
+  "styles": "style.css",
+  "icon": "../../../../Assets/Icons/atlas.png",
+  "symbol": "⌖",
+  "status": "planned-not-loaded",
+  "permissions": [
+    "storage:local",
+    "desktop:read",
+    "desktop:write",
+    "network:fetch"
+  ],
+  "compatibility": "BlynsOS 1.3+"
+}

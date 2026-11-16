@@ -1,0 +1,20 @@
+{
+  "id": "chatline",
+  "name": "Chatline",
+  "description": "Chat and messaging workspace (planned for a later release).",
+  "category": "Communication",
+  "version": "0.1.0",
+  "entry": "app.js",
+  "template": "index.html",
+  "styles": "style.css",
+  "icon": "../../../../Assets/Icons/chatline.png",
+  "symbol": "●",
+  "status": "planned-not-loaded",
+  "permissions": [
+    "storage:local",
+    "desktop:read",
+    "desktop:write",
+    "network:fetch"
+  ],
+  "compatibility": "BlynsOS 1.3+"
+}

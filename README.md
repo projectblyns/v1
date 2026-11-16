@@ -1,42 +1,28 @@
-# BlynsOS 1.2 — Major Update
+# BlynsOS 1.3 — App Package Update
 
-Release package based on the existing BlynsOS 1.1 Indexed structure. Existing browser-profile data is retained; do not use **Erase All Content** during an ordinary upgrade.
+BlynsOS is a browser-based desktop workspace. Version 1.3 builds on v1.2.1 with a more reliable startup sequence, a repaired first-run setup flow, a cleaner lock screen and a new per-app package structure.
 
-## Installation
+## Start
 
-1. Back up the current repository.
-2. Copy the contents of this ZIP into the repository root, preserving folder names and capitalisation.
-3. Keep any personal assets that are not supplied in this package.
-4. Commit and push the changes to GitHub Pages.
-5. Hard-refresh the deployed page with `Ctrl + Shift + R`.
+Jalankan melalui local web server atau deploy sebagai static site (contohnya GitHub Pages). Elakkan `file://` kerana pelayar boleh menyekat `fetch` dan storan tertentu. The project uses browser storage; user profiles and saved files remain in the browser used to run BlynsOS.
 
-## Main changes in 1.2
+## v1.3 changes
 
-- Uploaded wallpapers are stored in IndexedDB and restored after refresh.
-- Appearance lists built-in and installed wallpapers; **Get More** opens the Store catalogue.
-- App and wallpaper installation requires the account password.
-- The desktop grid appears only while dragging desktop items.
-- Launchpad replaces the App Library label and only lists installed apps.
-- Stage Manager is limited to five windows; overflow windows are minimized, with no scroll rail.
-- Settings includes a profile card in its sidebar.
-- The lock screen uses separate glass clock/calendar surfaces, a minimal password field and a rounded clock with smaller AM/PM.
-- Avatar and profile shapes are fixed to a true circle.
-- Dock glass, scrollbars, sliders and progress bars have been refined.
-- New password hashes use PBKDF2-SHA-256 with 600,000 iterations. Existing stored hashes remain verifiable.
-- Optional package apps now compare manifest versions and can be updated after password confirmation; Focus Timer is updated to v1.2.0.
+- Boot progress resets to 0 and completes over the full 3 seconds on every power-on, restart and shutdown-to-start cycle.
+- Setup Hello screen now renders on entry. The language-selection step has been removed, leaving a 9-step setup flow. The account-preparation screen advances automatically.
+- Lock screen shows the calendar/date above the time, uses a smaller clock and password field, removes glass frames and removes the “Unlock BlynsOS” caption.
+- 12-hour lock-screen time no longer displays AM/PM. The desktop menu-bar clock retains its selected time format.
+- Navigator, Daybook, Jotter, Tasks, Soundwave, World Clock, Calculator, Writer and Inbox now have their own `manifest.json`, `index.html`, `style.css` and `app.js` package folders.
+- Chatline and Atlas are reserved as future packages and are not loaded by default in this release.
+- App packages receive a shared API for local storage, desktop file listing/saving, network fetch and downloading binary files into BlynsOS Downloads/Desktop storage.
 
-## App architecture note
+## Architecture
 
-`Apps/Packages/` contains independently installable, manifest-versioned app modules, including Focus Timer v1.2.0. Apps in this folder can be updated as their manifest version advances. Most legacy built-in applications still share private Core helpers and remain registered in `Core/core.js` for compatibility; they have not all been migrated into individual folders or gained separate per-app customization in this release. Independent editing/updating is currently available for modular packages. `Apps/BuiltIn/README.md` describes the staged extraction path.
+- `Core/` owns boot, setup handoff, lock screen, desktop, windows and system UI.
+- `Systems/` owns storage, security, wallpaper registry, file vault and package manager.
+- `Apps/Packages/<app-id>/` owns each packaged app's manifest, HTML fragment, scoped CSS and JS entry point.
+- `Docs/APP_DEVELOPMENT.md` is the v1.3 developer contract and lists the package APIs.
 
-## Main entry points
+The nine selected built-in app packages currently use a compatibility adapter to preserve their existing renderers while the package boundary is established. Standalone third-party packages can register without a Core window ID and supply their own `mount(container, context)` renderer. Chatline and Atlas remain future, unloaded scaffolds.
 
-- `index.html` — repository-root redirect.
-- `Core/Index.html` — boot, lock screen and desktop shell.
-- `Core/core.js` / `Core/core.css` — window manager and desktop UI.
-- `Setup/` — first-run Setup Assistant.
-- `Systems/` — storage, security, wallpaper catalogue, package manager and IndexedDB File Vault.
-- `Apps/Packages/` — installable app modules.
-- `Assets/` — icons and wallpaper assets.
-
-**Version:** BlynsOS 1.2 Major Update · 15 November 2026.
+**Version:** BlynsOS 1.3 · 16 November 2026.

@@ -1,0 +1,25 @@
+{
+  "id": "writer",
+  "coreId": "textedit",
+  "name": "Writer",
+  "description": "A clean document editor.",
+  "category": "Productivity",
+  "version": "1.3.0",
+  "entry": "app.js",
+  "styles": "style.css",
+  "template": "index.html",
+  "icon": "../../../Assets/Icons/writer.png",
+  "symbol": "▤",
+  "colors": "#d6e7f6,#8eabc8",
+  "size": [
+    720,
+    500
+  ],
+  "permissions": [
+    "storage:local",
+    "desktop:read",
+    "desktop:write",
+    "network:fetch"
+  ],
+  "compatibility": "BlynsOS 1.3+"
+}

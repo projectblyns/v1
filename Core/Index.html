@@ -25,6 +25,16 @@
   <script defer src="../Systems/registry.js"></script>
   <script defer src="../Systems/file-vault.js"></script>
   <script defer src="../Systems/packages.js"></script>
+  <script defer src="../Apps/Packages/runtime.js"></script>
+  <script defer src="../Apps/Packages/navigator/app.js"></script>
+  <script defer src="../Apps/Packages/daybook/app.js"></script>
+  <script defer src="../Apps/Packages/jotter/app.js"></script>
+  <script defer src="../Apps/Packages/task/app.js"></script>
+  <script defer src="../Apps/Packages/soundwave/app.js"></script>
+  <script defer src="../Apps/Packages/world-clock/app.js"></script>
+  <script defer src="../Apps/Packages/calculator/app.js"></script>
+  <script defer src="../Apps/Packages/writer/app.js"></script>
+  <script defer src="../Apps/Packages/inbox/app.js"></script>
   <script defer src="../Setup/setup.js"></script>
   <script defer src="boot.js"></script>
   <script defer src="off.js"></script>
@@ -55,13 +65,12 @@
   </section>
 
   <section class="ph wall" id="lock" aria-label="Lock screen">
-    <div id="clock" aria-label="Current time"></div>
     <div id="date" aria-label="Current date"></div>
+    <div id="clock" aria-label="Current time"></div>
     <div id="lu">
       <div class="av" id="lav" role="img" aria-label="User profile"></div>
       <b id="lnm"></b>
-      <label class="lock-password-label" for="pw">Unlock BlynsOS</label>
-      <input autocomplete="current-password" id="pw" placeholder="Enter password" type="password">
+      <input autocomplete="current-password" id="pw" placeholder="Password" type="password" aria-label="Account password">
       <p id="unlock-error" role="alert"></p>
     </div>
   </section>

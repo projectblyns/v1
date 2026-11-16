@@ -575,3 +575,12 @@
 
 /* The setup shell is hosted by both Core and the standalone Setup page. */
 #setup-root{position:relative;z-index:1;display:flex;width:100%;height:100%;align-items:center;justify-content:center;}
+
+
+/* Keep the Continue button genuinely hidden on the account-preparation step.
+   The .continue-button display:flex rule otherwise overrides the browser's
+   default [hidden] display rule. */
+#continue-button[hidden],
+#back-button[hidden] {
+  display: none !important;
+}

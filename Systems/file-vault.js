@@ -2,8 +2,9 @@
 (() => {
   'use strict';
   const DB_NAME = 'blyns-vault';
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const STORE = 'images';
+  const FILE_STORE = 'files';
   const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
   let databasePromise;
 
@@ -18,6 +19,12 @@
           const store = db.createObjectStore(STORE, { keyPath: 'id' });
           store.createIndex('createdAt', 'createdAt', { unique: false });
           store.createIndex('name', 'name', { unique: false });
+        }
+        if (!db.objectStoreNames.contains(FILE_STORE)) {
+          const store = db.createObjectStore(FILE_STORE, { keyPath: 'id' });
+          store.createIndex('createdAt', 'createdAt', { unique: false });
+          store.createIndex('name', 'name', { unique: false });
+          store.createIndex('folder', 'folder', { unique: false });
         }
       };
       request.onsuccess = () => resolve(request.result);
@@ -65,6 +72,67 @@
     await requestPersistence();
     const { blob, ...metadata } = record;
     return metadata;
+  }
+
+  async function saveFile(file, extra = {}) {
+    if (!(file instanceof Blob)) throw new TypeError('Choose a file to save first.');
+    const MAX_FILE_BYTES = 100 * 1024 * 1024;
+    if (file.size > MAX_FILE_BYTES) throw new Error('Files must be 100 MB or smaller.');
+    const db = await openDatabase();
+    const record = {
+      id: makeId(),
+      name: String(extra.name || file.name || 'Downloaded file').slice(0, 180),
+      type: file.type || 'application/octet-stream',
+      size: file.size,
+      createdAt: new Date().toISOString(),
+      folder: String(extra.folder || 'Downloads'),
+      blob: file
+    };
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(FILE_STORE, 'readwrite');
+      tx.objectStore(FILE_STORE).add(record);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('File could not be saved.'));
+      tx.onabort = () => reject(tx.error || new Error('File save was cancelled.'));
+    });
+    await requestPersistence();
+    const { blob, ...metadata } = record;
+    return metadata;
+  }
+
+  async function listFiles(folder = null) {
+    const db = await openDatabase();
+    const records = await new Promise((resolve, reject) => {
+      const tx = db.transaction(FILE_STORE, 'readonly');
+      const request = tx.objectStore(FILE_STORE).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error || new Error('Could not list saved files.'));
+    });
+    return records
+      .filter(record => !folder || record.folder === folder)
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .map(({ blob, ...metadata }) => metadata);
+  }
+
+  async function getFile(id) {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(FILE_STORE, 'readonly');
+      const request = tx.objectStore(FILE_STORE).get(id);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('Could not read saved file.'));
+    });
+  }
+
+  async function deleteFile(id) {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(FILE_STORE, 'readwrite');
+      tx.objectStore(FILE_STORE).delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error || new Error('Could not delete saved file.'));
+      tx.onabort = () => reject(tx.error || new Error('File deletion was cancelled.'));
+    });
   }
 
   async function listImages(folder = null) {
@@ -120,6 +188,7 @@
 
   window.BlynsFileVault = Object.freeze({
     saveImage, listImages, getImage, deleteImage,
+    saveFile, listFiles, getFile, deleteFile,
     createObjectURL, revokeObjectURL, requestPersistence, estimate
   });
 })();

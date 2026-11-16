@@ -24,7 +24,6 @@
     ms: {
       step:'Langkah',start:'Mula',continue:'Teruskan',back:'Kembali',caption:'Satu permulaan baharu.',
       ready:'Selamat datang. Mari sediakan ruang kerja anda.',
-      langTitle:'Pilih bahasa anda',langDesc:'Bahasa boleh diubah kemudian dalam tetapan.',
       regionTitle:'Pilih rantau anda',regionDesc:'Ini membantu menetapkan pilihan setempat.',
       nameTitle:'Siapa nama anda?',nameDesc:'Nama ini dipaparkan pada skrin kunci dan profil.',
       nameLabel:'Nama akaun',namePlaceholder:'Masukkan nama anda',
@@ -38,13 +37,12 @@
       accentLabel:'Warna aksen',avatarLabel:'Simbol avatar',
       prepareTitle:'Menyediakan ruang kerja',prepareDesc:'Profil dan tetapan anda sedang disimpan.',
       errorRequired:'Sila lengkapkan ruangan ini.',errorShort:'Kata laluan mesti sekurang-kurangnya 8 aksara.',
-      errorMismatch:'Kata laluan tidak sepadan.',languageMs:'Bahasa Melayu',languageEn:'English',
+      errorMismatch:'Kata laluan tidak sepadan.',
       light:'Cerah',dark:'Gelap',initial:'Huruf pertama nama'
     },
     en: {
       step:'Step',start:'Get Started',continue:'Continue',back:'Back',caption:'A beautiful new beginning.',
       ready:'Welcome. Let’s prepare your workspace.',
-      langTitle:'Choose your language',langDesc:'You can change this later in Settings.',
       regionTitle:'Choose your region',regionDesc:'This helps set your local preferences.',
       nameTitle:'What should we call you?',nameDesc:'This name appears on your lock screen and profile.',
       nameLabel:'Account name',namePlaceholder:'Enter your name',
@@ -85,8 +83,8 @@
         <div class="setup-shade" aria-hidden="true"></div>
         <section class="setup-card" aria-live="polite">
           <div class="setup-topline">
-            <span class="setup-brand">BLYNS OS <span>1.2</span></span>
-            <span class="step-counter" id="step-counter">1 / 10</span>
+            <span class="setup-brand">BLYNS OS <span>1.3</span></span>
+            <span class="step-counter" id="step-counter">1 / 9</span>
           </div>
           <div class="step-track" aria-hidden="true"><div class="step-track-fill" id="step-track-fill"></div></div>
           <div id="step-content" class="step-content"></div>
@@ -101,7 +99,7 @@
     if (!$('#step-content',root)) {
       root.innerHTML=`
         <section class="setup-card" aria-live="polite">
-          <div class="setup-topline"><span class="setup-brand">BLYNS OS <span>1.2</span></span><span class="step-counter" id="step-counter">1 / 10</span></div>
+          <div class="setup-topline"><span class="setup-brand">BLYNS OS <span>1.3</span></span><span class="step-counter" id="step-counter">1 / 9</span></div>
           <div class="step-track"><div class="step-track-fill" id="step-track-fill"></div></div>
           <div id="step-content" class="step-content"></div>
           <div class="setup-footer"><button id="back-button" class="back-button" type="button" hidden>Back</button><button id="continue-button" class="continue-button" type="button">Continue <span>→</span></button></div>
@@ -114,7 +112,7 @@
     window.clearInterval(greetingTimer);
     window.clearTimeout(prepareTimer);
     ensureShell();
-    draft=defaults();step=1;render();
+    draft=defaults();step=1;drawStep();
   }
 
   function render(markup) {
@@ -128,14 +126,14 @@
     if(!content||!counter||!track||!back||!next||!error) {
       throw new Error('Setup markup is incomplete.');
     }
-    counter.textContent=`${t('step')} ${step} / 10`;
-    track.style.width=`${step*10}%`;
+    counter.textContent=`${t('step')} ${String(step).padStart(2,'0')} / 09`;
+    track.style.width=`${(step/9)*100}%`;
     error.textContent='';
-    back.hidden=step===1||step===10;
-    next.hidden=step===10;
+    back.hidden=step===1||step===9;
+    next.hidden=step===9;
     back.textContent=t('back');
     next.innerHTML=`${step===1?t('start'):t('continue')} <span aria-hidden="true">→</span>`;
-    back.onclick=()=>{if(step>1&&step<10){step--;drawStep();}};
+    back.onclick=()=>{if(step>1&&step<9){step--;drawStep();}};
     next.onclick=nextStep;
     content.classList.remove('step-changing');
     if(markup!==undefined)content.innerHTML=markup;
@@ -157,52 +155,47 @@
       return;
     }
     if(step===2) {
-      render(`<p class="step-eyebrow">${t('step')} 02</p><h1 class="step-title">${t('langTitle')}</h1><p class="step-description">${t('langDesc')}</p><div class="language-options" role="group"><button class="language-option ${draft.language==='ms'?'selected':''}" data-language="ms" type="button"><span><span class="language-name">${t('languageMs')}</span><span class="language-native">Malaysia</span></span><span class="language-check">✓</span></button><button class="language-option ${draft.language==='en'?'selected':''}" data-language="en" type="button"><span><span class="language-name">English</span><span class="language-native">International</span></span><span class="language-check">✓</span></button></div>`);
-      $$('[data-language]',content).forEach(btn=>btn.onclick=()=>{draft.language=btn.dataset.language;drawStep();});
-      return;
-    }
-    if(step===3) {
-      render(`<p class="step-eyebrow">${t('step')} 03</p><h1 class="step-title">${t('regionTitle')}</h1><p class="step-description">${t('regionDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-region">Region</label><select class="setup-input" id="setup-region">${regions.map(r=>`<option ${r===draft.region?'selected':''}>${r}</option>`).join('')}</select></div>`);
+      render(`<p class="step-eyebrow">${t('step')} 02</p><h1 class="step-title">${t('regionTitle')}</h1><p class="step-description">${t('regionDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-region">Region</label><select class="setup-input" id="setup-region">${regions.map(r=>`<option ${r===draft.region?'selected':''}>${r}</option>`).join('')}</select></div>`);
       $('#setup-region',root).onchange=e=>draft.region=e.target.value;
       return;
     }
-    if(step===4) {
-      render(`<p class="step-eyebrow">${t('step')} 04</p><h1 class="step-title">${t('nameTitle')}</h1><p class="step-description">${t('nameDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-name">${t('nameLabel')}</label><input class="setup-input" id="setup-name" maxlength="28" autocomplete="name" placeholder="${t('namePlaceholder')}" value="${safe(draft.name)}"></div>`);
+    if(step===3) {
+      render(`<p class="step-eyebrow">${t('step')} 03</p><h1 class="step-title">${t('nameTitle')}</h1><p class="step-description">${t('nameDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-name">${t('nameLabel')}</label><input class="setup-input" id="setup-name" maxlength="28" autocomplete="name" placeholder="${t('namePlaceholder')}" value="${safe(draft.name)}"></div>`);
       $('#setup-name',root).oninput=e=>draft.name=e.target.value;
       $('#setup-name',root).focus();return;
     }
-    if(step===5) {
-      render(`<p class="step-eyebrow">${t('step')} 05</p><h1 class="step-title">${t('passTitle')}</h1><p class="step-description">${t('passDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-password">${t('passLabel')}</label><input class="setup-input" id="setup-password" type="password" autocomplete="new-password" placeholder="${t('passPlaceholder')}"></div>`);
+    if(step===4) {
+      render(`<p class="step-eyebrow">${t('step')} 04</p><h1 class="step-title">${t('passTitle')}</h1><p class="step-description">${t('passDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-password">${t('passLabel')}</label><input class="setup-input" id="setup-password" type="password" autocomplete="new-password" placeholder="${t('passPlaceholder')}"></div>`);
       $('#setup-password',root).oninput=e=>draft.password=e.target.value;
       $('#setup-password',root).focus();return;
     }
-    if(step===6) {
-      render(`<p class="step-eyebrow">${t('step')} 06</p><h1 class="step-title">${t('confirmTitle')}</h1><p class="step-description">${t('confirmDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-confirm">${t('confirmLabel')}</label><input class="setup-input" id="setup-confirm" type="password" autocomplete="new-password" placeholder="${t('confirmPlaceholder')||'Re-enter your password'}"></div>`);
+    if(step===5) {
+      render(`<p class="step-eyebrow">${t('step')} 05</p><h1 class="step-title">${t('confirmTitle')}</h1><p class="step-description">${t('confirmDesc')}</p><div class="setup-input-wrap"><label class="setup-label" for="setup-confirm">${t('confirmLabel')}</label><input class="setup-input" id="setup-confirm" type="password" autocomplete="new-password" placeholder="${t('confirmPlaceholder')}"></div>`);
       $('#setup-confirm',root).oninput=e=>draft.confirm=e.target.value;
       $('#setup-confirm',root).focus();return;
     }
-    if(step===7) {
-      render(`<p class="step-eyebrow">${t('step')} 07</p><h1 class="step-title">${t('themeTitle')}</h1><p class="step-description">${t('themeDesc')}</p><div class="setup-choice-grid"><button class="setup-choice ${!draft.dark?'active':''}" data-theme="light" type="button">☀ &nbsp; ${t('light')}</button><button class="setup-choice ${draft.dark?'active':''}" data-theme="dark" type="button">◐ &nbsp; ${t('dark')}</button></div>`);
+    if(step===6) {
+      render(`<p class="step-eyebrow">${t('step')} 06</p><h1 class="step-title">${t('themeTitle')}</h1><p class="step-description">${t('themeDesc')}</p><div class="setup-choice-grid"><button class="setup-choice ${!draft.dark?'active':''}" data-theme="light" type="button">☀ &nbsp; ${t('light')}</button><button class="setup-choice ${draft.dark?'active':''}" data-theme="dark" type="button">◐ &nbsp; ${t('dark')}</button></div>`);
       $$('[data-theme]',content).forEach(btn=>btn.onclick=()=>{draft.dark=btn.dataset.theme==='dark';$$('[data-theme]',content).forEach(x=>x.classList.toggle('active',x===btn));});
       return;
     }
-    if(step===8) {
+    if(step===7) {
       const extra=(window.BLYNS_WALLPAPERS||[]).map(w=>({id:w.id,name:w.name,preview:`url("${w.preview||w.src}") center/cover`}));
       const options=[...wallpapers,...extra.filter(w=>!wallpapers.some(x=>x.id===w.id))];
-      render(`<p class="step-eyebrow">${t('step')} 08</p><h1 class="step-title">${t('wallpaperTitle')}</h1><p class="step-description">${t('wallpaperDesc')}</p><div class="setup-wall-grid">${options.map(w=>`<button class="setup-wall-choice ${draft.wallpaper===w.id?'active':''}" data-wallpaper="${safe(w.id)}" type="button"><span class="setup-wall-preview" style="display:block;height:72px;border-radius:9px;background:${safe(w.preview)}"></span><span>${safe(w.name)}</span></button>`).join('')}</div>`);
+      render(`<p class="step-eyebrow">${t('step')} 07</p><h1 class="step-title">${t('wallpaperTitle')}</h1><p class="step-description">${t('wallpaperDesc')}</p><div class="setup-wall-grid">${options.map(w=>`<button class="setup-wall-choice ${draft.wallpaper===w.id?'active':''}" data-wallpaper="${safe(w.id)}" type="button"><span class="setup-wall-preview" style="display:block;height:72px;border-radius:9px;background:${safe(w.preview)}"></span><span>${safe(w.name)}</span></button>`).join('')}</div>`);
       $$('[data-wallpaper]',content).forEach(btn=>btn.onclick=()=>{draft.wallpaper=btn.dataset.wallpaper;$$('[data-wallpaper]',content).forEach(x=>x.classList.toggle('active',x===btn));});
       return;
     }
-    if(step===9) {
+    if(step===8) {
       const glyphs=[['initial',t('initial')],['🙂','Smile'],['🌟','Star'],['🌙','Moon'],['💎','Gem'],['🌿','Leaf'],['🚀','Rocket']];
       const display=draft.avatarGlyph==='initial'?(draft.name||'B').slice(0,1).toUpperCase():draft.avatarGlyph;
-      render(`<p class="step-eyebrow">${t('step')} 09</p><h1 class="step-title">${t('personalTitle')}</h1><p class="step-description">${t('personalDesc')}</p><div class="setup-avatar-preview" id="setup-avatar-preview" style="background:${draft.avatarColor}">${safe(display)}</div><label class="setup-label" for="setup-avatar-color">${t('accentLabel')}</label><div class="setup-color-row">${palette.map(([c,n])=>`<button class="setup-color-choice ${draft.accent===c?'active':''}" data-accent="${c}" title="${n}" style="background:${c}" type="button"></button>`).join('')}</div><input id="setup-avatar-color" type="color" value="${draft.avatarColor}" style="width:70px;height:38px;border:0;background:transparent"><label class="setup-label" for="setup-avatar-glyph">${t('avatarLabel')}</label><select id="setup-avatar-glyph" class="setup-input">${glyphs.map(([v,n])=>`<option value="${safe(v)}" ${draft.avatarGlyph===v?'selected':''}>${safe(n)}</option>`).join('')}</select>`);
+      render(`<p class="step-eyebrow">${t('step')} 08</p><h1 class="step-title">${t('personalTitle')}</h1><p class="step-description">${t('personalDesc')}</p><div class="setup-avatar-preview" id="setup-avatar-preview" style="background:${draft.avatarColor}">${safe(display)}</div><label class="setup-label" for="setup-avatar-color">${t('accentLabel')}</label><div class="setup-color-row">${palette.map(([c,n])=>`<button class="setup-color-choice ${draft.accent===c?'active':''}" data-accent="${c}" title="${n}" style="background:${c}" type="button"></button>`).join('')}</div><input id="setup-avatar-color" type="color" value="${draft.avatarColor}" style="width:70px;height:38px;border:0;background:transparent"><label class="setup-label" for="setup-avatar-glyph">${t('avatarLabel')}</label><select id="setup-avatar-glyph" class="setup-input">${glyphs.map(([v,n])=>`<option value="${safe(v)}" ${draft.avatarGlyph===v?'selected':''}>${safe(n)}</option>`).join('')}</select>`);
       $$('[data-accent]',content).forEach(btn=>btn.onclick=()=>{draft.accent=btn.dataset.accent;draft.avatarColor=btn.dataset.accent;$('#setup-avatar-color',root).value=btn.dataset.accent;$$('[data-accent]',content).forEach(x=>x.classList.toggle('active',x===btn));$('#setup-avatar-preview',root).style.background=btn.dataset.accent;});
       $('#setup-avatar-color',root).oninput=e=>{draft.avatarColor=e.target.value;draft.accent=e.target.value;$('#setup-avatar-preview',root).style.background=e.target.value;};
       $('#setup-avatar-glyph',root).onchange=e=>{draft.avatarGlyph=e.target.value;$('#setup-avatar-preview',root).textContent=e.target.value==='initial'?(draft.name||'B').slice(0,1).toUpperCase():e.target.value;};
       return;
     }
-    if(step===10) {
+    if(step===9) {
       render(`<div class="preparing-icon" aria-hidden="true"></div><h1 class="step-title">${t('prepareTitle')}</h1><p class="step-description">${t('prepareDesc')}</p><div class="preparing-track"><div class="preparing-fill"></div></div>`);
       $('#back-button',root).hidden=true;$('#continue-button',root).hidden=true;
       prepareTimer=window.setTimeout(finish,2300);
@@ -211,10 +204,10 @@
 
   async function nextStep() {
     const error=$('#setup-error',root);error.textContent='';
-    if(step===4){draft.name=$('#setup-name',root).value.trim();if(!draft.name){error.textContent=t('errorRequired');$('#setup-name',root).focus();return;}}
-    if(step===5){draft.password=$('#setup-password',root).value;if(draft.password.length<8){error.textContent=t('errorShort');$('#setup-password',root).focus();return;}}
-    if(step===6){draft.confirm=$('#setup-confirm',root).value;if(draft.confirm!==draft.password){error.textContent=t('errorMismatch');$('#setup-confirm',root).focus();return;}}
-    if(step<10){step++;drawStep();}
+    if(step===3){draft.name=$('#setup-name',root).value.trim();if(!draft.name){error.textContent=t('errorRequired');$('#setup-name',root).focus();return;}}
+    if(step===4){draft.password=$('#setup-password',root).value;if(draft.password.length<8){error.textContent=t('errorShort');$('#setup-password',root).focus();return;}}
+    if(step===5){draft.confirm=$('#setup-confirm',root).value;if(draft.confirm!==draft.password){error.textContent=t('errorMismatch');$('#setup-confirm',root).focus();return;}}
+    if(step<9){step++;drawStep();}
   }
 
   async function finish() {
@@ -248,7 +241,7 @@
       if(target)target.textContent=error.message||'Setup could not be completed.';
       $('#back-button',root).hidden=false;
       $('#continue-button',root).hidden=false;
-      step=5;drawStep();
+      step=4;drawStep();
     }
   }
 
